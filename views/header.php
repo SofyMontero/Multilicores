@@ -38,7 +38,7 @@ if (!isset($_SESSION["usuario"])) {
 	<link rel="stylesheet" href="../css/style.css">
     <script>
         // Verificar sesión al cargar la página
-        fetch("../Public/session_check.php")
+        fetch("../controllers/session_check.php")
             .then(response => response.json())
             .then(data => {
                 if (!data.auth) {

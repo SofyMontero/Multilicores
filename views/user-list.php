@@ -79,7 +79,7 @@ $users = $user->getUsers();
 								<th><?php echo $user["usuario"]; ?></th>
 
 								<td>
-									<a href="user-update.html" class="btn btn-success">
+									<a href="user-update.php?id=<?echo$user["id"];?>" class="btn btn-success">
 	  									<i class="fas fa-sync-alt"></i>	
 									</a>
 								</td>
