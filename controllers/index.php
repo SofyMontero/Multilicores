@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //  if ($userData && password_verify($clave, $userData["password"])) {
     if ($clave==$userData["password"]) {
         $_SESSION["usuario"] = $userData["usuario"];
-        header("Location: ../Public/home.php"); // Redirige al dashboard
+        header("Location: ../views/home.php"); // Redirige al dashboard
         exit();
     } else {
         header("Location: ../index.html?error=Usuario%20o%20contraseña%20incorrectos".$userData["password"]);
