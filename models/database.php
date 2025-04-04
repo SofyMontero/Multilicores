@@ -1,9 +1,9 @@
 <?php
 class Database {
     private $host = "localhost";
-    private $db_name = "multilicores";
-    private $username = "root";
-    private $password = "";
+    private $db_name = "u633742531_Multilicores";
+    private $username = "u633742531_Multilicores25";
+    private $password = "Multilicores2025";
     private $charset = "utf8mb4";
 
     public function connect() {
