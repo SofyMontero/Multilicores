@@ -1,6 +1,7 @@
 <?php
 include_once "header.php";
 require_once "../models/database.php";
+
 class User {
     private $db;
 
@@ -10,7 +11,7 @@ class User {
 
     public function getUsers() {
         try {
-            $query = $this->db->connect()->prepare("SELECT `id`, `usuario`, `password`, `email`, `nombre`, `telefono`, `direccion` FROM `users` order by id desc");
+            $query = $this->db->connect()->prepare("SELECT `id`, `usuario`, `password`, `email`, `telefono`, `direccion`, `nombre`, `rol` FROM `users` ");
             $query->execute(); // Ejecutar la consulta
             return $query->fetchAll(PDO::FETCH_ASSOC); // Obtener todos los resultados como array asociativo
         } catch (PDOException $e) {
@@ -79,7 +80,7 @@ $users = $user->getUsers();
 								<th><?php echo $user["usuario"]; ?></th>
 
 								<td>
-									<a href="user-update.php?id=<?echo$user["id"];?>" class="btn btn-success">
+									<a href='user-update.php?id=<?php echo$user["id"];?>' class='btn btn-success'>
 	  									<i class="fas fa-sync-alt"></i>	
 									</a>
 								</td>

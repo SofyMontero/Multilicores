@@ -1,6 +1,32 @@
+
 <?php
 include_once "header.php";
 require_once "../models/database.php";
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+class User {
+    private $db;
+
+    public function __construct() {
+        $this->db = new Database(); // Crear instancia de la base de datos
+    }
+
+    public function getUsers() {
+        try {
+            $query = $this->db->connect()->prepare("SELECT `id`, `usuario`, `password`, `email`, `telefono`, `direccion`, `nombre`, `rol` FROM `users` WHERE id=:id");
+            $query->bindParam(':id', $_GET["id"], PDO::PARAM_INT); 
+			$query->execute(); // Ejecutar la consulta
+            return $query->fetchAll(PDO::FETCH_ASSOC); // Obtener todos los resultados como array asociativo
+        } catch (PDOException $e) {
+            die("Error en la consulta: " . $e->getMessage());
+        }
+    }
+}
+
+// Crear instancia de User y obtener los usuarios
+$user = new User();
+$users = $user->getUsers();
 ?>
 
 			<!-- Page header -->
@@ -29,40 +55,40 @@ require_once "../models/database.php";
 			
 			<!-- Content -->
 			<div class="container-fluid">
-				<form action="" class="form-neon" autocomplete="off">
+			<?php foreach ($users as $user) {?>
+				<th><?php echo $user["id"]; ?></th>
+				<th><?php echo $user["usuario"]; ?></th>
+				
+				<form action="../controllers/UserController.php" class="form-neon" autocomplete="off" method="POST">
 					<fieldset>
 						<legend><i class="far fa-address-card"></i> &nbsp; Información personal</legend>
 						<div class="container-fluid">
 							<div class="row">
-								<div class="col-12 col-md-4">
+								<!-- <div class="col-12 col-md-4">
 									<div class="form-group">
 										<label for="usuario_dni" class="bmd-label-floating">DNI</label>
-										<input type="text" pattern="[0-9-]{1,20}" class="form-control" name="usuario_dni" id="usuario_dni" maxlength="20">
 									</div>
-								</div>
+								</div> -->
+								<input type="hidden" pattern="[0-9-]{1,20}" class="form-control" name="id" id="id" maxlength="20" value="<?php echo $user["id"]; ?>">
+
 								
 								<div class="col-12 col-md-4">
 									<div class="form-group">
-										<label for="usuario_nombre" class="bmd-label-floating">Nombres</label>
-										<input type="text" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{1,35}" class="form-control" name="usuario_nombre" id="usuario_nombre" maxlength="35">
+										<label for="usuario_nombre" class="bmd-label-floating">Nombre completo</label>
+										<input type="text" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{1,35}" class="form-control" name="nombre" id="usuario_nombre" maxlength="35" value="<?php echo $user["nombre"]; ?>">
 									</div>
 								</div>
-								<div class="col-12 col-md-4">
-									<div class="form-group">
-										<label for="usuario_apellido" class="bmd-label-floating">Apellidos</label>
-										<input type="text" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{1,35}" class="form-control" name="usuario_apellido" id="usuario_apellido" maxlength="35">
-									</div>
-								</div>
+
 								<div class="col-12 col-md-6">
 									<div class="form-group">
 										<label for="usuario_telefono" class="bmd-label-floating">Teléfono</label>
-										<input type="text" pattern="[0-9()+]{1,20}" class="form-control" name="usuario_telefono" id="usuario_telefono" maxlength="20">
+										<input type="text" pattern="[0-9()+]{1,20}" class="form-control" name="telefono" id="telefono" maxlength="20" value="<?php echo $user["telefono"]; ?>">
 									</div>
 								</div>
 								<div class="col-12 col-md-6">
 									<div class="form-group">
 										<label for="usuario_direccion" class="bmd-label-floating">Dirección</label>
-										<input type="text" pattern="[a-zA-Z0-99áéíóúÁÉÍÓÚñÑ()# ]{1,190}" class="form-control" name="usuario_direccion" id="usuario_direccion" maxlength="190">
+										<input type="text" pattern="[a-zA-Z0-99áéíóúÁÉÍÓÚñÑ()# ]{1,190}" class="form-control" name="direccion" id="usuario_direccion" maxlength="190" value="<?php echo $user["direccion"]; ?>">
 									</div>
 								</div>
 							</div>
@@ -76,29 +102,25 @@ require_once "../models/database.php";
 								<div class="col-12 col-md-6">
 									<div class="form-group">
 										<label for="usuario_usuario" class="bmd-label-floating">Nombre de usuario</label>
-										<input type="text" pattern="[a-zA-Z0-9]{1,35}" class="form-control" name="usuario_usuario" id="usuario_usuario" maxlength="35">
+										<input type="text" pattern="[a-zA-Z0-9]{1,35}" class="form-control" name="usuario_usuario" id="usuario_usuario" value="<?php echo $user["usuario"]; ?>" maxlength="35">
 									</div>
 								</div>
 								<div class="col-12 col-md-6">
 									<div class="form-group">
 										<label for="usuario_email" class="bmd-label-floating">Email</label>
-										<input type="email" class="form-control" name="usuario_email" id="usuario_email" maxlength="70">
-									</div>
-								</div>
-								<div class="col-12">
-									<legend style="margin-top: 40px;"><i class="fas fa-lock"></i> &nbsp; Nueva contraseña</legend>
-									<p>Para actualizar la contraseña de esta cuenta ingrese una nueva y vuelva a escribirla. En caso que no desee actualizarla debe dejar vacíos los dos campos de las contraseñas.</p>
-								</div>
-								<div class="col-12 col-md-6">
-									<div class="form-group">
-										<label for="usuario_clave_nueva_1" class="bmd-label-floating">Contraseña</label>
-										<input type="password" class="form-control" name="usuario_clave_nueva_1" id="usuario_clave_nueva_1" maxlength="200">
+										<input type="email" class="form-control" name="usuario_email" id="usuario_email" maxlength="70" value="<?php echo $user["email"]; ?>">
 									</div>
 								</div>
 								<div class="col-12 col-md-6">
 									<div class="form-group">
-										<label for="usuario_clave_nueva_2" class="bmd-label-floating">Repetir contraseña</label>
-										<input type="password" class="form-control" name="usuario_clave_nueva_2" id="usuario_clave_nueva_2" maxlength="200">
+										<label for="usuario_clave_1" class="bmd-label-floating">Contraseña</label>
+										<input type="password" class="form-control" name="usuario_clave_1" id="usuario_clave_1" maxlength="200" value="<?php echo $user["password"]; ?>">
+									</div>
+								</div>
+								<div class="col-12 col-md-6">
+									<div class="form-group">
+										<label for="usuario_clave_2" class="bmd-label-floating">Repetir contraseña</label>
+										<input type="password" class="form-control" name="usuario_clave_2" id="usuario_clave_2" maxlength="200">
 									</div>
 								</div>
 							</div>
@@ -110,45 +132,26 @@ require_once "../models/database.php";
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-12">
-									<p><span class="badge badge-info">Control total</span> Permisos para registrar, actualizar y eliminar</p>
-									<p><span class="badge badge-success">Edición</span> Permisos para registrar y actualizar</p>
-									<p><span class="badge badge-dark">Registrar</span> Solo permisos para registrar</p>
+									
 									<div class="form-group">
 										<select class="form-control" name="usuario_privilegio">
-											<option value="" selected="" disabled="">Seleccione una opción</option>
-											<option value="1">Control total</option>
-											<option value="2">Edición</option>
-											<option value="3">Registrar</option>
+											<option value="" selected="" disabled="">Rol</option>
+											<option value="1">Administrador</option>
+											<option value="2">Cliente</option>
+											
 										</select>
 									</div>
 								</div>
 							</div>
 						</div>
 					</fieldset>
-					<br><br><br>
-					<fieldset>
-						<p class="text-center">Para poder guardar los cambios en esta cuenta debe de ingresar su nombre de usuario y contraseña</p>
-						<div class="container-fluid">
-							<div class="row">
-								<div class="col-12 col-md-6">
-									<div class="form-group">
-										<label for="usuario_admin" class="bmd-label-floating">Nombre de usuario</label>
-										<input type="text" pattern="[a-zA-Z0-9]{1,35}" class="form-control" name="usuario_admin" id="usuario_admin" maxlength="35">
-									</div>
-								</div>
-								<div class="col-12 col-md-6">
-									<div class="form-group">
-										<label for="clave_admin" class="bmd-label-floating">Contraseña</label>
-										<input type="password" class="form-control" name="clave_admin" id="clave_admin" maxlength="200">
-									</div>
-								</div>
-							</div>
-						</div>
-					</fieldset>
 					<p class="text-center" style="margin-top: 40px;">
-						<button type="submit" class="btn btn-raised btn-success btn-sm"><i class="fas fa-sync-alt"></i> &nbsp; ACTUALIZAR</button>
+						<button type="reset" class="btn btn-raised btn-secondary btn-sm"><i class="fas fa-paint-roller"></i> &nbsp; LIMPIAR</button>
+						&nbsp; &nbsp;
+						<button type="submit" class="btn btn-raised btn-info btn-sm"><i class="far fa-save"></i> &nbsp; GUARDAR</button>
 					</p>
 				</form>
+				<?php }?>
 			</div>
 			
 

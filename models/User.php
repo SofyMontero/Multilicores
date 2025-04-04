@@ -25,6 +25,26 @@ class User {
             "nombre" => $nombre
         ]);
     }
+    public function updateUser($id,$usuario, $password, $email,$telefono, $direccion, $nombre) {
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT); // Encriptar la contraseña
+        $query = $this->db->connect()->prepare(" UPDATE users 
+        SET usuario = :usuario, 
+            password = :password, 
+            email = :email, 
+            telefono = :telefono, 
+            direccion = :direccion, 
+            nombre = :nombre 
+        WHERE id = :id");
+        return $query->execute([
+            "id" => $id,
+            "usuario" => $usuario,
+            "password" => $hashedPassword,
+            "email" => $email,
+            "telefono" => $telefono,
+            "direccion" => $direccion,
+            "nombre" => $nombre
+        ]);
+    }
 }
 
 
