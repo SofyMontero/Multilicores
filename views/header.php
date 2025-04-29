@@ -93,7 +93,7 @@ if (!isset($_SESSION["usuario"])) {
 									<a href="item-new.php"><i class="fas fa-plus fa-fw"></i> &nbsp; Agregar Promociones</a>
 								</li>
 								<li>
-									<a href="item-list.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de Promociones</a>
+									<a href="promo.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de Promociones</a>
 								</li>
 								<li>
 									<a href="item-search.php"><i class="fas fa-search fa-fw"></i> &nbsp; Enviar Promociones</a>
@@ -108,7 +108,7 @@ if (!isset($_SESSION["usuario"])) {
 									<a href="reservation-new.php"><i class="fas fa-plus fa-fw"></i> &nbsp; Nuevo préstamo</a>
 								</li>
 								<li>
-									<a href="reservation-list.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de Pedidos</a>
+									<a href="cartera.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de Pedidos</a>
 								</li>
 								<li>
 									<a href="reservation-search.php"><i class="fas fa-search-dollar fa-fw"></i> &nbsp; Buscar Pedidos</a>

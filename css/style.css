@@ -28,7 +28,7 @@
 :root{
 	--color-one: #F5F5F5; /* Fondo claro */
 	--color-two: #80a3bc; /* Azul grisáceo suave */
-	--color-three: #EC5252; /* Puedes mantener este rojo para resaltar botones y elementos importantes */
+	--color-three: #0c68aa; /* Puedes mantener este rojo para resaltar botones y elementos importantes */
 	--form-color: #F9F9F9; /* Fondo claro para formularios */
 
 	--accent-color: #253556; /* Gris oscuro para texto y algunos detalles */

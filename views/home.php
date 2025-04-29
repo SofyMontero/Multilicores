@@ -24,7 +24,7 @@ require_once "../models/database.php";
 					</div>
 				</a>
 
-				<a href="item-list.php" class="tile">
+				<a href="promo.php" class="tile">
 					<div class="tile-tittle">Promociones</div>
 					<div class="tile-icon">
 						<i class="fas fa-pallet fa-fw"></i>
@@ -32,7 +32,7 @@ require_once "../models/database.php";
 					</div>
 				</a>
 
-				<a href="reservation-list.php" class="tile">
+				<a href="cartera.php" class="tile">
 					<div class="tile-tittle">Pedidos</div>
 					<div class="tile-icon">
 						<i class="fas fa-file-invoice-dollar fa-fw"></i>
@@ -44,7 +44,7 @@ require_once "../models/database.php";
 					<div class="tile-tittle">Usuarios</div>
 					<div class="tile-icon">
 						<i class="fas fa-user-secret fa-fw"></i>
-						
+						0
 					</div>
 				</a>
 
