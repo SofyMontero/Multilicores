@@ -16,7 +16,7 @@ require_once "../models/database.php";
 			<!-- Content -->
 			<div class="full-box tile-container">
 
-				<a href="client-new.php" class="tile">
+				<a href="clientes.php" class="tile">
 					<div class="tile-tittle">Clientes</div>
 					<div class="tile-icon">
 						<i class="fas fa-users fa-fw"></i>
