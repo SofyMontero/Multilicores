@@ -4,6 +4,7 @@ if (!isset($_SESSION["usuario"])) {
     header("Location: ../index.html?error=Debes%20iniciar%20sesión");
     exit();
 }
+date_default_timezone_set('America/Bogota');
 
 ?>
 <!DOCTYPE html>
@@ -72,70 +73,23 @@ if (!isset($_SESSION["usuario"])) {
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas fa-users fa-fw"></i> &nbsp; Clientes <i class="fas fa-chevron-down"></i></a>
-							<ul>
-								<li>
-									<a href="clientes.php"><i class="fas fa-plus fa-fw"></i> &nbsp; Agregar Cliente</a>
-								</li>
-								<li>
-									<a href="client-list.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de clientes</a>
-								</li>
-								<li>
-									<a href="client-search.php"><i class="fas fa-search fa-fw"></i> &nbsp; Buscar cliente</a>
-								</li>
-							</ul>
+							<a href="#" class="nav-btn-submenu"><i class="fas fa-address-book fa-fw"></i> &nbsp; Clientes </a>							
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas fa-pallet fa-fw"></i> &nbsp; Promociones <i class="fas fa-chevron-down"></i></a>
-							<ul>
-								<li>
-									<a href="item-new.php"><i class="fas fa-plus fa-fw"></i> &nbsp; Agregar Promociones</a>
-								</li>
-								<li>
-									<a href="promo.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de Promociones</a>
-								</li>
-								<li>
-									<a href="item-search.php"><i class="fas fa-search fa-fw"></i> &nbsp; Enviar Promociones</a>
-								</li>
-							</ul>
+							<a href="#" class="nav-btn-submenu"><i class="fas fa-bullhorn fa-fw"></i> &nbsp; Promociones </a>							
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas fa-file-invoice-dollar fa-fw"></i> &nbsp; Pedidos <i class="fas fa-chevron-down"></i></a>
-							<ul>
-								<li>
-									<a href="reservation-new.php"><i class="fas fa-plus fa-fw"></i> &nbsp; Nuevo préstamo</a>
-								</li>
-								<li>
-									<a href="cartera.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de Pedidos</a>
-								</li>
-								<li>
-									<a href="reservation-search.php"><i class="fas fa-search-dollar fa-fw"></i> &nbsp; Buscar Pedidos</a>
-								</li>
-								<li>
-									<a href="reservation-pending.php"><i class="fas fa-hand-holding-usd fa-fw"></i> &nbsp; Pedidos pendientes</a>
-								</li>
-							</ul>
+							<a href="#" class="nav-btn-submenu"><i class="fas fa-file-invoice-dollar fa-fw"></i> &nbsp; Pedidos </a>							
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas  fa-user-secret fa-fw"></i> &nbsp; Usuarios <i class="fas fa-chevron-down"></i></a>
-							<ul>
-								<li>
-									<a href="user-new.php"><i class="fas fa-plus fa-fw"></i> &nbsp; Nuevo usuario</a>
-								</li>
-								<li>
-									<a href="user-list.php"><i class="fas fa-clipboard-list fa-fw"></i> &nbsp; Lista de usuarios</a>
-								</li>
-								<li>
-									<a href="user-search.php"><i class="fas fa-search fa-fw"></i> &nbsp; Buscar usuario</a>
-								</li>
-							</ul>
+							<a href="#" class="nav-btn-submenu"><i class="fas fa-user fa-fw"></i> &nbsp; Usuarios </a>							
 						</li>
 
 						<li>
-							<a href="company.php"><i class="fas fa-store-alt fa-fw"></i> &nbsp; Empresa</a>
+							<a href="company.php"><i class="fas fa-shopping-cart fa-fw"></i> &nbsp; Solicitudes</a>
 						</li>
 					</ul>
 				</nav>

@@ -19,7 +19,7 @@ require_once "../models/database.php";
 				<a href="clientes.php" class="tile">
 					<div class="tile-tittle">Clientes</div>
 					<div class="tile-icon">
-						<i class="fas fa-users fa-fw"></i>
+						<i class="fas fa-address-book fa-fw"></i>
 						
 					</div>
 				</a>
@@ -27,7 +27,7 @@ require_once "../models/database.php";
 				<a href="promo.php" class="tile">
 					<div class="tile-tittle">Promociones</div>
 					<div class="tile-icon">
-						<i class="fas fa-pallet fa-fw"></i>
+						<i class="fas fa-bullhorn fa-fw"></i>
 						
 					</div>
 				</a>
@@ -43,16 +43,15 @@ require_once "../models/database.php";
 				<a href="user-list.php" class="tile">
 					<div class="tile-tittle">Usuarios</div>
 					<div class="tile-icon">
-						<i class="fas fa-user-secret fa-fw"></i>
-						0
+						<i class="fas fa-user fa-fw"></i>						
 					</div>
 				</a>
 
 				<a href="company.php" class="tile">
-					<div class="tile-tittle">Empresa</div>
-					<div class="tile-icon">
-						<i class="fas fa-store-alt fa-fw"></i>
-						
+					<div class="tile-tittle">Solicitudes</div>
+					<div class="tile-icon">						
+					<i class="fas fa-shopping-cart fa-fw"></i>
+		
 					</div>
 				</a>
 				
