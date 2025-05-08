@@ -65,3 +65,22 @@ $(document).ready(function(){
         });
     });
 })(jQuery);
+
+document.querySelectorAll('#emoji-box .emoji').forEach(function (emoji) {
+    emoji.addEventListener('click', function () {
+        const emojiChar = this.textContent;
+        const textarea = document.getElementById('descripcion');
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+
+        // Insertar emoji en la posición del cursor
+        textarea.value = text.slice(0, start) + emojiChar + text.slice(end);
+        textarea.selectionStart = textarea.selectionEnd = start + emojiChar.length;
+        textarea.focus();
+
+        // Cierra el selector después de seleccionar
+        document.getElementById('emoji-box').style.display = 'none';
+    });
+});
