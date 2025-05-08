@@ -1,3 +1,30 @@
+<script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
+<script>
+document.getElementById('form-promocion').addEventListener('submit', function(e) {
+    e.preventDefault(); // ⚠️ Esto evita que la página se recargue
+
+    const form = e.target;
+    const formData = new FormData(form); // Captura texto + archivos
+
+    fetch('guardar_promocion.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Promoción guardada con éxito');
+            form.reset();
+        } else {
+            alert('⚠️ Error al guardar: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('❌ Error de red o servidor');
+    });
+});
+</script>
 <?php
 include_once "header.php";
 require_once "../models/database.php";
@@ -99,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="estado">Estado</label>
+                                    <label for="Estado">Estado</label>
                                     <select class="form-control" id="estado" name="estado">
                                         <option value="Activa" selected>Activa</option>
                                         <option value="Inactiva">Inactiva</option>
@@ -107,19 +134,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="descripcion">Descripción de la Promoción <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Descripción detallada de la promoción" required></textarea>
+                                    <label for="estado">Imagen</label>
+                                    <input type="file" class="form-control" id="imagen" name="imagen" placeholder="Ej: Empresa XYZ">
+
+                                </div>
+                            </div>
+                        
+                            <div class="col-md-4">
+                                    <div class="form-group">
+                                    
+                                        <label for="descripcion">Descripción de la Promoción <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Descripción detallada de la promoción" required></textarea>
+                                        <div class="form-group mt-2">
+                                        <button type="button" id="abrir-emojis" class="btn btn-sm btn-secondary">😊 Agregar Emoji</button>
+                                        <div id="emoji-box" style="display: none; position: absolute; z-index: 1000; background: #fff; border: 1px solid #ccc; padding: 10px; max-width: 250px; max-height: 200px; overflow-y: auto; border-radius: 8px;">
+                                            <!-- Emojis aquí -->
+                                            <span class="emoji">😀</span> <span class="emoji">😁</span> <span class="emoji">😂</span>
+                                            <span class="emoji">🤣</span> <span class="emoji">😊</span> <span class="emoji">😍</span>
+                                            <span class="emoji">😎</span> <span class="emoji">😢</span> <span class="emoji">😡</span>
+                                            <span class="emoji">🥳</span> <span class="emoji">😴</span> <span class="emoji">👍</span>
+                                            <span class="emoji">🙏</span> <span class="emoji">🔥</span> <span class="emoji">🌟</span>
+                                            <span class="emoji">💯</span> <span class="emoji">🎉</span> <span class="emoji">🚀</span>
+                                            <span class="emoji">💖</span> <span class="emoji">🍕</span> <span class="emoji">🌈</span>
+                                            <span class="emoji">🐶</span> <span class="emoji">🐱</span> <span class="emoji">⚽</span>
+                                            <!-- Agrega más si quieres -->
+                                        </div>
+                                    
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
                         <div class="row mt-3">
                             <div class="col-12 text-center">
+
                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Promoción</button>
-                                <button type="reset" class="btn btn-secondary"><i class="fas fa-broom"></i> Limpiar Campos</button>
+                                <button type="reset" class="btn btn-secondary"><i class="fas fa-paint-roller"></i> Limpiar</button>
                             </div>
                         </div>
                     </form>
@@ -336,7 +389,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             });
         });
     });
+
+    document.getElementById('abrir-emojis').addEventListener('click', function (e) {
+    const box = document.getElementById('emoji-box');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+});
+
+
 </script>
+
 
 <?php
 include_once "footer.php";
