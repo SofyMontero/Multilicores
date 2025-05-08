@@ -1,29 +1,32 @@
 <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-document.getElementById('form-promocion').addEventListener('submit', function(e) {
-    e.preventDefault(); // ⚠️ Esto evita que la página se recargue
 
-    const form = e.target;
-    const formData = new FormData(form); // Captura texto + archivos
 
-    fetch('guardar_promocion.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ Promoción guardada con éxito');
-            form.reset();
-        } else {
-            alert('⚠️ Error al guardar: ' + data.message);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert('❌ Error de red o servidor');
-    });
-});
+// $(document).ready(function () {
+//     $('#form-promocion').on('submit', function (e) {
+//         e.preventDefault(); // Evita el envío clásico
+
+//         let formData = new FormData(this);
+
+//         $.ajax({
+//             url: 'procesar_promocion.php', // Cambia esto a tu script PHP de destino
+//             type: 'POST',
+//             data: formData,
+//             contentType: false, // Necesario para enviar archivos
+//             processData: false, // Necesario para enviar archivos
+//             success: function (response) {
+//                 console.log('Respuesta del servidor:', response);
+//                 alert('Promoción guardada correctamente');
+//                 // Puedes limpiar el formulario o redirigir si quieres
+//             },
+//             error: function (xhr, status, error) {
+//                 console.error('Error AJAX:', error);
+//                 alert('Ocurrió un error al guardar la promoción');
+//             }
+//         });
+//     });
+// });
 </script>
 <?php
 include_once "header.php";
@@ -110,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
                 <div class="card-body">
                     <form method="POST" action="" id="form-promocion">
-                        <input type="hidden" name="action" value="insert">
+                        <input type="hidden" name="action" id="action" value="insert">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -396,6 +399,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 });
 
 
+document.getElementById('form-promocion').addEventListener('submit', function(e) {
+    e.preventDefault(); // ⚠️ Esto evita que la página se recargue
+
+    const form = e.target;
+    const formData = new FormData(form); // Captura texto + archivos
+
+    fetch('../controllers/promoController.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Promoción guardada con éxito');
+            form.reset();
+        } else {
+            alert('⚠️ Error al guardar: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('❌ Error de red o servidor');
+    });
+});
 </script>
 
 
