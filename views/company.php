@@ -230,26 +230,45 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(response => response.json())
     .then(data => {
         const tbody = document.querySelector("#tabla-promos tbody");
-        data.forEach(promo => {
+        data.forEach((promo, index) => {
             const fila = `
                 <tr>
-                    <td>${promo.pro_id }</td>
+                    <td>${promo.pro_id}</td>
                     <td>${promo.pro_nombre}</td>
                     <td>${promo.pro_descripcion}</td>
                     
                     <td>
-                        <a href="promocion-edit.php?id=4" class="btn btn-success btn-sm mr-1" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
+                        <select name="Pedido" class="pedidoSelect form-select mb-3" data-index="${index}">
+                            <option value="">Seleccione...</option>
+                            <option value="recibido">Perfecto, su pedido ya fue recibido y está en alistamiento</option>
+                            <option value="sin_stock">Algunos de los productos solicitados no se encuentran disponibles. ¿Desea confirmar el pedido?</option>  
+                        </select>
+
+                        <div class="sinStockContainer" style="display: none;">
+                            <label>Productos sin stock</label>
+                            <textarea name="descripcion" rows="4" cols="50" class="form-control mb-3" placeholder="Escribe aquí..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Enviar</button>
                     </td>
-                    
                 </tr>`;
             tbody.innerHTML += fila;
+        });
+
+        // Ahora sí: agregar eventos a los selects recién creados
+        document.querySelectorAll(".pedidoSelect").forEach(select => {
+            select.addEventListener("change", function () {
+                const container = this.nextElementSibling; // el div que sigue al select
+                if (this.value === "sin_stock") {
+                    container.style.display = "block";
+                } else {
+                    container.style.display = "none";
+                }
+            });
         });
     })
     .catch(error => console.error("Error:", error));
 });
-
 </script>
 
 
