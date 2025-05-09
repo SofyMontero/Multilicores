@@ -4,8 +4,12 @@ require_once "database.php";
 class Promo {
     private $db;
 
+    // public function __construct() {
+    //     $this->db = new Database();
+    // }
     public function __construct() {
-        $this->db = new Database();
+        $database = new Database();     // Esto crea el objeto de tu clase
+        $this->db = $database->connect(); // Esto guarda el PDO
     }
 
     // public function getUserByUsername($usuario) {
@@ -13,9 +17,21 @@ class Promo {
     //     $query->execute(["usuario" => $usuario]);
     //     return $query->fetch(PDO::FETCH_ASSOC);
     // }
-    public function registerPromo($titulo, $patrocinador, $estado, $imagen, $descripcion) {
+    // public function registerPromo($titulo, $patrocinador, $estado, $imagen, $descripcion) {
         
-        $query = $this->db->connect()->prepare("INSERT INTO `promos`( `pro_nombre`, `pro_patrocinador`, `pro_estado`, `pro_descripcion`, `pro_imagen`) VALUES (:titulo,:patrocinador,:estado,:descripcion,:imagen)");
+    //     $query = $this->db->connect()->prepare("INSERT INTO `promos`( `pro_nombre`, `pro_patrocinador`, `pro_estado`, `pro_descripcion`, `pro_imagen`) VALUES (:titulo,:patrocinador,:estado,:descripcion,:imagen)");
+    //     return $query->execute([
+    //         "titulo" => $titulo,
+    //         "patrocinador" => $patrocinador,
+    //         "estado" => $estado,
+    //         "imagen" => $imagen,
+    //         "descripcion" => $descripcion
+    //     ]);
+    // }
+
+    public function registerPromo($titulo, $patrocinador, $estado, $imagen, $descripcion) {
+        $query = $this->db->prepare("INSERT INTO `promos`(`pro_nombre`, `pro_patrocinador`, `pro_estado`, `pro_descripcion`, `pro_imagen`) 
+                                     VALUES (:titulo, :patrocinador, :estado, :descripcion, :imagen)");
         return $query->execute([
             "titulo" => $titulo,
             "patrocinador" => $patrocinador,
@@ -43,6 +59,12 @@ class Promo {
             "imagen" => $imagen,
             "descripcion" => $descripcion
         ]);
+    }
+
+    public function getAllPromos() {
+        $stmt = $this->db->prepare("SELECT * FROM promos");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 

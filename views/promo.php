@@ -1,33 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-
-
-// $(document).ready(function () {
-//     $('#form-promocion').on('submit', function (e) {
-//         e.preventDefault(); // Evita el envío clásico
-
-//         let formData = new FormData(this);
-
-//         $.ajax({
-//             url: 'procesar_promocion.php', // Cambia esto a tu script PHP de destino
-//             type: 'POST',
-//             data: formData,
-//             contentType: false, // Necesario para enviar archivos
-//             processData: false, // Necesario para enviar archivos
-//             success: function (response) {
-//                 console.log('Respuesta del servidor:', response);
-//                 alert('Promoción guardada correctamente');
-//                 // Puedes limpiar el formulario o redirigir si quieres
-//             },
-//             error: function (xhr, status, error) {
-//                 console.error('Error AJAX:', error);
-//                 alert('Ocurrió un error al guardar la promoción');
-//             }
-//         });
-//     });
-// });
-</script>
 <?php
 include_once "header.php";
 require_once "../models/database.php";
@@ -196,109 +168,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-dark table-sm">
+                        <table class="table table-dark table-sm" id="tabla-promos" border="1">
+                       
                             <thead>
                                 <tr class="text-center roboto-medium">
-                                    <th>#</th>
+                                    <th>Id</th>
                                     <th>Promoción</th>
-                                    <th>Descripción</th>
                                     <th>Patrocinador</th>
                                     <th>Estado</th>
-                                    <th>Opciones</th>                                
+                                    <th>Descripción</th>
+                                    <th>Imagen</th>   
+                                    <th>Editar</th>  
+                                    <th>Enviar</th>    
+
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                // Mostrar los datos de promociones desde la base de datos
-                                // if($resultado && $resultado->num_rows > 0) {
-                                //     $contador = 1;
-                                //     while($row = $resultado->fetch_assoc()) {
-                                //         echo '<tr class="text-center">';
-                                //         echo '<td>'.$contador.'</td>';
-                                //         echo '<td>'.$row['promo'].'</td>';
-                                //         echo '<td>'.$row['descripcion'].'</td>';
-                                //         echo '<td>'.$row['patrocinador'] ? $row['patrocinador'] : 'N/A'.'</td>';
-                                //         
-                                //         $estado_badge = '';
-                                //         switch($row['estado']) {
-                                //             case 'Activa': $estado_badge = 'success'; break;
-                                //             case 'Inactiva': $estado_badge = 'secondary'; break;
-                                //             case 'Programada': $estado_badge = 'info'; break;
-                                //             default: $estado_badge = 'primary';
-                                //         }
-                                //         
-                                //         echo '<td><span class="badge badge-'.$estado_badge.'">'.$row['estado'].'</span></td>';
-                                //         echo '<td>';
-                                //         echo '<a href="promocion-edit.php?id='.$row['id'].'" class="btn btn-success btn-sm mr-1" title="Editar">';
-                                //         echo '<i class="fas fa-edit"></i>';
-                                //         echo '</a>';
-                                //         
-                                //         if($row['estado'] == 'Inactiva') {
-                                //             echo '<button type="button" class="btn btn-info btn-sm reactivar-btn" data-id="'.$row['id'].'" title="Activar">';
-                                //             echo '<i class="fas fa-sync-alt"></i>';
-                                //             echo '</button>';
-                                //         } else {
-                                //             echo '<button type="button" class="btn btn-warning btn-sm desactivar-btn" data-id="'.$row['id'].'" title="Desactivar">';
-                                //             echo '<i class="fas fa-power-off"></i>';
-                                //             echo '</button>';
-                                //         }
-                                //         
-                                //         echo '</td>';
-                                //         echo '</tr>';
-                                //         $contador++;
-                                //     }
-                                // } else {
-                                //     echo '<tr><td colspan="6" class="text-center">No hay promociones registradas</td></tr>';
-                                // }
+
                                 ?>
                                 
-                                <!-- Ejemplos estáticos -->
-                                <tr class="text-center">
-                                    <td>1</td>
-                                    <td>Descuento 50% Primavera</td>
-                                    <td>Descuento del 50% en todos los productos de temporada primavera 2025</td>
-                                    <td>Fashion Company</td>
-                                    <td><span class="badge badge-success">Activa</span></td>
-                                    <td>
-                                        <a href="promocion-edit.php?id=1" class="btn btn-success btn-sm mr-1" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-warning btn-sm desactivar-btn" data-id="1" title="Desactivar">
-                                            <i class="fas fa-power-off"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="text-center">
-                                    <td>2</td>
-                                    <td>2x1 en Accesorios</td>
-                                    <td>Lleva 2 accesorios por el precio de 1 durante toda la semana</td>
-                                    <td>N/A</td>
-                                    <td><span class="badge badge-success">Activa</span></td>
-                                    <td>
-                                        <a href="promocion-edit.php?id=2" class="btn btn-success btn-sm mr-1" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-warning btn-sm desactivar-btn" data-id="2" title="Desactivar">
-                                            <i class="fas fa-power-off"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="text-center">
-                                    <td>3</td>
-                                    <td>Envío Gratis</td>
-                                    <td>Envío gratis en compras superiores a $50.000</td>
-                                    <td>Transportadora Rápida</td>
-                                    <td><span class="badge badge-secondary">Inactiva</span></td>
-                                    <td>
-                                        <a href="promocion-edit.php?id=3" class="btn btn-success btn-sm mr-1" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-info btn-sm reactivar-btn" data-id="3" title="Activar">
-                                            <i class="fas fa-sync-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="text-center">
+
+                                <!-- <tr class="text-center">
                                     <td>4</td>
                                     <td>Black Friday 2024</td>
                                     <td>Descuentos especiales en toda la tienda por Black Friday</td>
@@ -312,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                             <i class="fas fa-power-off"></i>
                                         </button>
                                     </td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -423,6 +314,41 @@ document.getElementById('form-promocion').addEventListener('submit', function(e)
         alert('❌ Error de red o servidor');
     });
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch('../controllers/promoController.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'action=mostrar'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const tbody = document.querySelector("#tabla-promos tbody");
+        data.forEach(promo => {
+            const fila = `
+                <tr>
+                    <td>${promo.pro_id }</td>
+                    <td>${promo.pro_nombre}</td>
+                    <td>${promo.pro_patrocinador}</td>
+                    <td>${promo.pro_estado}</td>
+                    <td>${promo.pro_descripcion}</td>
+                    <td><img src="../uploads/${promo.pro_imagen}" width="100"></td>
+                    <td>
+                        <a href="promocion-edit.php?id=4" class="btn btn-success btn-sm mr-1" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </td>
+                    
+                </tr>`;
+            tbody.innerHTML += fila;
+        });
+    })
+    .catch(error => console.error("Error:", error));
+});
+
 </script>
 
 
