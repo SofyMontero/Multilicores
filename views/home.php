@@ -54,6 +54,13 @@ require_once "../models/database.php";
 		
 					</div>
 				</a>
+				<a href="categorias.php" class="tile">
+					<div class="tile-tittle">Catalogo</div>
+					<div class="tile-icon">						
+					<i class="fas fa-shopping-cart fa-fw"></i>
+		
+					</div>
+				</a>
 				
 			</div>
 			
