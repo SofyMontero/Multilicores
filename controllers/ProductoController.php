@@ -31,8 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
                     $precio_paca    = $fila[2];
                     $descripcion    = $fila[3];
                     $cantidad_paca  = $fila[4];
-
-                    $producto->insertarProducto($precio_unidad, $id_categoria, $precio_paca, $descripcion, $cantidad_paca);
+                    $imagen         = $fila[5];
+                    $producto->insertarProducto($precio_unidad, $id_categoria, $precio_paca, $descripcion, $cantidad_paca,$imagen  );
                     $insertados++;
                 }
             }

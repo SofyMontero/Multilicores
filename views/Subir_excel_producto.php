@@ -87,6 +87,7 @@ $importados = $_GET['importados'] ?? null;
                             <th>PRECIO PACA</th>
                             <th>CANTIDAD PACA</th>
                             <th>ID CATEGORÍA</th>
+                            <th>IMAGEN</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,6 +100,7 @@ $importados = $_GET['importados'] ?? null;
                                 <td>$<?php echo number_format($prod['precio_paca'], 2); ?></td>
                                 <td><?php echo (int)$prod['cantidad_paca']; ?></td>
                                 <td><?php echo (int)$prod['id_categoria']; ?></td>
+                                <td><?php echo (int)$prod['imagen']; ?></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
