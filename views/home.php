@@ -61,6 +61,13 @@ require_once "../models/database.php";
 		
 					</div>
 				</a>
+				<a href="Subir_excel_producto.php" class="tile">
+					<div class="tile-tittle">Cargar Productos</div>
+					<div class="tile-icon">						
+					<i class="fas fa-shopping-cart fa-fw"></i>
+		
+					</div>
+				</a>
 				
 			</div>
 			
