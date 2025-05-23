@@ -153,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // $password = "Dobarli23@transmillas";
             // $dbname = "u713516042_transmillas2";
             // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname);
+            // $conn = new mysqli($servername, $username, $password, $dbname);
 
             //INSERTAMOS LOS REGISTROS DEL ENVIO DEL WHATSAPP
             // $sql = "INSERT INTO registro "
