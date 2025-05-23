@@ -14,7 +14,7 @@ require_once "../models/database.php";
                     </div>
 
                     <div class="card-body p-4">
-                        <form action="../controller/ProductoController.php" method="POST" enctype="multipart/form-data">
+                        <form action="../controllers/ProductoController.php" method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="archivo_excel" class="form-label">Selecciona el archivo Excel</label>
                                 <input type="file" name="archivo_excel" id="archivo_excel" class="form-control" accept=".xlsx,.xls" required>
