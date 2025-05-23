@@ -1,6 +1,13 @@
 <?php 
 include_once "header.php";
 require_once "../models/database.php";
+require_once "../models/ProductoModel.php";
+
+// Obtener productos desde la base de datos
+$producto = new Producto();
+$productos = $producto->obtenerProductos(); // Asegúrate de tener este método en tu modelo
+
+$importados = $_GET['importados'] ?? null;
 
 // Simulación de productos (puedes adaptar esto a tu base de datos real)
 $productos = [
@@ -35,38 +42,65 @@ $productos = [
     <h2 class="text-center mb-4"><i class="fas fa-store"></i> Catálogo de Licores</h2>
     <form method="POST" action="procesar_pedido.php">
         <div class="row">
-            <?php foreach ($productos as $producto): ?>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <img src="<?= $producto['imagen'] ?>" class="card-img-top" alt="<?= $producto['nombre'] ?>">
-                        <div class="card-body">
-                            <h5 class="card-title"><?= $producto['nombre'] ?></h5>
-                            <p class="card-text"><?= $producto['descripcion'] ?></p>
-                            <p class="card-text">
-                                <strong>Precio Unidad:</strong> $<?= number_format($producto['precio_unidad']) ?> COP<br>
-                                <strong>Precio Paca:</strong> $<?= number_format($producto['precio_paca']) ?> COP
-                            </p>
+            <?php if (!empty($productos)): ?>
+                            <?php $contador = 1; foreach ($productos as $prod): ?>
+                                                                <!-- <td><?php echo $contador++; ?></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><?php echo (int)$prod['cantidad_paca']; ?></td>
+                                <td><?php echo (int)$prod['id_categoria']; ?></td>
+                                <td></td> -->
 
-                            <div class="form-group">
-                                <label for="tipo_<?= $producto['id'] ?>">Tipo de venta</label>
-                                <select name="productos[<?= $producto['id'] ?>][tipo]" class="form-control" required>
-                                    <option value="unidad">Unidad</option>
-                                    <option value="paca">Paca</option>
-                                </select>
-                            </div>
 
-                            <div class="form-group mt-2">
-                                <label for="cantidad_<?= $producto['id'] ?>">Cantidad</label>
-                                <input type="number" name="productos[<?= $producto['id'] ?>][cantidad]" class="form-control" min="1" required>
-                            </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <img src="assets/img/licores<?php echo (int)$prod['imagen']; ?>" class="card-img-top" alt="<?= $producto['nombre'] ?>">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?php echo htmlspecialchars($prod['descripcion']); ?></h5>
+                                            <p class="card-text"></p>
+                                            <p class="card-text">
+                                                <strong>Precio Unidad:</strong>$<?php echo number_format($prod['precio_unidad'], 2); ?> COP<br>
+                                                <strong>Precio Paca:</strong> $<?php echo number_format($prod['precio_paca'], 2); ?>COP
+                                            </p>
 
-                            <input type="hidden" name="productos[<?= $producto['id'] ?>][id]" value="<?= $producto['id'] ?>">
-                            <input type="hidden" name="productos[<?= $producto['id'] ?>][nombre]" value="<?= $producto['nombre'] ?>">
+                                            <div class="form-group">
+                                                <label for="tipo_<?= $producto['id'] ?>">Tipo de venta</label>
+                                                <select name="productos[<?= $producto['id'] ?>][tipo]" class="form-control" required>
+                                                    <option value="unidad">Unidad</option>
+                                                    <option value="paca">Paca</option>
+                                                </select>
+                                            </div>
 
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+                                            <div class="form-group mt-2">
+                                                <label for="cantidad_">Cantidad</label>
+                                                <input type="number" name="productos[][cantidad]" class="form-control" min="1" required>
+                                            </div>
+
+                                            <!-- <input type="hidden" name="productos[<?= $producto['id'] ?>][id]" value="<?= $producto['id'] ?>">
+                                            <input type="hidden" name="productos[<?= $producto['id'] ?>][nombre]" value="<?php echo htmlspecialchars($prod['descripcion']); ?>"> -->
+
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="6" class="text-center">No hay productos registrados</td></tr>
+                        <?php endif; ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
         </div>
 
         <div class="text-center mt-4">
