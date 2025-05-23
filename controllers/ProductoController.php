@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
                 }
             }
 
-            header("Location: ../views/product-list.php?importados=$insertados");
+            header("Location: ../views/Subir_excel_producto.php?importados=$insertados");
             exit;
 
         } catch (Exception $e) {
