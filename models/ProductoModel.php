@@ -26,4 +26,20 @@ class Producto {
     }
 
     // Si necesitas más funciones como listar, actualizar, etc., puedo ayudarte a agregarlas
+    public function obtenerProductos() {
+    $query = $this->db->connect()->prepare("
+        SELECT 
+            id_producto,
+            descripcion_producto AS descripcion,
+            precio_unidad_producto AS precio_unidad,
+            precio_paca_producto AS precio_paca,
+            cantidad_paca_producto AS cantidad_paca,
+            id_cate_producto AS id_categoria
+        FROM productos
+        ORDER BY id_producto DESC
+    ");
+    
+    $query->execute();
+    return $query->fetchAll(PDO::FETCH_ASSOC);
+}
 }
