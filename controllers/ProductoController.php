@@ -1,6 +1,6 @@
 <?php
 require_once "../vendor/autoload.php";      // PhpSpreadsheet
-require_once "../models/Producto.php";      // Modelo
+require_once "../models/ProductoModel.php";      // Modelo
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
