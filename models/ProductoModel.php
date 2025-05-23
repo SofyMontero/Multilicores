@@ -1,0 +1,29 @@
+<?php
+require_once "database.php";
+
+class Producto {
+    private $db;
+
+    public function __construct() {
+        $this->db = new Database();
+    }
+
+    // Método para insertar producto desde Excel
+    public function insertarProducto($precioUnidad, $idCategoria, $precioPaca, $descripcion, $cantidadPaca) {
+        $query = $this->db->connect()->prepare("
+            INSERT INTO productos 
+            (precio_unidad_producto, id_cate_producto, precio_paca_producto, descripcion_producto, cantidad_paca_producto)
+            VALUES (:precioUnidad, :idCategoria, :precioPaca, :descripcion, :cantidadPaca)
+        ");
+
+        return $query->execute([
+            "precioUnidad"  => $precioUnidad,
+            "idCategoria"   => $idCategoria,
+            "precioPaca"    => $precioPaca,
+            "descripcion"   => $descripcion,
+            "cantidadPaca"  => $cantidadPaca
+        ]);
+    }
+
+    // Si necesitas más funciones como listar, actualizar, etc., puedo ayudarte a agregarlas
+}
