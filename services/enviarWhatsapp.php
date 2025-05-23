@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "template" => [
                     "name" => "hello_world",  // Nombre de tu plantilla en WhatsApp
                     "language" => [
-                        "code" => "es"  // Código de idioma, en este caso español (es)
+                        "code" => "en_US"  // Código de idioma, en este caso español (es)
                     ]
                 ]
             ]);
