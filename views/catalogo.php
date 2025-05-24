@@ -59,7 +59,7 @@ $productos = [
 
                                 <div class="col-md-4 mb-4">
                                     <div class="card h-100 shadow-sm">
-                                        <img src="assets/img/licores<?php echo (int)$prod['imagen']; ?>" class="card-img-top" alt="<?= $producto['nombre'] ?>">
+                                        <img src="assets/img/licores<?php echo (int)$prod['imagen']; ?>" class="card-img-top" alt="<?php echo htmlspecialchars($prod['descripcion']); ?>">
                                         <div class="card-body">
                                             <h5 class="card-title"><?php echo htmlspecialchars($prod['descripcion']); ?></h5>
                                             <p class="card-text"></p>
