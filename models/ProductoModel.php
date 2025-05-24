@@ -44,4 +44,16 @@ class Producto {
     $query->execute();
     return $query->fetchAll(PDO::FETCH_ASSOC);
 }
+
+ public function obtenerCategorias() {
+    $query = $this->db->connect()->prepare("
+    SELECT `id_categoria`,
+    `nombre_categoria`, 
+    `imagen_categoria`
+    FROM `categorias` 
+    ");
+    
+    $query->execute();
+    return $query->fetchAll(PDO::FETCH_ASSOC);
+}
 }
