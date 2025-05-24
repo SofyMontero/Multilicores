@@ -27,7 +27,7 @@ $importados = $_GET['importados'] ?? null;
                         </a>
                         <div class="card-body text-center">
                             <h5 class="card-title"><?php echo $prod['nombre_categoria']; ?></h5>
-                            <a href="catalogo.php?categoria=<?php echo $prod['id_categoria']; ?>" class="btn btn-success w-100">Ver productos</a>
+                            <a href="catalogo.php?categoria=<?php echo $prod['id_categoria']; ?>&nombre=<?php echo $prod['nombre_categoria']; ?>" class="btn btn-success w-100">Ver productos</a>
                         </div>
                     </div>
                 </div>

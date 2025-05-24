@@ -7,6 +7,8 @@ error_reporting(E_ALL);
 
 require_once "../models/ProductoModel.php";
 $categoria=$_GET['categoria'] ;
+$nombre=$_GET['nombre'] ;
+
 // Obtener productos desde la base de datos
 $producto = new Producto();
 $productos = $producto->obtenerProductos($categoria); // Asegúrate de tener este método en tu modelo
@@ -53,7 +55,7 @@ $importados = $_GET['importados'] ?? null;
 
                                 <div class="col-md-4 mb-4">
                                     <div class="card h-100 shadow-sm">
-                                        <img src="assets/img/licores<?php echo $prod['imagen']; ?>" class="card-img-top" alt="<?php echo htmlspecialchars($prod['descripcion']); ?>">
+                                        <img src="assets/img/licores/<?php echo$nombre."/".$prod['imagen']; ?>" class="card-img-top" alt="<?php echo htmlspecialchars($prod['descripcion']); ?>">
                                         <div class="card-body">
                                             <h5 class="card-title"><?php echo htmlspecialchars($prod['descripcion']); ?></h5>
                                             <p class="card-text"></p>
