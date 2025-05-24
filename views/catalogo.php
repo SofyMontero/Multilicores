@@ -6,10 +6,10 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once "../models/ProductoModel.php";
-
+$categoria=$_GET['categoria'] ;
 // Obtener productos desde la base de datos
 $producto = new Producto();
-$productos = $producto->obtenerProductos(); // Asegúrate de tener este método en tu modelo
+$productos = $producto->obtenerProductos($categoria); // Asegúrate de tener este método en tu modelo
 
 $importados = $_GET['importados'] ?? null;
 

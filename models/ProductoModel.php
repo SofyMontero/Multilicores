@@ -27,7 +27,13 @@ class Producto {
     }
 
     // Si necesitas más funciones como listar, actualizar, etc., puedo ayudarte a agregarlas
-    public function obtenerProductos() {
+    public function obtenerProductos($categoria) {
+        if ($categoria=="0") {
+            $conde="";
+        }else{
+            $conde="and id_cate_producto='$categoria'";
+        }
+        
     $query = $this->db->connect()->prepare("
         SELECT 
             id_producto,
@@ -37,7 +43,7 @@ class Producto {
             cantidad_paca_producto AS cantidad_paca,
             id_cate_producto AS id_categoria,
             imagen_producto AS imagen
-        FROM productos
+        FROM productos where id_producto>0 $conde
         ORDER BY id_producto DESC
     ");
     
