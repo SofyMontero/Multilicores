@@ -48,13 +48,7 @@ $productos = [
         <div class="row">
             <?php if (!empty($productos)): ?>
                             <?php $contador = 1; foreach ($productos as $prod): ?>
-                                <td><?php echo $contador++; ?></td>
-                                <td></td>
-                                <td>$<?php echo number_format($prod['precio_unidad'], 2); ?></td>
-                                <td>$<?php echo number_format($prod['precio_paca'], 2); ?></td>
-                                <td><?php echo (int)$prod['cantidad_paca']; ?></td>
-                                <td><?php echo (int)$prod['id_categoria']; ?></td>
-                                <td><?php echo (int)$prod['imagen']; ?></td>
+
 
 
                                 <div class="col-md-4 mb-4">
