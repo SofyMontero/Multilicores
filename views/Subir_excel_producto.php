@@ -91,16 +91,31 @@ $importados = $_GET['importados'] ?? null;
                         </tr>
                     </thead>
                     <tbody>
+                                `id_producto`, 
+        `precio_unidad_producto`, 
+        `id_cate_producto`, 
+        `precio_paca_producto`, 
+        `descripcion_producto`, 
+        `cantidad_paca_producto`, 
+        `imagen_producto`, 
+        `estado_producto`,
+        `acti_Unidad`,
+        `codigo_productos`
                         <?php if (!empty($productos)): ?>
                             <?php $contador = 1; foreach ($productos as $prod): ?>
                             <tr class="text-center">
-                                <td><?php echo $contador++; ?></td>
-                                <td><?php echo htmlspecialchars($prod['descripcion']); ?></td>
-                                <td>$<?php echo number_format($prod['precio_unidad'], 2); ?></td>
-                                <td>$<?php echo number_format($prod['precio_paca'], 2); ?></td>
-                                <td><?php echo (int)$prod['cantidad_paca']; ?></td>
-                                <td><?php echo (int)$prod['id_categoria']; ?></td>
-                                <td><?php echo (int)$prod['imagen']; ?></td>
+                                <td><?php echo $prod['id_producto']; ?></td>
+                                <td>$<?php echo number_format($prod['precio_unidad_producto'],2); ?></td>
+                                <td><?php echo $prod['id_cate_producto']; ?></td>
+                                <td><?php echo number_format($prod['precio_paca_producto'], 2); ?></td>
+                                <td>$<?php echo $prod['descripcion_producto']; ?></td>
+                                <td><?php echo $prod['cantidad_paca_producto']; ?></td>
+                                <td><?php echo $prod['imagen_producto']; ?></td>
+                                <td><?php echo $prod['estado_producto']; ?></td>
+                                <td><?php echo $prod['acti_Unidad']; ?></td>
+                                <td><?php echo $prod['codigo_productos']; ?></td>
+
+
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>

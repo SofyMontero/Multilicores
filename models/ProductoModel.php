@@ -70,13 +70,16 @@ class Producto {
         
     $query = $this->db->connect()->prepare("
         SELECT 
-            id_producto,
-            descripcion_producto AS descripcion,
-            precio_unidad_producto AS precio_unidad,
-            precio_paca_producto AS precio_paca,
-            cantidad_paca_producto AS cantidad_paca,
-            id_cate_producto AS id_categoria,
-            imagen_producto AS imagen
+        `id_producto`, 
+        `precio_unidad_producto`, 
+        `id_cate_producto`, 
+        `precio_paca_producto`, 
+        `descripcion_producto`, 
+        `cantidad_paca_producto`, 
+        `imagen_producto`, 
+        `estado_producto`,
+        `acti_Unidad`,
+        `codigo_productos`
         FROM productos where id_producto>0 $conde
         ORDER BY id_producto DESC
     ");
