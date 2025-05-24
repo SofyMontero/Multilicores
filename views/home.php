@@ -55,18 +55,17 @@ require_once "../models/database.php";
 					</div>
 				</a>
 				<a href="categorias.php" class="tile">
-					<div class="tile-tittle">Catalogo</div>
-					<div class="tile-icon">						
-					<i class="fas fa-shopping-cart fa-fw"></i>
-		
-					</div>
+				    <div class="tile-tittle">Catálogo</div>
+ 					   <div class="tile-icon">
+ 					       <i class="fas fa-th-large fa-fw"></i> <!-- Icono tipo grid para categorías -->
+ 					   </div>
 				</a>
+
 				<a href="Subir_excel_producto.php" class="tile">
-					<div class="tile-tittle">Cargar Productos</div>
-					<div class="tile-icon">						
-					<i class="fas fa-shopping-cart fa-fw"></i>
-		
-					</div>
+   				 <div class="tile-tittle">Cargar Productos</div>
+   					 <div class="tile-icon">
+   					     <i class="fas fa-file-upload fa-fw"></i> <!-- Icono de carga de archivo -->
+  					  </div>
 				</a>
 				
 			</div>

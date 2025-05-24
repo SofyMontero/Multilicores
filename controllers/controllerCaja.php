@@ -7,7 +7,7 @@ $data = json_decode(file_get_contents("php://input"), true);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   try {
     $db = new Database();
-    $conexion = $db->connect(); // ← ahora sí tienes PDO
+    $conexion = $db->connect(); 
 
     $fecha       = $data['fecha'];
     $cliente_id  = $data['cliente_id'];
