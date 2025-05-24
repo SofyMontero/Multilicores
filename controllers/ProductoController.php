@@ -14,29 +14,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
     if (is_uploaded_file($archivo)) {
         try {
             $spreadsheet = IOFactory::load($archivo);
-            $hoja = $spreadsheet->getActiveSheet();
-            $datos = $hoja->toArray();
+                $hoja = $spreadsheet->getActiveSheet();
+                $datos = $hoja->toArray();
 
-            // Remover la primera fila si es encabezado
-            array_shift($datos);
+                // Remover la primera fila si es encabezado
+                array_shift($datos);
 
-            $producto = new Producto();
-            $insertados = 0;
+                $producto = new Producto();
+                $insertados = 0;
 
-            foreach ($datos as $fila) {
-                // Asegúrate de que haya al menos 5 columnas
-                if (count($fila) >= 5) {
-                    $precio_unidad  = $fila[0];
-                    $id_categoria   = $fila[1];
-                    $precio_paca    = $fila[2];
-                    $descripcion    = $fila[3];
-                    $cantidad_paca  = $fila[4];
-                    $imagen         = $fila[5];
-                    $producto->insertarProducto($precio_unidad, $id_categoria, $precio_paca, $descripcion, $cantidad_paca,$imagen  );
-                    $insertados++;
+                foreach ($datos as $fila) {
+                    // Asegúrate de que haya al menos 5 columnas
+                    if (count($fila) >= 5) {
+                        // Convertir campos vacíos a 0
+                        $precio_unidad  = !empty($fila[0]) ? $fila[0] : 0;
+                        $id_categoria   = !empty($fila[1]) ? $fila[1] : 0;
+                        $precio_paca    = !empty($fila[2]) ? $fila[2] : 0;
+                        $descripcion    = !empty($fila[3]) ? $fila[3] : ''; // Dejar string vacío si no hay descripción
+                        $cantidad_paca  = !empty($fila[4]) ? $fila[4] : 0;
+                        $imagen         = !empty($fila[5]) ? $fila[5] : ''; // Dejar string vacío si no hay imagen
+
+                        $producto->insertarProducto(
+                            $precio_unidad,
+                            $id_categoria,
+                            $precio_paca,
+                            $descripcion,
+                            $cantidad_paca,
+                            $imagen
+                        );
+
+                        $insertados++;
+                    }
                 }
-            }
-
             header("Location: ../views/Subir_excel_producto.php?importados=$insertados");
             exit;
 
