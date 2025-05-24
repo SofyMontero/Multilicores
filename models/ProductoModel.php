@@ -9,20 +9,54 @@ class Producto {
     }
 
     // Método para insertar producto desde Excel
-    public function insertarProducto($precioUnidad, $idCategoria, $precioPaca, $descripcion, $cantidadPaca,$imagen  ) {
+    public function insertarProducto(
+                        $codigo_producto,
+                        $descripcion_producto,
+                        $cantidad_paca_producto,
+                        $precio_unidad,
+                        $precio_paca,
+                        $id_cate_producto,
+                        $acti_Unidad,
+                        $imagen_producto,
+                        $estado_producto) {
         $query = $this->db->connect()->prepare("
             INSERT INTO productos 
-            (precio_unidad_producto, id_cate_producto, precio_paca_producto, descripcion_producto, cantidad_paca_producto,imagen_producto)
-            VALUES (:precioUnidad, :idCategoria, :precioPaca, :descripcion, :cantidadPaca, :imagen)
+            (
+
+            `codigo_productos`, 
+            `descripcion_producto`,
+            `cantidad_paca_producto`,
+            `precio_unidad_producto`,
+            `precio_paca_producto`,
+            `id_cate_producto`,
+            `acti_Unidad`, 
+            `imagen_producto`,
+            `estado_producto`,
+            
+            )
+            VALUES (
+                :codigo_producto,
+                :descripcion_producto,
+                :cantidad_paca_producto,
+                :precio_unidad,
+                :precio_paca,
+                :id_cate_producto,
+                :acti_Unidad,
+                :imagen_producto,
+                :estado_producto
+            )
         ");
 
         return $query->execute([
-            "precioUnidad"  => $precioUnidad,
-            "idCategoria"   => $idCategoria,
-            "precioPaca"    => $precioPaca,
-            "descripcion"   => $descripcion,
-            "cantidadPaca"  => $cantidadPaca,
-            "imagen"  => $imagen
+                "codigo_producto" =>$codigo_producto,
+                "descripcion_producto" =>$descripcion_producto,
+                "cantidad_paca_producto" =>$cantidad_paca_producto,
+                "precio_unidad" =>$precio_unidad,
+                "precio_paca" =>$precio_paca,
+                "id_cate_producto" =>$id_cate_producto,
+                "acti_Unidad" =>$acti_Unidad,
+                "imagen_producto" =>$imagen_producto,
+                "estado_producto" =>$estado_producto
         ]);
     }
 

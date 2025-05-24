@@ -27,20 +27,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
                     // Asegúrate de que haya al menos 5 columnas
                     if (count($fila) >= 5) {
                         // Convertir campos vacíos a 0
-                        $precio_unidad  = !empty($fila[0]) ? $fila[0] : 0;
-                        $id_categoria   = !empty($fila[1]) ? $fila[1] : 0;
-                        $precio_paca    = !empty($fila[2]) ? $fila[2] : 0;
-                        $descripcion    = !empty($fila[3]) ? $fila[3] : ''; // Dejar string vacío si no hay descripción
-                        $cantidad_paca  = !empty($fila[4]) ? $fila[4] : 0;
-                        $imagen         = !empty($fila[5]) ? $fila[5] : ''; // Dejar string vacío si no hay imagen
+                        $codigo_producto         = !empty($fila[0]) ? $fila[0] : 0;
+                        $descripcion_producto    = !empty($fila[1]) ? $fila[1] : 0;
+                        $cantidad_paca_producto  = !empty($fila[2]) ? $fila[2] : 0;
+                        $precio_unidad           = !empty($fila[3]) ? $fila[3] : 0;
+                        $precio_paca             = !empty($fila[4]) ? $fila[4] : 0; 
+                        $id_cate_producto        = !empty($fila[5]) ? $fila[5] : 0;
+                        $acti_Unidad             = !empty($fila[6]) ? $fila[6] : 0; 
+                        $imagen_producto         = !empty($fila[7]) ? $fila[7] : 0; 
+                        $estado_producto         = !empty($fila[8]) ? $fila[8] : 0; 
 
                         $producto->insertarProducto(
-                            $precio_unidad,
-                            $id_categoria,
-                            $precio_paca,
-                            $descripcion,
-                            $cantidad_paca,
-                            $imagen
+                        $codigo_producto,
+                        $descripcion_producto,
+                        $cantidad_paca_producto,
+                        $precio_unidad,
+                        $precio_paca,
+                        $id_cate_producto,
+                        $acti_Unidad,
+                        $imagen_producto,
+                        $estado_producto
                         );
 
                         $insertados++;
