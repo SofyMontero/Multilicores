@@ -78,3 +78,42 @@ require_once "../models/database.php";
 include_once "footer.php";
 
 ?>
+
+<style>
+	.tile-container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	gap: 20px; /* espacio entre tarjetas */
+}
+
+.tile {
+	width: calc(25% - 15px); /* 4 por fila */
+	min-width: 200px;
+	padding: 20px;
+	background-color: #f5f5f5;
+	border-radius: 10px;
+	text-align: center;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	text-decoration: none;
+	color: #333;
+}
+
+@media (max-width: 1024px) {
+	.tile {
+		width: calc(33.33% - 15px); /* 3 por fila en pantallas medianas */
+	}
+}
+
+@media (max-width: 768px) {
+	.tile {
+		width: calc(50% - 15px); /* 2 por fila */
+	}
+}
+
+@media (max-width: 480px) {
+	.tile {
+		width: 100%; /* 1 por fila en móvil */
+	}
+}
+</style>
