@@ -1,6 +1,10 @@
 <?php 
 include_once "header.php";
 require_once "../models/database.php";
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once "../models/ProductoModel.php";
 
 // Obtener productos desde la base de datos
