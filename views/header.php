@@ -73,23 +73,30 @@ date_default_timezone_set('America/Bogota');
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas fa-address-book fa-fw"></i> &nbsp; Clientes </a>							
+							<a href="clientes.php"><i class="fas fa-address-book fa-fw"></i> &nbsp; Clientes </a>							
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas fa-bullhorn fa-fw"></i> &nbsp; Promociones </a>							
+							<a href="promo.php"><i class="fas fa-bullhorn fa-fw"></i> &nbsp; Promociones </a>							
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas fa-file-invoice-dollar fa-fw"></i> &nbsp; Pedidos </a>							
+							<a href="cartera.php"><i class="fas fa-file-invoice-dollar fa-fw"></i> &nbsp; Pedidos </a>							
 						</li>
 
 						<li>
-							<a href="#" class="nav-btn-submenu"><i class="fas fa-user fa-fw"></i> &nbsp; Usuarios </a>							
+							<a href="user-list.php"><i class="fas fa-user fa-fw"></i> &nbsp; Usuarios </a>							
 						</li>
 
 						<li>
 							<a href="company.php"><i class="fas fa-shopping-cart fa-fw"></i> &nbsp; Solicitudes</a>
+						</li>
+						<li>
+							<a href="categorias.php"><i class="fas fa-th-large fa-fw"></i> &nbsp; Catálogo </a>							
+						</li>
+
+						<li>
+							<a href="Subir_excel_producto.php"> <i class="fas fa-file-upload fa-fw"></i> &nbsp; Cargar Productos</a>
 						</li>
 					</ul>
 				</nav>
