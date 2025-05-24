@@ -48,13 +48,13 @@ $productos = [
         <div class="row">
             <?php if (!empty($productos)): ?>
                             <?php $contador = 1; foreach ($productos as $prod): ?>
-                                                                <!-- <td><?php echo $contador++; ?></td>
+                                <td><?php echo $contador++; ?></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td>$<?php echo number_format($prod['precio_unidad'], 2); ?></td>
+                                <td>$<?php echo number_format($prod['precio_paca'], 2); ?></td>
                                 <td><?php echo (int)$prod['cantidad_paca']; ?></td>
                                 <td><?php echo (int)$prod['id_categoria']; ?></td>
-                                <td></td> -->
+                                <td><?php echo (int)$prod['imagen']; ?></td>
 
 
                                 <div class="col-md-4 mb-4">
@@ -69,8 +69,8 @@ $productos = [
                                             </p>
 
                                             <div class="form-group">
-                                                <label for="tipo_<?= $producto['id'] ?>">Tipo de venta</label>
-                                                <select name="productos[<?= $producto['id'] ?>][tipo]" class="form-control" required>
+                                                <label for="tipo_1">Tipo de venta</label>
+                                                <select name="productos[uno][tipo]" class="form-control" required>
                                                     <option value="unidad">Unidad</option>
                                                     <option value="paca">Paca</option>
                                                 </select>
@@ -78,11 +78,9 @@ $productos = [
 
                                             <div class="form-group mt-2">
                                                 <label for="cantidad_">Cantidad</label>
-                                                <input type="number" name="productos[][cantidad]" class="form-control" min="1" required>
+                                                <input type="number" name="productos[uno][cantidad]" class="form-control" min="1" required>
                                             </div>
 
-                                            <!-- <input type="hidden" name="productos[<?= $producto['id'] ?>][id]" value="<?= $producto['id'] ?>">
-                                            <input type="hidden" name="productos[<?= $producto['id'] ?>][nombre]" value="<?php echo htmlspecialchars($prod['descripcion']); ?>"> -->
 
                                         </div>
                                     </div>
