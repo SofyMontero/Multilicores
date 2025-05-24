@@ -14,32 +14,32 @@ $productos = $producto->obtenerProductos(); // Asegúrate de tener este método 
 $importados = $_GET['importados'] ?? null;
 
 // Simulación de productos (puedes adaptar esto a tu base de datos real)
-$productos = [
-    [
-        "id" => 1,
-        "nombre" => "Ron Medellín 750ml",
-        "descripcion" => "Ron añejado colombiano.",
-        "precio_unidad" => 35000,
-        "precio_paca" => 200000, // Por ejemplo, 6 botellas
-        "imagen" => "https://via.placeholder.com/150"
-    ],
-    [
-        "id" => 2,
-        "nombre" => "Aguardiente Antioqueño 375ml",
-        "descripcion" => "Tradición paisa en una botella.",
-        "precio_unidad" => 18000,
-        "precio_paca" => 100000,
-        "imagen" => "https://via.placeholder.com/150"
-    ],
-    [
-        "id" => 3,
-        "nombre" => "Cerveza Poker Lata",
-        "descripcion" => "Cerveza rubia refrescante.",
-        "precio_unidad" => 3500,
-        "precio_paca" => 40000,
-        "imagen" => "https://via.placeholder.com/150"
-    ]
-];
+// $productos = [
+//     [
+//         "id" => 1,
+//         "nombre" => "Ron Medellín 750ml",
+//         "descripcion" => "Ron añejado colombiano.",
+//         "precio_unidad" => 35000,
+//         "precio_paca" => 200000, // Por ejemplo, 6 botellas
+//         "imagen" => "https://via.placeholder.com/150"
+//     ],
+//     [
+//         "id" => 2,
+//         "nombre" => "Aguardiente Antioqueño 375ml",
+//         "descripcion" => "Tradición paisa en una botella.",
+//         "precio_unidad" => 18000,
+//         "precio_paca" => 100000,
+//         "imagen" => "https://via.placeholder.com/150"
+//     ],
+//     [
+//         "id" => 3,
+//         "nombre" => "Cerveza Poker Lata",
+//         "descripcion" => "Cerveza rubia refrescante.",
+//         "precio_unidad" => 3500,
+//         "precio_paca" => 40000,
+//         "imagen" => "https://via.placeholder.com/150"
+//     ]
+// ];
 ?>
 
 <div class="container mt-5">
