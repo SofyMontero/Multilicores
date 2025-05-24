@@ -31,7 +31,7 @@ class Producto {
             `id_cate_producto`,
             `acti_Unidad`, 
             `imagen_producto`,
-            `estado_producto`,
+            `estado_producto`
             
             )
             VALUES (
