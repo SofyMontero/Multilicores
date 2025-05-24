@@ -7,7 +7,7 @@ require_once "../models/ProductoModel.php";
 
 // Obtener productos desde la base de datos
 $producto = new Producto();
-$productos = $producto->obtenerProductos(); // Asegúrate de tener este método en tu modelo
+$productos = $producto->obtenerProductos(0); // Asegúrate de tener este método en tu modelo
 
 $importados = $_GET['importados'] ?? null;
 ?>
