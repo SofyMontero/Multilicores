@@ -81,8 +81,10 @@ $importados = $_GET['importados'] ?? null;
                 <table class="table table-dark table-sm">
                     <thead>
                         <tr class="text-center roboto-medium">
+                            
                             <th>ID</th>
                             <th>PRECIO UNIDAD</th>
+                            <th>PRECIO PACA</th>
                             <th>CATEGORIA</th>
                             <th>PRODUCTO</th>
                             <th>CANT PACA</th>
@@ -99,8 +101,8 @@ $importados = $_GET['importados'] ?? null;
                             <tr class="text-center">
                                 <td><?php echo $prod['id_producto']; ?></td>
                                 <td>$<?php echo number_format($prod['precio_unidad_producto'],2); ?></td>
-                                <td><?php echo $prod['id_cate_producto']; ?></td>
                                 <td><?php echo number_format($prod['precio_paca_producto'], 2); ?></td>
+                                <td><?php echo $prod['id_cate_producto']; ?></td>
                                 <td>$<?php echo $prod['descripcion_producto']; ?></td>
                                 <td><?php echo $prod['cantidad_paca_producto']; ?></td>
                                 <td><?php echo $prod['imagen_producto']; ?></td>
