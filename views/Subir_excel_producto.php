@@ -81,26 +81,19 @@ $importados = $_GET['importados'] ?? null;
                 <table class="table table-dark table-sm">
                     <thead>
                         <tr class="text-center roboto-medium">
-                            <th>#</th>
-                            <th>DESCRIPCIÓN</th>
+                            <th>ID</th>
                             <th>PRECIO UNIDAD</th>
-                            <th>PRECIO PACA</th>
-                            <th>CANTIDAD PACA</th>
-                            <th>ID CATEGORÍA</th>
+                            <th>CATEGORIA</th>
+                            <th>PRODUCTO</th>
+                            <th>CANT PACA</th>
                             <th>IMAGEN</th>
+                            <th>ESTADO</th>
+                            <th>U o P</th>
+                            <th>CODIGO</th>
                         </tr>
                     </thead>
                     <tbody>
-                                `id_producto`, 
-        `precio_unidad_producto`, 
-        `id_cate_producto`, 
-        `precio_paca_producto`, 
-        `descripcion_producto`, 
-        `cantidad_paca_producto`, 
-        `imagen_producto`, 
-        `estado_producto`,
-        `acti_Unidad`,
-        `codigo_productos`
+
                         <?php if (!empty($productos)): ?>
                             <?php $contador = 1; foreach ($productos as $prod): ?>
                             <tr class="text-center">
