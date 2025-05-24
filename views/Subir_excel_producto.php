@@ -82,16 +82,17 @@ $importados = $_GET['importados'] ?? null;
                     <thead>
                         <tr class="text-center roboto-medium">
                             
-                            <th>ID</th>
+                            <th>CODIGO</th>
+                            <th>PRODUCTO</th>
+                            <th>EMBALAGE</th>
                             <th>PRECIO UNIDAD</th>
                             <th>PRECIO PACA</th>
                             <th>CATEGORIA</th>
-                            <th>PRODUCTO</th>
-                            <th>CANT PACA</th>
+                            <th>U o P</th>
                             <th>IMAGEN</th>
                             <th>ESTADO</th>
-                            <th>U o P</th>
-                            <th>CODIGO</th>
+                            
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -99,16 +100,17 @@ $importados = $_GET['importados'] ?? null;
                         <?php if (!empty($productos)): ?>
                             <?php $contador = 1; foreach ($productos as $prod): ?>
                             <tr class="text-center">
-                                <td><?php echo $prod['id_producto']; ?></td>
-                                <td>$<?php echo number_format($prod['precio_unidad_producto'],2); ?></td>
-                                <td><?php echo number_format($prod['precio_paca_producto'], 2); ?></td>
-                                <td><?php echo $prod['id_cate_producto']; ?></td>
-                                <td>$<?php echo $prod['descripcion_producto']; ?></td>
+                                <td><?php echo $prod['codigo_productos']; ?></td>
+                                <td><?php echo $prod['descripcion_producto']; ?></td>
                                 <td><?php echo $prod['cantidad_paca_producto']; ?></td>
+                                <td>$<?php echo number_format($prod['precio_unidad_producto'],2); ?></td>
+                                <td>$<?php echo number_format($prod['precio_paca_producto'], 2); ?></td>
+                                <td><?php echo $prod['id_cate_producto']; ?></td>
+                                <td><?php echo $prod['acti_Unidad']; ?></td>
                                 <td><?php echo $prod['imagen_producto']; ?></td>
                                 <td><?php echo $prod['estado_producto']; ?></td>
-                                <td><?php echo $prod['acti_Unidad']; ?></td>
-                                <td><?php echo $prod['codigo_productos']; ?></td>
+                                
+                                
 
 
                             </tr>
