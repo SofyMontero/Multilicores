@@ -1,7 +1,5 @@
 <?php
-// header("Access-Control-Allow-Origin: https://sistema.transmillas.com");
-// header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-// header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 
 // Lista de dominios permitidos
 $allowed_origins = [
@@ -51,10 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Datos que recibimos
     $telefonoCliente = $data['telefono'];
     $numeroGuia = $data['numero_guia'];
-    $tipo_alerta = $data['tipo_alerta'];
+    $tipo_alerta = $data['plantilla'];
     $id_guia = $data['id_guia'];
     $imagen1 = $data['imagen1'];
 
+
+
+    
+// $texto = $_POST['texto'] ?? null;
+// $imagen1 = $_POST['imagen1'] ?? null;
+// $plantilla = $_POST['plantilla'] ?? 'promo1';
 
     // MENSAJE A ENVIAR
 

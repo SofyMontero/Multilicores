@@ -341,6 +341,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             <i class="fas fa-edit"></i>
                         </a>
                     </td>
+                    <td>
+                        <button class="btn btn-info btn-sm btn-enviar-promo" onclick='enviarPromo(${promo.pro_id}, ${JSON.stringify(promo.pro_descripcion)}, ${JSON.stringify(promo.pro_imagen)})'>
+                        <i class="fas fa-paper-plane"></i> Enviar
+                        </button>
+                    </td>
                     
                 </tr>`;
             tbody.innerHTML += fila;
@@ -348,6 +353,34 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(error => console.error("Error:", error));
 });
+function enviarPromo(id, descripcion, imagen) {
+function enviarPromo(id, descripcion, imagen) {
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('texto', descripcion);
+    formData.append('imagen1', imagen);
+    formData.append('action', 'enviarPromo');
+    
+
+    fetch('../controllers/promoController.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.error) {
+            alert('Error: ' + result.error);
+        } else {
+            alert('Promoción enviada correctamente.');
+            console.log(result);
+        }
+    })
+    .catch(error => {
+        console.error('Error al enviar la promoción:', error);
+        alert('Error de red al enviar la promoción.');
+    });
+}
+}
 
 </script>
 

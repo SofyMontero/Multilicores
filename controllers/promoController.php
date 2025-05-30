@@ -104,6 +104,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $promociones = $promo->getAllPromos();
         header('Content-Type: application/json');
         echo json_encode($promociones);
+    }elseif ($metod=="enviarPromo") {
+
+        $id = $_POST['id'] ?? null;
+        $texto = $_POST['texto'] ?? null;
+        $imagen1 = $_POST['imagen1'] ?? null;
+
+        $promo = new Promo();
+        $resultados = $promo->enviarPromo($id, $texto, $imagen1);
+
+        // Puedes devolver los resultados para verificar desde el frontend
+        echo json_encode([
+            'success' => true,
+            'resultados' => $resultados
+        ]);
+        
     }
     exit();
 }

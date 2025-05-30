@@ -66,6 +66,51 @@ class Promo {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function enviarPromo($idPromo, $descripcion, $imagen): array {
+        $clientes = $this->getClientes();
+
+        $resultados = [];
+
+        foreach ($clientes as $cliente) {
+            $telefono = $cliente['cli_telefono'];
+
+            $postData = [
+                'telefono' => $telefono,
+                'texto' => $descripcion,
+                'imagen1' => $imagen,
+                'plantilla' => 'promo1' // opcional, según tu lógica
+            ];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "../enviarWhatsapp.php");
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Content-Type: application/x-www-form-urlencoded",
+                "Authorization: Bearer Multilicoreslicor25"
+            ]);
+
+            $response = curl_exec($ch);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            $resultados[] = [
+                'cliente' => $cliente['cli_nombre'],
+                'telefono' => $telefono,
+                'resultado' => $error ?: $response
+            ];
+        }
+
+        return $resultados;
+    }
+    
+    public function getClientes() {
+    $stmt = $this->db->prepare("SELECT * FROM clientes");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 
 
