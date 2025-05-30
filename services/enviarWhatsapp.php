@@ -104,14 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
         // TOKEN QUE NOS DA FACEBOOK
-        $token = 'EAAhhlSyrHkMBOzaKZBNa7L69daQg2Pb4SNDoDe9Ji7GSXAMJmGZB0azjhqI9pdT8CmIQlxBztwUFRaSMa91OfJ7BlZB9c1OeHTzoZBPqJRJBXcgj3CguaCebZBP3WZCu6F13z3qRrUPifHAWM5Yi0ydbatsZCINmd0t5W3fPGSwf8HFEC5VIz2HB1ownCFWgWyLku4Fo5udEA5UHfRMx3mDLzJQlAMcC1rZBGuhSq0Mw0HPCs3F3PlwZB';
+        $token = 'EAAhhlSyrHkMBOxLZBq1IkxTs3A8O1yUJWOtk58j0BUv7eUHemP3P6lzWRUE9LohfAqdC9um6yjihIsof6ZARhb1ZBlJ7YZC0E0j4LAWHr77DkLD50KaKVPqGjwazQ6FJ8JRolfZBGtrdAAx8ZAVZCoDMi7uLZBgddffFCKKLx7mrfjck6P0P27wFbn1ewwqUkwpkkAZDZD';
 
         // IDENTIFICADOR DE NÚMERO DE TELÉFONO
-         $telefonoID = '596553246876520';
+         $telefonoID = '599178349953891';
         // $telefonoID = '430240436843311';
 
         // URL A DONDE SE MANDARÁ EL MENSAJE
-        $url = 'https://graph.facebook.com/v15.0/' . $telefonoID . '/messages';
+        $url = 'https://graph.facebook.com/v22.0/' . $telefonoID . '/messages';
             // Cabeceras para la solicitud
         $header = array(
             "Authorization: Bearer " . $token,
