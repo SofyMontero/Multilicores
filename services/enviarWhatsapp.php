@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
     // Verificar si se enviaron los datos necesarios
-    if (!isset($data['telefono']) ||!isset($data['tipo_alerta'])) {
+    if (!isset($data['telefono']) ||!isset($data['plantilla'])) {
         echo json_encode(['error' => 'Faltan datos: teléfono o número de guía']);
         exit;
     }
