@@ -48,10 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Datos que recibimos
     $telefonoCliente = $data['telefono'];
-    $numeroGuia = $data['numero_guia'];
+   
     $tipo_alerta = $data['plantilla'];
-    $id_guia = $data['id_guia'];
-    $imagen1 = $data['imagen1'];
+    
+    
 
 
 
