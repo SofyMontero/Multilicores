@@ -49,20 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['error' => 'Faltan datos: plantilla']);
         exit;
     }
-
-    // Datos que recibimos
-    $telefonoCliente = $data['telefono'];
-   
-    $tipo_alerta = $data['plantilla'];
-    
     
 
-
-
-    
-// $texto = $_POST['texto'] ?? null;
-// $imagen1 = $_POST['imagen1'] ?? null;
-// $plantilla = $_POST['plantilla'] ?? 'promo1';
 
     // MENSAJE A ENVIAR
 
