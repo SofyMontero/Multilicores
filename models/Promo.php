@@ -78,7 +78,7 @@ class Promo {
                 'telefono' => $telefono,
                 'texto' => $descripcion,
                 'imagen1' => $imagen,
-                'plantilla' => 'promo1' // opcional, según tu lógica
+                'plantilla' => '2' // opcional, según tu lógica
             ];
 
             $ch = curl_init();
