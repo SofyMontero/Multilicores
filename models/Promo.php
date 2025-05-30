@@ -80,8 +80,8 @@ class Promo {
 
             $data = [
                 'telefono' => $telefono,
-                'texto' => "Hola desde PHP",
-                'imagen1' => "", // opcional
+                'texto' => "$descripcion",
+                'imagen1' => "$imagen", // opcional
                 'plantilla' => '2'
             ];
 
