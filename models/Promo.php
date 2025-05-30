@@ -75,9 +75,9 @@ class Promo {
             $telefono = $cliente['cli_telefono'];
 
             $postData = [
-                'telefono' => $telefono,
-                'texto' => $descripcion,
-                'imagen1' => $imagen,
+                'telefono' => "$telefono",
+                'texto' => "$descripcion",
+                'imagen1' => "$imagen",
                 'plantilla' => '2' // opcional, según tu lógica
             ];
 
