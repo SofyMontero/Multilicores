@@ -51,7 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
 
-$tipo_alerta=$data['plantilla'];
+        $tipo_alerta=$data['plantilla'];
+        $telefonoCliente=$data['telefono'];
     // MENSAJE A ENVIAR
 
     switch ($tipo_alerta) {
