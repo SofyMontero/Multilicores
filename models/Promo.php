@@ -75,56 +75,41 @@ class Promo {
             $telefono = $cliente['cli_telefono'];
 
 
-            	if (preg_match('/^\d{10}$/', $telefono)) {
-                    // echo "La variable tiene exactamente 10 números.";
+        if (preg_match('/^\d{10}$/', $telefono)) {
+            $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
 
-                        // URL de la API
-                    $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
+            $data = [
+                'telefono' => $telefono,
+                'texto' => "Hola desde PHP",
+                'imagen1' => "", // opcional
+                'plantilla' => '2'
+            ];
 
-                    // Datos que enviarás en la solicitud
-                    $data = array(
-                            'telefono' => "3125215864",
-                            'texto' => "hola si",
-                            'imagen1' => "hola no hay",
-                            'plantilla' => "2"
-                    );
+            $data_json = json_encode($data);
 
+            $curl = curl_init();
 
-                    // Convertir los datos a formato JSON
-                    $data_json = json_encode($data);
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $data_json,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer Multilicoreslicor25'
+                ],
+            ]);
 
-                    // Iniciar una sesión cURL
-                    $curl = curl_init();
+            $response = curl_exec($curl);
+            $error = curl_error($curl);
+            curl_close($curl);
 
-                    // Configurar las opciones cURL
-                    curl_setopt_array($curl, array(
-                        CURLOPT_URL => $url, // URL de la API
-                        CURLOPT_RETURNTRANSFER => true, // Retorna el resultado como cadena
-                        CURLOPT_POST => true, // Indica que la solicitud será POST
-                        CURLOPT_POSTFIELDS => $data_json, // Los datos que se envían en la solicitud
-                        CURLOPT_HTTPHEADER => array(
-                            'Content-Type: application/json', // Tipo de contenido
-                            'Authorization: Bearer Multilicoreslicor25' // Si la API requiere autenticación
-                        ),
-                    ));
-
-                    // Ejecutar la solicitud y obtener la respuesta
-                    $response = curl_exec($curl);
-                    $error = curl_error($curl);
-                    // Manejar errores cURL
-
-                     $resultados[] = [
-                        'cliente' => $cliente['cli_nombre'],
-                        'telefono' => $telefono,
-                        'resultado' => $error ?: $response
-                     ];
-
-
-                    // Cerrar la sesión cURL
-                    curl_close($curl);
-                } else {
-                    echo "La variable no cumple con el formato.";
-                }
+            $resultados[] = [
+                'cliente' => $cliente['cli_nombre'],
+                'telefono' => $telefono,
+                'resultado' => $error ?: $response
+            ];
+        }
 
         }
 
