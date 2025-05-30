@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         break;
         //Servicio recogido
         case '2':
-
+            $textoPromo = $data['texto'];
 
                     // Datos de la plantilla
         $mensaje = json_encode([
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         "parameters" => [
                             [
                                 "type" => "text",
-                                "text" => $numeroGuia  // Parámetro dinámico para el número de guía
+                                "text" => $textoPromo  // Parámetro dinámico para el número de guía
                             ]
                         ]
                     ]
