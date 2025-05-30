@@ -82,7 +82,7 @@ class Promo {
             ];
 
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "../services/enviarWhatsapp.php");
+            curl_setopt($ch, CURLOPT_URL, "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php");
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
