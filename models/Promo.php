@@ -92,7 +92,7 @@ class Promo {
                     // Datos que enviarás en la solicitud
                     $data = array(
                             'telefono' => "$telefono",
-                            'texto' => "$descripcion",
+                            'texto' => "hola si",
                             'imagen1' => "$imagen",
                             'plantilla' => '2'
                     );
