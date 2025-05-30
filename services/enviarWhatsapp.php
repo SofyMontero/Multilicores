@@ -41,18 +41,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
     // Verificar si se enviaron los datos necesarios
-    if (!isset($data['telefono'])) {
-        echo json_encode(['error' => 'Faltan datos: teléfono']);
-        exit;
-    }
-    if (!isset($data['plantilla'])) {
-        echo json_encode(['error' => 'Faltan datos: plantilla']);
+    if (!isset($data['telefono']) ||!isset($data['plantilla'])) {
+        echo json_encode(['error' => 'Faltan datos: teléfono o plantilla']);
         exit;
     }
     
 
-        $tipo_alerta=$data['plantilla'];
-        $telefonoCliente=$data['telefono'];
+    // Datos que recibimos
+    $telefonoCliente = $data['telefono'];
+   
+    $tipo_alerta = $data['plantilla'];
+    
+    
+
+
+
+    
+// $texto = $_POST['texto'] ?? null;
+// $imagen1 = $_POST['imagen1'] ?? null;
+// $plantilla = $_POST['plantilla'] ?? 'promo1';
+
     // MENSAJE A ENVIAR
 
     switch ($tipo_alerta) {
@@ -186,7 +194,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Verificar el resultado del envío
         if ($status_code == 200) {
             echo json_encode(['success' => 'Mensaje enviado con éxito ']);
- 
+            // file_put_contents('alertas_log.txt', "Mensaje tipo ".$tipo_alerta." para telefono ".$telefonoCliente." guia numero ".$numeroGuia." fecha ".$fechaHoraColombia." \n", FILE_APPEND);
+            
+            // $servername = "localhost";
+            // $username = "u713516042_jose2";
+            // $password = "Dobarli23@transmillas";
+            // $dbname = "u713516042_transmillas2";
+            // Create connection
+            // $conn = new mysqli($servername, $username, $password, $dbname);
+
+            //INSERTAMOS LOS REGISTROS DEL ENVIO DEL WHATSAPP
+            // $sql = "INSERT INTO registro "
+            //     . "(mensaje_recibido,mensaje_enviado,id_wa,timestamp_wa,telefono_wa,tipo,id_servicio,fecha_hora) VALUES "
+            //     . "('' ,'" . $tipo_alerta . "','','','" . $telefonoCliente . "','Alerta','".$id_guia."','$fechaHoraColombia');";
+            // $conn->query($sql);
+            // $conn->close();
         
         } else {
             // file_put_contents('alertas_log.txt', "Mensaje tipo ".$tipo_alerta." para telefono ".$telefonoCliente." guia numero ".$numeroGuia." fecha ".$fechaHoraColombia." \n Error al enviar el mensaje', 'status_code' => $status_code"." NO ENVIADO ", FILE_APPEND);
