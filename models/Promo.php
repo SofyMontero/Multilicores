@@ -74,14 +74,6 @@ class Promo {
         foreach ($clientes as $cliente) {
             $telefono = $cliente['cli_telefono'];
 
-            // $postData = [
-            //     'telefono' => "$telefono",
-            //     'texto' => "$descripcion",
-            //     'imagen1' => "$imagen",
-            //     'plantilla' => '2' // opcional, según tu lógica
-            // ];
-
-
 
             	if (preg_match('/^\d{10}$/', $telefono)) {
                     // echo "La variable tiene exactamente 10 números.";
@@ -94,7 +86,7 @@ class Promo {
                             'telefono' => "3125215864",
                             'texto' => "hola si",
                             'imagen1' => "hola no hay",
-                            'plantilla' => '2'
+                            'plantilla' => "2"
                     );
 
 
@@ -134,25 +126,6 @@ class Promo {
                     echo "La variable no cumple con el formato.";
                 }
 
-            // $ch = curl_init();
-            // curl_setopt($ch, CURLOPT_URL, "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php");
-            // curl_setopt($ch, CURLOPT_POST, true);
-            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            // curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-            // curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            //     "Content-Type: application/x-www-form-urlencoded",
-            //     "Authorization: Bearer Multilicoreslicor25"
-            // ]);
-
-            // $response = curl_exec($ch);
-            // $error = curl_error($ch);
-            // curl_close($ch);
-
-            // $resultados[] = [
-            //     'cliente' => $cliente['cli_nombre'],
-            //     'telefono' => $telefono,
-            //     'resultado' => $error ?: $response
-            // ];
         }
 
         return $resultados;
@@ -166,68 +139,6 @@ class Promo {
 
 }
 
-function enviarAlertaWhat($numguia,$telefono,$tipo,$idservi){
-
-	if (preg_match('/^\d{10}$/', $telefono)) {
-		// echo "La variable tiene exactamente 10 números.";
-
-			// URL de la API
-		$url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
-
-		// Datos que enviarás en la solicitud
-		$data = array(
-			"numero_guia" => "$numguia", // Número de guía
-			"telefono" => "$telefono",  // Número de teléfono 3160490959
-			// "telefono" => "3107781913",  // Número de teléfono 3160490959
-			"tipo_alerta" => "$tipo",
-			"id_guia" => "$idservi"
-		);
-
-
-		// Convertir los datos a formato JSON
-		$data_json = json_encode($data);
-
-		// Iniciar una sesión cURL
-		$curl = curl_init();
-
-		// Configurar las opciones cURL
-		curl_setopt_array($curl, array(
-			CURLOPT_URL => $url, // URL de la API
-			CURLOPT_RETURNTRANSFER => true, // Retorna el resultado como cadena
-			CURLOPT_POST => true, // Indica que la solicitud será POST
-			CURLOPT_POSTFIELDS => $data_json, // Los datos que se envían en la solicitud
-			CURLOPT_HTTPHEADER => array(
-				'Content-Type: application/json', // Tipo de contenido
-				'Authorization: Bearer Multilicoreslicor25' // Si la API requiere autenticación
-			),
-		));
-
-		// Ejecutar la solicitud y obtener la respuesta
-		$response = curl_exec($curl);
-
-		// Manejar errores cURL
-		if($response === false) {
-			$error = curl_error($curl);
-			echo "Error en la solicitud: $error";
-		} else {
-			// Decodificar la respuesta (si es JSON)
-			$response_data = json_decode($response, true);
-			
-			// Mostrar la respuesta
-			echo "Respuesta de la API: ";
-			print_r($response_data);
-		}
-
-		// Cerrar la sesión cURL
-		curl_close($curl);
-	} else {
-		echo "La variable no cumple con el formato.";
-	}
-
-
-
-
- }	
 
 
 ?>
