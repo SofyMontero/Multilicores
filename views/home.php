@@ -80,11 +80,12 @@ include_once "footer.php";
 ?>
 
 <style>
-	.tile-container {
+.tile-container {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: flex-start;
+	justify-content: center; /* centrado horizontal */
 	gap: 20px; /* espacio entre tarjetas */
+	padding: 20px;
 }
 
 .tile {
@@ -97,11 +98,17 @@ include_once "footer.php";
 	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 	text-decoration: none;
 	color: #333;
+	transition: transform 0.2s ease;
 }
 
+.tile:hover {
+	transform: translateY(-5px);
+}
+
+/* Responsive ajustes */
 @media (max-width: 1024px) {
 	.tile {
-		width: calc(33.33% - 15px); /* 3 por fila en pantallas medianas */
+		width: calc(33.33% - 15px); /* 3 por fila */
 	}
 }
 
@@ -113,7 +120,8 @@ include_once "footer.php";
 
 @media (max-width: 480px) {
 	.tile {
-		width: 100%; /* 1 por fila en móvil */
+		width: 100%; /* 1 por fila */
 	}
 }
+
 </style>
