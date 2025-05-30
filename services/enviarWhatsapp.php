@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
     // Verificar si se enviaron los datos necesarios
-    if (!isset($data['telefono']) || !isset($data['numero_guia']) || !isset($data['tipo_alerta'])|| !isset($data['id_guia'])) {
+    if (!isset($data['telefono']) ||!isset($data['tipo_alerta'])) {
         echo json_encode(['error' => 'Faltan datos: teléfono o número de guía']);
         exit;
     }
@@ -99,6 +99,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]
             ]
         ]);
+        break;
+        case 'promo1':
+            if (!isset($data['imagen1']) || !isset($data['texto'])) {
+                echo json_encode(['error' => 'Faltan datos: imagen o texto']);
+                exit;
+            }
+
+            $imagen1 = $data['imagen1'];
+            $textoPromo = $data['texto'];
+
+            $mensaje = json_encode([
+                "messaging_product" => "whatsapp",
+                "to" => $telefonoCliente,
+                "type" => "template",
+                "template" => [
+                    "name" => "promo1",
+                    "language" => [
+                        "code" => "es"
+                    ],
+                    "components" => [
+                        [
+                            "type" => "header",
+                            "parameters" => [
+                                [
+                                    "type" => "image",
+                                    "image" => [
+                                        "link" => "https://multilicoreschapinero.com/sistema/uploads/" . $imagen1
+                                    ]
+                                ]
+                            ]
+                        ],
+                        [
+                            "type" => "body",
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => $textoPromo
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
         break;
   
     }
