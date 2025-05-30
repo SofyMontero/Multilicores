@@ -353,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(error => console.error("Error:", error));
 });
-function enviarPromo(id, descripcion, imagen) {
+
 function enviarPromo(id, descripcion, imagen) {
     const formData = new FormData();
     formData.append('id', id);
@@ -380,7 +380,7 @@ function enviarPromo(id, descripcion, imagen) {
         alert('Error de red al enviar la promoción.');
     });
 }
-}
+
 
 </script>
 
