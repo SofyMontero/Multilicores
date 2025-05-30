@@ -91,9 +91,9 @@ class Promo {
 
                     // Datos que enviarás en la solicitud
                     $data = array(
-                            'telefono' => "$telefono",
+                            'telefono' => "3125215864",
                             'texto' => "hola si",
-                            'imagen1' => "$imagen",
+                            'imagen1' => "hola no hay",
                             'plantilla' => '2'
                     );
 
