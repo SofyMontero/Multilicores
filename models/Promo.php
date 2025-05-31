@@ -82,7 +82,7 @@ class Promo {
                 'telefono' => $telefono,
                 'texto' => "$descripcion",
                 'imagen1' => "$imagen", // opcional
-                'plantilla' => 'Servicio'
+                'plantilla' => 'servicio'
             ];
 
             $data_json = json_encode($data);

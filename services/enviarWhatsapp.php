@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "to" => $telefonoCliente,
             "type" => "template",
             "template" => [
-                "name" => "Servicio",  // Nombre de la plantilla
+                "name" => "servicio",  // Nombre de la plantilla
                 "language" => ["code" => "es"],  // Idioma de la plantilla
                 "components" => [
                     [
