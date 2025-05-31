@@ -27,46 +27,43 @@ $busqueda = $_GET['busqueda'] ?? '';
 </head>
 
 <body>
-    <header class="header-empresarial">
-        <div class="container-fluid px-3 px-md-4">
-            <div class="text-center">
-                <div class="mb-3">
-                    <i class="fas fa-wine-bottle icono-principal"></i>
-                    <h1 class="titulo-principal d-inline">Multilicores</h1>
+   <header class="header-modern bg-white border-bottom">
+        <div class="container py-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                <!-- Logo + nombre + subtítulo -->
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                      <div class="logo-icon">
+                        <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" />
+                     </div>
+                    <div class="d-flex flex-column">
+                        <h1 class="company-title m-0">Multilicores</h1>
+                        <p class="company-subtitle m-0 small">Distribución especializada en Licores</p>
+                    </div>
                 </div>
-                <p class="text-muted mb-0" style="font-size: clamp(0.9rem, 2.5vw, 1.1rem);">
-                    Distribución especializada en Licores 
-                </p>
+
+                <!-- Menú de navegación -->
+                <nav class="d-flex align-items-center gap-4 flex-grow-1 justify-content-center">
+                    <a href="categorias.php" class="text-muted fw-semibold text-decoration-none">Categorías</a>
+                    <a href="promociones.php" class="text-muted fw-semibold text-decoration-none">Promociones</a>
+                    <a href="catalogo.php" class="text-muted fw-semibold text-decoration-none">Productos</a>
+                </nav>
+
+                <!-- Buscador + carrito -->
+                <div class="d-flex align-items-center gap-3 flex-shrink-0">
+                    <div class=" active-container d-flex">
+                        <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput">
+                        <button class="search-btn btn btn-primary px-3" type="button">
+                            <i class="fas fa-search text-white"></i>
+                        </button>
+                    </div>                   
+                </div>
             </div>
         </div>
     </header>
 
     <section style="padding: clamp(2rem, 5vw, 4rem) 0;">
-        <div class="container-fluid px-3 px-md-4">
-            <!-- Header con título y buscador -->
-            <div class="header-with-search">
-                <div class="title-section">
-                    <h2 class="titulo-seccion mb-0">Nuestras Categorías</h2>
-                    <div class="linea-divisoria"></div>
-                </div>
-                
-                <div class="search-container-right">
-                    <form class="search-form-compact" method="GET" action="">
-                        <input 
-                            type="text" 
-                            class="form-control search-input-compact" 
-                            id="searchInput"
-                            name="busqueda"
-                            placeholder="Buscar categorías..."
-                            value="<?php echo htmlspecialchars($busqueda); ?>"
-                            autocomplete="off">
-                        
-                        <button type="submit" class="search-btn-compact">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
+        <div class="container-fluid px-3 px-md-4">             
 
             <!-- Información de resultados -->
             <div id="searchInfo" class="search-results-info" style="display: none;">

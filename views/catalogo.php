@@ -38,23 +38,43 @@ $importados = $_GET['importados'] ?? null;
 
 <body>
     <!-- Header Moderno -->
-    <header class="header-modern">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8 col-md-7">
-                    <div class="text-center text-md-start">
-                        <div class="logo-container justify-content-center justify-content-md-start">
-                            <div class="logo-icon"></div>
-                            <h1 class="company-title">Multilicores</h1>
-                        </div>
-                        <p class="company-subtitle">Distribución especializada en Licores</p>
+    <header class="header-modern bg-white border-bottom">
+        <div class="container py-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                <!-- Logo + nombre + subtítulo -->
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                    <div class= logo-img>
+                        <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" />
+                    </div>
+                    <div class="d-flex flex-column">
+                        <h1 class="company-title m-0">Multilicores</h1>
+                        <p class="company-subtitle m-0 small">Distribución especializada en Licores</p>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-5">
-                    <div class="search-container ms-auto">
+
+                <!-- Menú de navegación -->
+                <nav class="d-flex align-items-center gap-4 flex-grow-1 justify-content-center">
+                    <a href="categorias.php" class="company-subtitle fw-semibold text-decoration-none">Categorías</a>
+                    <a href="promociones.php" class="company-subtitle fw-semibold text-decoration-none">Promociones</a>
+                    <a href="productos.php" class="company-subtitle fw-semibold text-decoration-underline">Productos</a>
+                </nav>
+
+                <!-- Buscador + carrito -->
+                <div class="d-flex align-items-center gap-3 flex-shrink-0">
+                    <div class=" active-container d-flex">
                         <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput">
-                        <button class="search-btn" type="button">
-                            <i class="fas fa-search"></i>
+                        <button class="search-btn btn btn-primary px-3" type="button">
+                            <i class="fas fa-search text-white"></i>
+                        </button>
+                    </div>
+
+                    <div class="position-relative" id="cartIcon">
+                        <button class="btn btn-outline-secondary position-relative">
+                            <i class="fas fa-shopping-cart fa-lg"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="cartCount">
+                                0
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -62,14 +82,10 @@ $importados = $_GET['importados'] ?? null;
         </div>
     </header>
 
+
     <!-- Catálogo de Productos -->
     <div class="container">
         <div class="catalog-header">
-            <h2 class="catalog-title">
-                <i class="fas fa-box text-primary me-2"></i>
-                Catálogo de Licores
-            </h2>
-            <p class="catalog-subtitle">Selecciona tus productos favoritos</p>
         </div>
 
         <form method="POST" action="procesar_pedido.php" id="orderForm">
@@ -105,35 +121,40 @@ $importados = $_GET['importados'] ?? null;
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Tipo de venta</label>
-                                        <select name="productos[<?php echo $index; ?>][tipo]"
-                                            class="form-select tipo-select"
-                                            data-index="<?php echo $index; ?>"
-                                            data-precio-unidad="<?php echo $prod['precio_unidad_producto']; ?>"
-                                            data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>">
-                                            <option value="">Seleccionar tipo</option>
-                                            <option value="unidad">Unidad</option>
-                                            <option value="paca">Paca</option>
-                                        </select>
+                                    <div class="row align-items-end g-2">
+                                        <div class="col-6">
+                                            <label class="form-label small">Tipo</label>
+                                            <select name="productos[<?php echo $index; ?>][tipo]"
+                                                class="form-select tipo-select form-select-sm"
+                                                data-index="<?php echo $index; ?>"
+                                                data-precio-unidad="<?php echo $prod['precio_unidad_producto']; ?>"
+                                                data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>">
+                                                <option value="">Tipo</option>
+                                                <option value="unidad">Unidad</option>
+                                                <option value="paca">Paca</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">Cant.</label>
+                                            <input type="number"
+                                                name="productos[<?php echo $index; ?>][cantidad]"
+                                                class="form-control form-control-sm cantidad-input"
+                                                min="1"
+                                                placeholder="1"
+                                                data-index="<?php echo $index; ?>">
+                                        </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Cantidad</label>
-                                        <input type="number"
-                                            name="productos[<?php echo $index; ?>][cantidad]"
-                                            class="form-control cantidad-input"
-                                            min="1"
-                                            placeholder="1"
+                                    <!-- Botón Agregar -->
+                                    <div class="text-end mt-2">
+                                        <button type="button"
+                                            class="btn btn-outline-success w-100 agregar-btn"
                                             data-index="<?php echo $index; ?>">
+                                            <i class="fas fa-cart-plus me-1"></i> Agregar
+                                        </button>
                                     </div>
 
-                                    <!-- <input type="hidden" name="productos[<?php echo $index; ?>][id]" value="<?php echo $prod['id']; ?>">
-                                    <input type="hidden" name="productos[<?php echo $index; ?>][nombre]" value="<?php echo htmlspecialchars($prod['descripcion_producto']); ?>">
 
-                                    <div class="subtotal-container" id="subtotal-<?php echo $index; ?>" style="display: none;">
-                                        <p class="subtotal-text">Subtotal: $<span class="subtotal-amount">0</span> COP</p>
-                                    </div> -->
                                 </div>
                             </div>
                         </div>
