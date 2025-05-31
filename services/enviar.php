@@ -20,12 +20,12 @@ function enviar($recibido, $enviado, $idWA,$timestamp,$telefonoCliente) {
     //SI LA CANTIDAD DE REGISTROS ES 0 ENVIAMOS EL MENSAJE DE LO CONTRARIO NO LO ENVIAMOS PORQUE YA SE ENVIO
     if ($cantidad == 0) {
         //TOKEN QUE NOS DA FACEBOOK
-        $token = 'EAAGYjsYz8Q8BO9ZCkhb0tul3JIiNwsJsHZATJC7oRIkJRYSUSHI8PjSRI3ZCoMyVCqpPzHhmvzZCydrtmqZB5ihEtyah6Cfhf2NyQyp80HYOFOKvFToSSKdV2A1WG87zzhF55zS0HT23DL7ZBZACijReFYJAOCFYZCXWPnxhRBHpYsGKnfbCzDLCQqZBbxpCx3xYD';
+        $token = 'EAAhhlSyrHkMBOxLZBq1IkxTs3A8O1yUJWOtk58j0BUv7eUHemP3P6lzWRUE9LohfAqdC9um6yjihIsof6ZARhb1ZBlJ7YZC0E0j4LAWHr77DkLD50KaKVPqGjwazQ6FJ8JRolfZBGtrdAAx8ZAVZCoDMi7uLZBgddffFCKKLx7mrfjck6P0P27wFbn1ewwqUkwpkkAZDZD';
         //NUESTRO TELEFONO
         $telefono = $telefonoCliente;
         //IDENTIFICADOR DE NÚMERO DE TELÉFONO
         // $telefonoID = '431356130053619';
-        $telefonoID = '430240436843311';
+        $telefonoID = '599178349953891';
 
         //URL A DONDE SE MANDARA EL MENSAJE
         $url = 'https://graph.facebook.com/v15.0/' . $telefonoID . '/messages';
@@ -65,7 +65,7 @@ function enviar($recibido, $enviado, $idWA,$timestamp,$telefonoCliente) {
 
         $fechaHora = date('Y-m-d H:i:s');
         
-        // echo "Fecha y hora en Bogotá: $fechaHora";
+        //echo "Fecha y hora en Bogotá: $fechaHora";
         //INSERTAMOS LOS REGISTROS DEL ENVIO DEL WHATSAPP
         $sql = "INSERT INTO registro "
             . "(mensaje_recibido    ,mensaje_enviado   ,id_wa        ,timestamp_wa        ,     telefono_wa,fecha_hora) VALUES "
@@ -80,8 +80,8 @@ function buscarCliente($telefono){
       require_once 'conexion.php';
       
     file_put_contents('debug_log.txt', "Después de require_once\n", FILE_APPEND);
-            $conn->query($sql);
-            $conn->close();
+            // $conn->query($sql);
+            // $conn->close();
 //         } else {
 //             // Si no hay resultados
          $respuesta= "No se encontraron clientes.";
