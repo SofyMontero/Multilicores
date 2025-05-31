@@ -28,7 +28,7 @@ function enviar($recibido, $enviado, $idWA,$timestamp,$telefonoCliente) {
         $telefonoID = '599178349953891';
 
         //URL A DONDE SE MANDARA EL MENSAJE
-        $url = 'https://graph.facebook.com/v15.0/' . $telefonoID . '/messages';
+        $url = 'https://graph.facebook.com/v22.0/' . $telefonoID . '/messages';
         //CONFIGURACION DEL MENSAJE
         
             $mensaje = ''
