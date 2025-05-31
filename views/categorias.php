@@ -1,5 +1,5 @@
 <?php
-include_once "header.php";
+// include_once "header.php";
 require_once "../models/database.php";
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -182,4 +182,3 @@ $busqueda = $_GET['busqueda'] ?? '';
 
 </html>
 
-<?php include_once "footer.php"; ?>

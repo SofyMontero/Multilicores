@@ -302,5 +302,3 @@ $importados = $_GET['importados'] ?? null;
 </body>
 
 </html>
-
-<?php include_once "footer.php"; ?>
