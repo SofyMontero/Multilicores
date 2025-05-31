@@ -79,11 +79,13 @@ $importados = $_GET['importados'] ?? null;
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4 product-item" data-name="<?php echo strtolower($prod['descripcion_producto']); ?>">
                             <div class="product-card">
                                 <div class="position-relative">
-                                    <img src="<?php echo '../assets/img/licores/' . $prod['imagen_producto']; ?>"
-                                        class="product-image"
-                                        loading="lazy"
-                                        alt="<?php echo htmlspecialchars($prod['descripcion_producto']); ?>"
-                                        onerror="this.src='/placeholder.svg?height=220&width=300&text=Producto'">
+                                    <div class="    ">
+                                        <img src="<?php echo '../assets/img/licores/' . $prod['imagen_producto']; ?>"
+                                            class="product-image"
+                                            loading="lazy"
+                                            alt="<?php echo htmlspecialchars($prod['descripcion_producto']); ?>"
+                                            onerror="this.src='/placeholder.svg?height=220&width=300&text=Producto'">
+                                    </div>
                                     <div class="category-badge">
                                         <?php echo strtoupper($categoria ?: 'LICOR'); ?>
                                     </div>
@@ -126,12 +128,12 @@ $importados = $_GET['importados'] ?? null;
                                             data-index="<?php echo $index; ?>">
                                     </div>
 
-                                    <input type="hidden" name="productos[<?php echo $index; ?>][id]" value="<?php echo $prod['id']; ?>">
+                                    <!-- <input type="hidden" name="productos[<?php echo $index; ?>][id]" value="<?php echo $prod['id']; ?>">
                                     <input type="hidden" name="productos[<?php echo $index; ?>][nombre]" value="<?php echo htmlspecialchars($prod['descripcion_producto']); ?>">
 
                                     <div class="subtotal-container" id="subtotal-<?php echo $index; ?>" style="display: none;">
                                         <p class="subtotal-text">Subtotal: $<span class="subtotal-amount">0</span> COP</p>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
