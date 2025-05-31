@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         break;
           //Servicio recogido
-        case 'Servicio':
+        case 'servicio':
             $textoPromo = $data['texto'];
 
                     // Datos de la plantilla
