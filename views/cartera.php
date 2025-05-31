@@ -4,55 +4,6 @@ require_once "../models/database.php";
 $conexion = (new Database())->connect();
 $fecha = date('Y-m-d');
 
-// Procesamiento del formulario de inserción
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'insert') {
-	try {
-		// Obtener datos del formulario
-		$fecha = $_POST['fecha'];
-		$cliente_id = $_POST['cliente_id'];
-		$num_factura = $_POST['num_factura'];
-		$ingreso = $_POST['ingreso'];
-		$egreso = $_POST['egreso'];
-		$estado = $_POST['estado'];
-		$medio_pago = $_POST['medio_pago'];
-		$validado = isset($_POST['validado']) ? 1 : 0;
-
-		// Validar datos
-		if (
-			empty($fecha) || empty($cliente_id) || empty($num_factura) ||
-			empty($estado) || empty($medio_pago)
-		) {
-			throw new Exception("Todos los campos obligatorios deben ser completados");
-		}
-
-		// Insertar en la base de datos
-		$sql_insert = "INSERT INTO pedidos (ped_fecha, ped_cliente, ped_factura, ped_ingreso, ped_egreso, ped_estado, ped_medio_pago, ped_validado) 
-                       VALUES (:fecha, :cliente_id, :num_factura, :ingreso, :egreso, :estado, :medio_pago, :validado)";
-
-		$stmt = $conexion->prepare($sql_insert);
-		$stmt->bindParam(':fecha', $fecha);
-		$stmt->bindParam(':cliente_id', $cliente_id);
-		$stmt->bindParam(':num_factura', $num_factura);
-		$stmt->bindParam(':ingreso', $ingreso);
-		$stmt->bindParam(':egreso', $egreso);
-		$stmt->bindParam(':estado', $estado);
-		$stmt->bindParam(':medio_pago', $medio_pago);
-		$stmt->bindParam(':validado', $validado);
-
-		if ($stmt->execute()) {
-			// Redirigir para evitar reenvío del formulario
-			header("Location: " . $_SERVER['PHP_SELF'] . "?inserted=true");
-			exit;
-		} else {
-			throw new Exception("Error al insertar el registro");
-		}
-	} catch (Exception $e) {
-		$error_message = "Error: " . $e->getMessage();
-		// Para depuración
-		error_log("Error en procesamiento de formulario: " . $e->getMessage());
-	}
-}
-
 // Procesamiento del formulario de eliminación
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
 	try {
@@ -96,8 +47,7 @@ $sql = "SELECT P.*,
         FROM pedidos P
         LEFT JOIN clientes C ON C.id = P.ped_cliente
         LEFT JOIN estados E ON E.estados_id = P.ped_estado
-        LEFT JOIN medio_pago MP ON MP.md_pago_id = P.ped_medio_pago
-        WHERE 1=1"; // Inicio de cláusula WHERE que permite concatenar condiciones
+        LEFT JOIN medio_pago MP ON MP.md_pago_id = P.ped_medio_pago"; // Inicio de cláusula WHERE que permite concatenar condiciones
 
 // Añadir condiciones de filtro si se proporcionan
 if (!empty($fecha_inicio)) {
@@ -641,7 +591,7 @@ try {
 	document.addEventListener('DOMContentLoaded', () => {
 		document.getElementById('guardar-btn').addEventListener('click', async () => {
 			const payload = {
-				fecha: document.getElementById('action').value,
+				action: document.getElementById('action').value,
 				fecha: document.getElementById('fecha').value,
 				cliente_id: document.getElementById('cliente_id').value,
 				num_factura: document.getElementById('num_factura').value,

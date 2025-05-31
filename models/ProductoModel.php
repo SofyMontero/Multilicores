@@ -61,31 +61,58 @@ class Producto {
     }
 
     // Si necesitas más funciones como listar, actualizar, etc., puedo ayudarte a agregarlas
-    public function obtenerProductos($categoria) {
-        if ($categoria=="0") {
-            $conde="";
-        }else{
-            $conde="and id_cate_producto='$categoria'";
-        }
-        
-    $query = $this->db->connect()->prepare("
+    public function obtenerProductos($categoria, $limit = 12, $offset = 0) {
+    $condicion = "";
+    $params = [];
+
+    if ($categoria !== "0") {
+        $condicion = "AND id_cate_producto = ?";
+        $params[] = $categoria;
+    }
+
+    // Forzamos que limit y offset sean enteros
+    $limit = (int)$limit;
+    $offset = (int)$offset;
+
+    $sql = "
         SELECT 
-        `id_producto`, 
-        `precio_unidad_producto`, 
-        `id_cate_producto`, 
-        `precio_paca_producto`, 
-        `descripcion_producto`, 
-        `cantidad_paca_producto`, 
-        `imagen_producto`, 
-        `estado_producto`,
-        `acti_Unidad`,
-        `codigo_productos`
-        FROM productos where id_producto>0 $conde
+            `id_producto`, 
+            `precio_unidad_producto`, 
+            `id_cate_producto`, 
+            `precio_paca_producto`, 
+            `descripcion_producto`, 
+            `cantidad_paca_producto`, 
+            `imagen_producto`, 
+            `estado_producto`,
+            `acti_Unidad`,
+            `codigo_productos`
+        FROM productos 
+        WHERE id_producto > 0 $condicion
         ORDER BY id_producto DESC
-    ");
-    
-    $query->execute();
+        LIMIT $limit OFFSET $offset
+    ";
+
+    $query = $this->db->connect()->prepare($sql);
+    $query->execute($params);
+
     return $query->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function contarProductos($categoria) {
+    $condicion = "";
+    $params = [];
+
+    if ($categoria !== "0") {
+        $condicion = "AND id_cate_producto = ?";
+        $params[] = $categoria;
+    }
+
+    $sql = "SELECT COUNT(*) FROM productos WHERE id_producto > 0 $condicion";
+
+    $query = $this->db->connect()->prepare($sql);
+    $query->execute($params);
+
+    return (int)$query->fetchColumn();
 }
 
  public function obtenerCategorias() {
@@ -97,6 +124,18 @@ class Producto {
     ");
     
     $query->execute();
+    return $query->fetchAll(PDO::FETCH_ASSOC);
+}
+ public function buscarProducto($producto) {
+    $query = $this->db->connect()->prepare("
+    SELECT `descripcion_producto`
+    FROM `productos` 
+    WHERE `descripcion_producto` LIKE :producto
+    ");
+
+    $query->execute([
+        "producto" => "%$producto%"
+    ]);
     return $query->fetchAll(PDO::FETCH_ASSOC);
 }
 }
