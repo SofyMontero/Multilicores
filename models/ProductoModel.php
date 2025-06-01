@@ -82,7 +82,6 @@ class Producto
         $limit = (int)$limit;
         $offset = (int)$offset;
 
-
         $sql = "
         SELECT 
             `id_producto`, 
@@ -113,7 +112,7 @@ class Producto
         $condicion = "";
         $params = [];
 
-        if ($categoria !== "0") {
+         if (!empty($categoria) && $categoria !== "0") {
             $condicion = "AND id_cate_producto = ?";
             $params[] = $categoria;
         }
