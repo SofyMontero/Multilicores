@@ -54,8 +54,7 @@
             border-radius: 8px;
         }
 
-        .search-btn {
-            position: absolute;
+        .search-btn {           
             right: 4px;
             top: 4px;
             bottom: 4px;

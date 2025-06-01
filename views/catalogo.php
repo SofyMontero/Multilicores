@@ -8,6 +8,7 @@ error_reporting(E_ALL);
 require_once "../models/ProductoModel.php";
 $categoria = $_GET['categoria'] ?? '';
 $nombre = $_GET['nombre'] ?? '';
+$busqueda = $_GET['id'] ?? '';
 
 // Obtener productos desde la base de datos
 $producto = new Producto();
@@ -19,9 +20,8 @@ $totalProductos = $producto->contarProductos($categoria);
 $totalPaginas = ceil($totalProductos / $limit);
 
 // Llamada al nuevo método paginado
-$productos = $producto->obtenerProductos($categoria, $limit, $offset);
+$productos = $producto->obtenerProductos($categoria, $busqueda ,$limit, $offset);
 
-$importados = $_GET['importados'] ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +44,7 @@ $importados = $_GET['importados'] ?? null;
 
                 <!-- Logo + nombre + subtítulo -->
                 <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                    <div class= logo-img>
+                    <div class=logo-img>
                         <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" />
                     </div>
                     <div class="d-flex flex-column">
@@ -57,18 +57,14 @@ $importados = $_GET['importados'] ?? null;
                 <nav class="d-flex align-items-center gap-4 flex-grow-1 justify-content-center">
                     <a href="categorias.php" class="company-subtitle fw-semibold text-decoration-none">Categorías</a>
                     <a href="promociones.php" class="company-subtitle fw-semibold text-decoration-none">Promociones</a>
-                    <a href="productos.php" class="company-subtitle fw-semibold text-decoration-underline">Productos</a>
+                    <a href="catalogo.php" class="company-subtitle fw-semibold text-decoration-underline">Productos</a>
                 </nav>
 
                 <!-- Buscador + carrito -->
                 <div class="d-flex align-items-center gap-3 flex-shrink-0">
                     <div class=" active-container d-flex">
                         <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput">
-                        <button class="search-btn btn btn-primary px-3" type="button">
-                            <i class="fas fa-search text-white"></i>
-                        </button>
                     </div>
-
                     <div class="position-relative" id="cartIcon">
                         <button class="btn btn-outline-secondary position-relative">
                             <i class="fas fa-shopping-cart fa-lg"></i>
@@ -186,7 +182,12 @@ $importados = $_GET['importados'] ?? null;
                     Enviar Pedido <span id="btnItemCount"></span>
                 </button>
             </div>
+            <div id="noResults" class="text-center text-muted py-4" style="display: none;">
+                <i class="fas fa-search fa-2x mb-2"></i>
+                <p>No se encontraron productos.</p>
+            </div>
         </form>
+
         <?php if ($totalPaginas > 1): ?>
             <nav class="d-flex justify-content-center mb-5">
                 <ul class="pagination">
@@ -290,10 +291,16 @@ $importados = $_GET['importados'] ?? null;
             });
 
             // Funcionalidad de búsqueda
+             const initialSearch = "<?php echo htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8'); ?>";
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
                 const productItems = document.querySelectorAll('.product-item');
+
+                if(isset($_GET['busqueda'] )){
+                  const productItems =   $_GET['busqueda'];
+
+                }
 
                 productItems.forEach(item => {
                     const productName = item.dataset.name;
@@ -320,6 +327,25 @@ $importados = $_GET['importados'] ?? null;
                     return false;
                 }
             });
+        });
+
+        const noResults = document.getElementById('noResults');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const productItems = document.querySelectorAll('.product-item');
+            let found = 0;
+
+            productItems.forEach(item => {
+                const productName = item.dataset.name;
+                if (productName.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    found++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = found === 0 ? 'block' : 'none';
         });
     </script>
 </body>

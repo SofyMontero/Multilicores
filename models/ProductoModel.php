@@ -1,24 +1,27 @@
 <?php
 require_once "database.php";
 
-class Producto {
+class Producto
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = new Database();
     }
 
     // Método para insertar producto desde Excel
     public function insertarProducto(
-                        $codigo_producto,
-                        $descripcion_producto,
-                        $cantidad_paca_producto,
-                        $precio_unidad,
-                        $precio_paca,
-                        $id_cate_producto,
-                        $acti_Unidad,
-                        $imagen_producto,
-                        $estado_producto) {
+        $codigo_producto,
+        $descripcion_producto,
+        $cantidad_paca_producto,
+        $precio_unidad,
+        $precio_paca,
+        $id_cate_producto,
+        $acti_Unidad,
+        $imagen_producto,
+        $estado_producto
+    ) {
         $query = $this->db->connect()->prepare("
             INSERT INTO productos 
             (
@@ -48,33 +51,39 @@ class Producto {
         ");
 
         return $query->execute([
-                "codigo_producto" =>$codigo_producto,
-                "descripcion_producto" =>$descripcion_producto,
-                "cantidad_paca_producto" =>$cantidad_paca_producto,
-                "precio_unidad" =>$precio_unidad,
-                "precio_paca" =>$precio_paca,
-                "id_cate_producto" =>$id_cate_producto,
-                "acti_Unidad" =>$acti_Unidad,
-                "imagen_producto" =>$imagen_producto,
-                "estado_producto" =>$estado_producto
+            "codigo_producto" => $codigo_producto,
+            "descripcion_producto" => $descripcion_producto,
+            "cantidad_paca_producto" => $cantidad_paca_producto,
+            "precio_unidad" => $precio_unidad,
+            "precio_paca" => $precio_paca,
+            "id_cate_producto" => $id_cate_producto,
+            "acti_Unidad" => $acti_Unidad,
+            "imagen_producto" => $imagen_producto,
+            "estado_producto" => $estado_producto
         ]);
     }
 
-    // Si necesitas más funciones como listar, actualizar, etc., puedo ayudarte a agregarlas
-    public function obtenerProductos($categoria, $limit = 12, $offset = 0) {
-    $condicion = "";
-    $params = [];
+    public function obtenerProductos($categoria, $busqueda, $limit = 12, $offset = 0)
+    {
+        $condicion = "";
+        $condicion1 = "";
+        $params = [];
 
-    if ($categoria !== "0") {
-        $condicion = "AND id_cate_producto = ?";
-        $params[] = $categoria;
-    }
+        if (!empty($categoria) && $categoria !== "0") {
+            $condicion .= " AND id_cate_producto = ?";
+            $params[] = $categoria;
+        }
 
-    // Forzamos que limit y offset sean enteros
-    $limit = (int)$limit;
-    $offset = (int)$offset;
+        if (!empty($busqueda)) {  
+            $condicion1 = " AND id_producto = ?";
+            $params[] = $busqueda;
+        }
+        // Forzamos que limit y offset sean enteros
+        $limit = (int)$limit;
+        $offset = (int)$offset;
 
-    $sql = "
+
+        $sql = "
         SELECT 
             `id_producto`, 
             `precio_unidad_producto`, 
@@ -87,55 +96,62 @@ class Producto {
             `acti_Unidad`,
             `codigo_productos`
         FROM productos 
-        WHERE id_producto > 0 $condicion
+        WHERE id_producto > 0 $condicion $condicion1
         ORDER BY id_producto DESC
         LIMIT $limit OFFSET $offset
     ";
+        
 
-    $query = $this->db->connect()->prepare($sql);
-    $query->execute($params);
+        $query = $this->db->connect()->prepare($sql);
+        $query->execute($params);
 
-    return $query->fetchAll(PDO::FETCH_ASSOC);
-}
-
-public function contarProductos($categoria) {
-    $condicion = "";
-    $params = [];
-
-    if ($categoria !== "0") {
-        $condicion = "AND id_cate_producto = ?";
-        $params[] = $categoria;
+        return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    $sql = "SELECT COUNT(*) FROM productos WHERE id_producto > 0 $condicion";
+    public function contarProductos($categoria)
+    {
+        $condicion = "";
+        $params = [];
 
-    $query = $this->db->connect()->prepare($sql);
-    $query->execute($params);
+        if ($categoria !== "0") {
+            $condicion = "AND id_cate_producto = ?";
+            $params[] = $categoria;
+        }
 
-    return (int)$query->fetchColumn();
-}
+        $sql = "SELECT COUNT(*) FROM productos WHERE id_producto > 0 $condicion";
 
- public function obtenerCategorias() {
-    $query = $this->db->connect()->prepare("
-    SELECT `id_categoria`,
-    `nombre_categoria`, 
-    `imagen_categoria`
-    FROM `categorias` 
+        $query = $this->db->connect()->prepare($sql);
+        $query->execute($params);
+
+        return (int)$query->fetchColumn();
+    }
+
+    public function obtenerCategorias()
+    {
+        $query = $this->db->connect()->prepare("
+             SELECT `id_categoria`,
+             `nombre_categoria`, 
+             `imagen_categoria`
+             FROM `categorias` 
+            ");
+
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function buscarSugerencias($termino)
+    {
+        $db = $this->db->connect();
+        $query = $db->prepare("
+        SELECT id_producto, descripcion_producto 
+        FROM productos 
+        WHERE descripcion_producto LIKE :termino 
+        ORDER BY descripcion_producto 
+        LIMIT 10
     ");
-    
-    $query->execute();
-    return $query->fetchAll(PDO::FETCH_ASSOC);
-}
- public function buscarProducto($producto) {
-    $query = $this->db->connect()->prepare("
-    SELECT `descripcion_producto`
-    FROM `productos` 
-    WHERE `descripcion_producto` LIKE :producto
-    ");
+        $query->bindValue(':termino', '%' . $termino . '%');
+        $query->execute();
 
-    $query->execute([
-        "producto" => "%$producto%"
-    ]);
-    return $query->fetchAll(PDO::FETCH_ASSOC);
-}
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
