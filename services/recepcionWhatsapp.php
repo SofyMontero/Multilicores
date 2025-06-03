@@ -47,7 +47,7 @@ write_log("Mensaje recibido de $telefonoCliente: $mensaje");
 if ($mensaje != null) {
     $respuestaTexto = "Hola bienvenido a Multilicores, en el siguiente link podrás hacer tu pedido:\nhttps://multilicoreschapinero.com/sistema/views/categorias.php";
     
-    require_once "envia.php";
+    require_once "enviar.php";
     enviar($mensaje, $respuestaTexto, $id, $timestamp, $telefonoCliente);
 
     write_log("Mensaje de respuesta enviado a $telefonoCliente");
