@@ -20,7 +20,7 @@ $totalProductos = $producto->contarProductos($categoria);
 $totalPaginas = ceil($totalProductos / $limit);
 
 // Llamada al nuevo método paginado
-$productos = $producto->obtenerProductos($categoria, $busqueda ,$limit, $offset);
+$productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset);
 
 ?>
 
@@ -40,45 +40,49 @@ $productos = $producto->obtenerProductos($categoria, $busqueda ,$limit, $offset)
     <!-- Header Moderno -->
     <header class="header-modern bg-white border-bottom">
         <div class="container py-3">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <nav class="navbar navbar-expand-lg navbar-light p-0 w-100">
 
-                <!-- Logo + nombre + subtítulo -->
-                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                    <div class=logo-img>
-                        <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" />
-                    </div>
+                <!-- Logo + Título -->
+                <div class="d-flex align-items-center gap-2">
+                    <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" style="height: 50px;">
                     <div class="d-flex flex-column">
-                        <h1 class="company-title m-0">Multilicores</h1>
+                        <h1 class="company-title m-0 fs-6">Multilicores</h1>
                         <p class="company-subtitle m-0 small">Distribución especializada en Licores</p>
                     </div>
                 </div>
 
-                <!-- Menú de navegación -->
-                <nav class="d-flex align-items-center gap-4 flex-grow-1 justify-content-center">
-                    <a href="categorias.php" class="company-subtitle fw-semibold text-decoration-none">Categorías</a>
-                    <a href="promociones.php" class="company-subtitle fw-semibold text-decoration-none">Promociones</a>
-                    <a href="catalogo.php" class="company-subtitle fw-semibold text-decoration-underline">Productos</a>
-                </nav>
+                <!-- Botón hamburguesa -->
+                <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </nav>
 
-                <!-- Buscador + carrito -->
-                <div class="d-flex align-items-center gap-3 flex-shrink-0">
-                    <div class=" active-container d-flex">
-                        <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput">
-                    </div>
+            <!-- Segundo bloque: buscador y carrito -->
+            <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center justify-content-between gap-3 mt-3">
+
+                <!-- Menú (colapsable solo en móvil) -->
+                <div class="collapse navbar-collapse" id="navbarMenu">
+                    <ul class="navbar-nav flex-column flex-lg-row gap-2 gap-lg-4">
+                        <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a></li>
+                        <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a></li>
+                        <li class="nav-item"><a class="nav-link fw-semibold text-decoration-underline" href="catalogo.php">Productos</a></li>
+                    </ul>
+                </div>
+
+                <!-- Buscador y carrito -->
+                <div class="d-flex flex-grow-1 align-items-center gap-2">
+                    <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput" autocomplete="off">
                     <div class="position-relative" id="cartIcon">
-                        <button class="btn btn-outline-secondary position-relative">
+                        <button class="btn btn-outline-secondary position-relative" type="button">
                             <i class="fas fa-shopping-cart fa-lg"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="cartCount">
-                                0
-                            </span>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="cartCount">0</span>
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
     </header>
-
-
     <!-- Catálogo de Productos -->
     <div class="container">
         <div class="catalog-header">
@@ -291,14 +295,14 @@ $productos = $producto->obtenerProductos($categoria, $busqueda ,$limit, $offset)
             });
 
             // Funcionalidad de búsqueda
-             const initialSearch = "<?php echo htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8'); ?>";
+            const initialSearch = "<?php echo htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8'); ?>";
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
                 const productItems = document.querySelectorAll('.product-item');
 
-                if(isset($_GET['busqueda'] )){
-                  const productItems =   $_GET['busqueda'];
+                if (isset($_GET['busqueda'])) {
+                    const productItems = $_GET['busqueda'];
 
                 }
 

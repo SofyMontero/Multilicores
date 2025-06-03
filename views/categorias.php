@@ -25,43 +25,48 @@ $productos = $producto->obtenerCategorias();
 </head>
 
 <body>
-    <header class="header-modern bg-white border-bottom">
-        <div class="container py-3">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-
-                <!-- Logo + nombre + subtítulo -->
-                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                    <div class="logo-icon">
-                        <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" />
-                    </div>
-                    <div class="d-flex flex-column">
-                        <h1 class="company-title m-0">Multilicores</h1>
-                        <p class="company-subtitle m-0 small">Distribución especializada en Licores</p>
-                    </div>
-                </div>
-
-                <!-- Menú de navegación -->
-                <nav class="d-flex align-items-center gap-4 flex-grow-1 justify-content-center">
-                    <a href="categorias.php" class="text-muted fw-semibold text-decoration-none">Categorías</a>
-                    <a href="promociones.php" class="text-muted fw-semibold text-decoration-none">Promociones</a>
-                    <a href="catalogo.php" class="text-muted fw-semibold text-decoration-none">Productos</a>
-                </nav>
-
-                <!-- Buscador -->
-                <div class="d-flex align-items-center gap-3 flex-shrink-0">
-                    <div class=" active-container d-flex">
-                        <div class="position-relative w-100">
-                            <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput" autocomplete="off">
-                            <ul id="autocompleteList" class="list-group position-absolute w-100 shadow-sm z-3" style="top: 100%; display: none;"></ul>
-                        </div>
-                        <button class="search-btn btn btn-primary px-3" type="button" id="btnBuscarProducto">
-                            <i class="fas fa-search text-white"></i>
-                        </button>
-                    </div>
+   <header class="header-modern bg-white border-bottom">
+    <div class="container py-3">
+        <nav class="navbar navbar-expand-lg navbar-light p-0">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" style="height: 50px;">
+                <div class="d-flex flex-column">
+                    <h1 class="company-title m-0 fs-5">Multilicores</h1>
+                    <p class="company-subtitle m-0 small">Distribución especializada en Licores</p>
                 </div>
             </div>
-        </div>
-    </header>
+
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse mt-3 mt-lg-0" id="navbarContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold text-muted" href="catalogo.php">Productos</a>
+                    </li>
+                </ul>
+
+                <form class="d-flex align-items-center gap-2 mt-3 mt-lg-0" role="search" onsubmit="event.preventDefault();">
+                    <div class="position-relative w-100">
+                        <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput" autocomplete="off">
+                        <ul id="autocompleteList" class="list-group position-absolute w-100 shadow-sm z-3" style="top: 100%; display: none;"></ul>
+                    </div>
+                    <button class="btn btn-primary px-3 search-btn" type="button" id="btnBuscarProducto">
+                        <i class="fas fa-search text-white"></i>
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </div>
+</header>
+
 
     <section style="padding: clamp(2rem, 5vw, 4rem) 0;">
         <div class="container-fluid px-3 px-md-4">
