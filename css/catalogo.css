@@ -335,3 +335,297 @@
             border-radius: 50%;
             object-fit: cover;
         }
+
+/* ///// carrito de compras */
+/* Estilos adicionales para el carrito funcional */
+
+/* Animaciones para botones */
+.agregar-btn {
+    transition: all 0.3s ease;
+}
+
+.agregar-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Badge del carrito */
+.position-relative .badge {
+    font-size: 0.7rem;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Botón del carrito con efecto hover */
+.btn-outline-secondary:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Resumen del pedido mejorado */
+.order-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #198754;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 30px 0;
+    box-shadow: 0 8px 25px rgba(25, 135, 84, 0.1);
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.summary-title {
+    color: #198754;
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.items-badge {
+    background: #198754;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #198754;
+    text-align: center;
+    padding: 10px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #198754;
+}
+
+/* Botón de envío mejorado */
+.submit-btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(25, 135, 84, 0.3);
+}
+
+.submit-btn:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Alertas personalizadas */
+.alert {
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+}
+
+/* Modal del carrito */
+.modal-header {
+    background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* Badges para tipo de producto */
+.badge {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+/* Precio destacado */
+.price-container .price-row {
+    transition: all 0.3s ease;
+}
+
+.price-container .price-row:hover {
+    background-color: #f8f9fa;
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+
+/* Botón de eliminar en el carrito */
+.btn-outline-danger:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Responsive mejoras */
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .order-summary {
+        margin: 20px 0;
+        padding: 15px;
+    }
+    
+    .summary-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .total-amount {
+        font-size: 1.3rem;
+    }
+    
+    .submit-btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+        min-width: 180px;
+    }
+}
+
+/* Animación para productos cuando se agregan */
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Efecto de carga para botones */
+.btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Indicador de carrito vacío */
+.empty-cart {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-cart i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+/* Contador de productos más visible */
+#cartCount {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Mejoras en la tabla del carrito */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Footer del modal */
+.modal-footer {
+    border-top: 2px solid #dee2e6;
+    padding: 20px;
+}
+
+/* Separador visual */
+.modal-footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #dee2e6, transparent);
+}

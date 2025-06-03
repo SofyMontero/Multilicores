@@ -40,9 +40,9 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
     <!-- Header Moderno -->
     <header class="header-modern bg-white border-bottom">
         <div class="container py-3">
-            <nav class="navbar navbar-expand-lg navbar-light p-0 w-100">
+            <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
 
-                <!-- Logo + Título -->
+                <!-- Logo + título -->
                 <div class="d-flex align-items-center gap-2">
                     <img src="../assets/img/logoM.png" alt="Logo Multilicores" class="logo-img" style="height: 50px;">
                     <div class="d-flex flex-column">
@@ -51,38 +51,33 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                     </div>
                 </div>
 
-                <!-- Botón hamburguesa -->
-                <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </nav>
-
-            <!-- Segundo bloque: buscador y carrito -->
-            <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center justify-content-between gap-3 mt-3">
-
-                <!-- Menú (colapsable solo en móvil) -->
-                <div class="collapse navbar-collapse" id="navbarMenu">
-                    <ul class="navbar-nav flex-column flex-lg-row gap-2 gap-lg-4">
-                        <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a></li>
-                        <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a></li>
-                        <li class="nav-item"><a class="nav-link fw-semibold text-decoration-underline" href="catalogo.php">Productos</a></li>
-                    </ul>
-                </div>
-
-                <!-- Buscador y carrito -->
-                <div class="d-flex flex-grow-1 align-items-center gap-2">
-                    <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput" autocomplete="off">
-                    <div class="position-relative" id="cartIcon">
-                        <button class="btn btn-outline-secondary position-relative" type="button">
-                            <i class="fas fa-shopping-cart fa-lg"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="cartCount">0</span>
-                        </button>
+                <!-- Menú de navegación con hamburguesa -->
+                <nav class="navbar navbar-expand-lg navbar-light p-0 flex-grow-1">
+                    <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-center mt-3 mt-lg-0" id="navbarMenu">
+                        <ul class="navbar-nav gap-3">
+                            <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a></li>
+                            <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a></li>
+                            <li class="nav-item"><a class="nav-link fw-semibold text-decoration-underline" href="catalogo.php">Productos</a></li>
+                        </ul>
                     </div>
+                </nav>
+
+                <!-- Buscador + carrito SIEMPRE visibles -->
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0 flex-shrink-0" style="min-width: 250px;">
+                    <input type="text" class="form-control search-input" placeholder="Buscar productos..." id="searchInput" autocomplete="off">
+                    <button class="btn btn-outline-secondary position-relative" type="button">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="cartCount">0</span>
+                    </button>
                 </div>
 
             </div>
         </div>
     </header>
+
     <!-- Catálogo de Productos -->
     <div class="container">
         <div class="catalog-header">
@@ -149,7 +144,10 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                                     <div class="text-end mt-2">
                                         <button type="button"
                                             class="btn btn-outline-success w-100 agregar-btn"
-                                            data-index="<?php echo $index; ?>">
+                                            data-id="<?php echo $prod['id_producto']; ?>"
+                                            data-nombre="<?php echo htmlspecialchars($prod['descripcion_producto']); ?>"
+                                            data-precio-unidad="<?php echo $prod['precio_unidad_producto']; ?>"
+                                            data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>">
                                             <i class="fas fa-cart-plus me-1"></i> Agregar
                                         </button>
                                     </div>
@@ -207,151 +205,8 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
         <?php endif; ?>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Variables globales
-        let pedido = {};
-        let totalGeneral = 0;
-        let totalItems = 0;
-
-        // Función para calcular subtotal
-        function calcularSubtotal(index) {
-            const tipoSelect = document.querySelector(`select[data-index="${index}"]`);
-            const cantidadInput = document.querySelector(`input[data-index="${index}"]`);
-            const subtotalContainer = document.getElementById(`subtotal-${index}`);
-            const subtotalAmount = subtotalContainer.querySelector('.subtotal-amount');
-
-            const tipo = tipoSelect.value;
-            const cantidad = parseInt(cantidadInput.value) || 0;
-            const precioUnidad = parseFloat(tipoSelect.dataset.precioUnidad);
-            const precioPaca = parseFloat(tipoSelect.dataset.precioPaca);
-
-            if (tipo && cantidad > 0) {
-                const precio = tipo === 'paca' ? precioPaca : precioUnidad;
-                const subtotal = precio * cantidad;
-
-                subtotalAmount.textContent = subtotal.toLocaleString('es-CO');
-                subtotalContainer.style.display = 'block';
-
-                // Actualizar pedido
-                pedido[index] = {
-                    tipo: tipo,
-                    cantidad: cantidad,
-                    subtotal: subtotal
-                };
-            } else {
-                subtotalContainer.style.display = 'none';
-                delete pedido[index];
-            }
-
-            actualizarResumen();
-        }
-
-        // Función para actualizar resumen del pedido
-        function actualizarResumen() {
-            totalGeneral = 0;
-            totalItems = 0;
-
-            Object.values(pedido).forEach(item => {
-                totalGeneral += item.subtotal;
-                totalItems += item.cantidad;
-            });
-
-            const orderSummary = document.getElementById('orderSummary');
-            const totalAmount = document.getElementById('totalAmount');
-            const itemsCount = document.getElementById('itemsCount');
-            const submitBtn = document.getElementById('submitBtn');
-            const btnItemCount = document.getElementById('btnItemCount');
-
-            if (totalItems > 0) {
-                orderSummary.style.display = 'block';
-                totalAmount.textContent = totalGeneral.toLocaleString('es-CO');
-                itemsCount.textContent = `${totalItems} ${totalItems === 1 ? 'producto' : 'productos'}`;
-                submitBtn.disabled = false;
-                btnItemCount.textContent = `(${totalItems})`;
-            } else {
-                orderSummary.style.display = 'none';
-                submitBtn.disabled = true;
-                btnItemCount.textContent = '';
-            }
-        }
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Listeners para selects de tipo
-            document.querySelectorAll('.tipo-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    const index = this.dataset.index;
-                    calcularSubtotal(index);
-                });
-            });
-
-            // Listeners para inputs de cantidad
-            document.querySelectorAll('.cantidad-input').forEach(input => {
-                input.addEventListener('input', function() {
-                    const index = this.dataset.index;
-                    calcularSubtotal(index);
-                });
-            });
-
-            // Funcionalidad de búsqueda
-            const initialSearch = "<?php echo htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8'); ?>";
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const productItems = document.querySelectorAll('.product-item');
-
-                if (isset($_GET['busqueda'])) {
-                    const productItems = $_GET['busqueda'];
-
-                }
-
-                productItems.forEach(item => {
-                    const productName = item.dataset.name;
-                    if (productName.includes(searchTerm)) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-
-            // Validación del formulario
-            document.getElementById('orderForm').addEventListener('submit', function(e) {
-                if (totalItems === 0) {
-                    e.preventDefault();
-                    alert('Por favor selecciona al menos un producto antes de enviar el pedido.');
-                    return false;
-                }
-
-                // Confirmar pedido
-                const confirmMessage = `¿Confirmas el envío del pedido?\n\nTotal de productos: ${totalItems}\nTotal a pagar: $${totalGeneral.toLocaleString('es-CO')} COP`;
-                if (!confirm(confirmMessage)) {
-                    e.preventDefault();
-                    return false;
-                }
-            });
-        });
-
-        const noResults = document.getElementById('noResults');
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const productItems = document.querySelectorAll('.product-item');
-            let found = 0;
-
-            productItems.forEach(item => {
-                const productName = item.dataset.name;
-                if (productName.includes(searchTerm)) {
-                    item.style.display = 'block';
-                    found++;
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            noResults.style.display = found === 0 ? 'block' : 'none';
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
+    <script src="../js/catalogo.js"></script>
 </body>
 
 </html>

@@ -1,175 +1,45 @@
 <?php
-require_once "database.php";
-
-class Producto
-{
-    private $db;
+class Pedido {
     private $pdo;
-
-    public function __construct()
-    {
-        $this->db = new Database();
-        $this->pdo = $this->db->connect(); // Asegúrate de que este método retorne un objeto PDO
+    
+    public function __construct() {
+        // Asumiendo que tienes una conexión PDO en database.php
+        global $pdo; // o como tengas configurada tu conexión
+        $this->pdo = $pdo;
     }
-
-    public function insertarProducto(
-        $codigo_producto,
-        $descripcion_producto,
-        $cantidad_paca_producto,
-        $precio_unidad,
-        $precio_paca,
-        $id_cate_producto,
-        $acti_Unidad,
-        $imagen_producto,
-        $estado_producto
-    ) {
-        $query = $this->pdo->prepare("
-            INSERT INTO productos (
-                codigo_productos, 
-                descripcion_producto,
-                cantidad_paca_producto,
-                precio_unidad_producto,
-                precio_paca_producto,
-                id_cate_producto,
-                acti_Unidad, 
-                imagen_producto,
-                estado_producto
-            ) VALUES (
-                :codigo_producto,
-                :descripcion_producto,
-                :cantidad_paca_producto,
-                :precio_unidad,
-                :precio_paca,
-                :id_cate_producto,
-                :acti_Unidad,
-                :imagen_producto,
-                :estado_producto
-            )
-        ");
-
-        return $query->execute([
-            "codigo_producto" => $codigo_producto,
-            "descripcion_producto" => $descripcion_producto,
-            "cantidad_paca_producto" => $cantidad_paca_producto,
-            "precio_unidad" => $precio_unidad,
-            "precio_paca" => $precio_paca,
-            "id_cate_producto" => $id_cate_producto,
-            "acti_Unidad" => $acti_Unidad,
-            "imagen_producto" => $imagen_producto,
-            "estado_producto" => $estado_producto
-        ]);
-    }
-
-    public function obtenerProductos($categoria, $busqueda, $limit = 12, $offset = 0)
-    {
-        $condicion = "";
-        $condicion1 = "";
-        $params = [];
-
-        if (!empty($categoria) && $categoria !== "0") {
-            $condicion .= " AND id_cate_producto = ?";
-            $params[] = $categoria;
-        }
-
-        if (!empty($busqueda)) {
-            $condicion1 = " AND id_producto = ?";
-            $params[] = $busqueda;
-        }
-
-        $limit = (int)$limit;
-        $offset = (int)$offset;
-
-        $sql = "
-        SELECT 
-            id_producto, 
-            precio_unidad_producto, 
-            id_cate_producto, 
-            precio_paca_producto, 
-            descripcion_producto, 
-            cantidad_paca_producto, 
-            imagen_producto, 
-            estado_producto,
-            acti_Unidad,
-            codigo_productos
-        FROM productos 
-        WHERE id_producto > 0 $condicion $condicion1
-        ORDER BY id_producto DESC
-        LIMIT $limit OFFSET $offset
-        ";
-
-        $query = $this->pdo->prepare($sql);
-        $query->execute($params);
-
-        return $query->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function contarProductos($categoria)
-    {
-        $condicion = "";
-        $params = [];
-
-        if (!empty($categoria) && $categoria !== "0") {
-            $condicion = "AND id_cate_producto = ?";
-            $params[] = $categoria;
-        }
-
-        $sql = "SELECT COUNT(*) FROM productos WHERE id_producto > 0 $condicion";
-
-        $query = $this->pdo->prepare($sql);
-        $query->execute($params);
-
-        return (int)$query->fetchColumn();
-    }
-
-    public function obtenerCategorias()
-    {
-        $query = $this->pdo->prepare("
-            SELECT id_categoria, nombre_categoria, imagen_categoria
-            FROM categorias
-        ");
-
-        $query->execute();
-        return $query->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function buscarSugerencias($termino)
-    {
-        $query = $this->pdo->prepare("
-            SELECT id_producto, descripcion_producto 
-            FROM productos 
-            WHERE descripcion_producto LIKE :termino 
-            ORDER BY descripcion_producto 
-            LIMIT 10
-        ");
-        $query->bindValue(':termino', '%' . $termino . '%');
-        $query->execute();
-
-        return $query->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function crearPedido($datosCliente, $productos, $total)
-    {
+    
+    /**
+     * Crear un nuevo pedido
+     * @param array $datosCliente - Información del cliente
+     * @param array $productos - Array de productos del pedido
+     * @param float $total - Total del pedido
+     * @return int|false - ID del pedido creado o false si falla
+     */
+    public function crearPedido($datosCliente, $productos, $total) {
         try {
             $this->pdo->beginTransaction();
-
+            
+            // 1. Insertar pedido principal usando tu estructura actual
             $sqlPedido = "INSERT INTO pedidos (
                 ped_cliente, 
                 ped_estado, 
                 ped_fecha, 
                 ped_numfac
             ) VALUES (?, ?, NOW(), ?)";
-
+            
+            // Generar número de factura único
             $numeroFactura = 'PED-' . date('Ymd') . '-' . sprintf('%04d', rand(1000, 9999));
-
+            
             $stmtPedido = $this->pdo->prepare($sqlPedido);
             $stmtPedido->execute([
                 $datosCliente['nombre'] . ' (' . ($datosCliente['email'] ?: 'Sin email') . ')',
                 'pendiente',
                 $numeroFactura
             ]);
-
+            
             $idPedido = $this->pdo->lastInsertId();
-
+            
+            // 2. Insertar detalles del pedido
             $sqlDetalle = "INSERT INTO detalle_pedidos (
                 id_pedido, 
                 id_producto, 
@@ -179,9 +49,9 @@ class Producto
                 precio_unitario, 
                 subtotal
             ) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
+            
             $stmtDetalle = $this->pdo->prepare($sqlDetalle);
-
+            
             foreach ($productos as $producto) {
                 $stmtDetalle->execute([
                     $idPedido,
@@ -193,19 +63,23 @@ class Producto
                     $producto['subtotal'] ?? 0
                 ]);
             }
-
+            
             $this->pdo->commit();
             return $idPedido;
-
+            
         } catch (Exception $e) {
             $this->pdo->rollBack();
             error_log("Error en crearPedido: " . $e->getMessage());
             return false;
         }
     }
-
-    public function obtenerPedidosCliente($nombreCliente)
-    {
+    
+    /**
+     * Obtener pedidos de un cliente
+     * @param string $nombreCliente - Nombre del cliente
+     * @return array - Array de pedidos
+     */
+    public function obtenerPedidosCliente($nombreCliente) {
         try {
             $sql = "SELECT * FROM pedidos WHERE ped_cliente LIKE ? ORDER BY ped_fecha DESC";
             $stmt = $this->pdo->prepare($sql);
@@ -216,9 +90,13 @@ class Producto
             return [];
         }
     }
-
-    public function obtenerDetallePedido($idPedido)
-    {
+    
+    /**
+     * Obtener detalles de un pedido específico
+     * @param int $idPedido - ID del pedido
+     * @return array - Array con detalles del pedido
+     */
+    public function obtenerDetallePedido($idPedido) {
         try {
             $sql = "SELECT dp.*, p.ped_cliente, p.ped_estado, p.ped_fecha, p.ped_numfac
                     FROM detalle_pedidos dp 
@@ -232,47 +110,63 @@ class Producto
             return [];
         }
     }
-
-    public function actualizarEstadoPedido($idPedido, $nuevoEstado, $comentario = '')
-    {
+    
+    /**
+     * Actualizar estado de un pedido
+     * @param int $idPedido - ID del pedido
+     * @param string $nuevoEstado - Nuevo estado
+     * @param string $comentario - Comentario opcional del cambio
+     * @return bool - true si se actualiza correctamente
+     */
+    public function actualizarEstadoPedido($idPedido, $nuevoEstado, $comentario = '') {
         try {
             $this->pdo->beginTransaction();
-
+            
+            // Obtener estado actual
             $sqlActual = "SELECT ped_estado FROM pedidos WHERE id_pedido = ?";
             $stmtActual = $this->pdo->prepare($sqlActual);
             $stmtActual->execute([$idPedido]);
             $estadoActual = $stmtActual->fetchColumn();
-
+            
+            // Actualizar estado
             $sql = "UPDATE pedidos SET ped_estado = ? WHERE id_pedido = ?";
             $stmt = $this->pdo->prepare($sql);
             $resultado = $stmt->execute([$nuevoEstado, $idPedido]);
-
+            
+            // Insertar en historial si existe la tabla
             if ($resultado && $estadoActual && $estadoActual !== $nuevoEstado) {
                 try {
                     $sqlHistorial = "INSERT INTO historial_pedidos (id_pedido, estado_anterior, estado_nuevo, comentario) 
-                                     VALUES (?, ?, ?, ?)";
+                                    VALUES (?, ?, ?, ?)";
                     $stmtHistorial = $this->pdo->prepare($sqlHistorial);
                     $comentarioFinal = $comentario ?: "Estado cambiado de $estadoActual a $nuevoEstado";
                     $stmtHistorial->execute([$idPedido, $estadoActual, $nuevoEstado, $comentarioFinal]);
                 } catch (Exception $e) {
+                    // Si no existe la tabla historial, continuar sin error
                     error_log("Historial no disponible: " . $e->getMessage());
                 }
             }
-
+            
             $this->pdo->commit();
             return $resultado;
-
+            
         } catch (Exception $e) {
             $this->pdo->rollBack();
             error_log("Error en actualizarEstadoPedido: " . $e->getMessage());
             return false;
         }
     }
-
-    public function obtenerTodosPedidos($limite = 50, $offset = 0)
-    {
+    
+    /**
+     * Obtener todos los pedidos (para administración)
+     * @param int $limite - Límite de resultados
+     * @param int $offset - Offset para paginación
+     * @return array - Array de pedidos
+     */
+    public function obtenerTodosPedidos($limite = 50, $offset = 0) {
         try {
-            $sql = "SELECT p.*, COUNT(dp.id_detalle) as total_productos
+            $sql = "SELECT p.*, 
+                           COUNT(dp.id_detalle) as total_productos
                     FROM pedidos p 
                     LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido 
                     GROUP BY p.id_pedido 
@@ -286,9 +180,12 @@ class Producto
             return [];
         }
     }
-
-    public function obtenerEstadisticas()
-    {
+    
+    /**
+     * Obtener estadísticas de pedidos
+     * @return array - Array con estadísticas
+     */
+    public function obtenerEstadisticas() {
         try {
             $sql = "SELECT 
                         COUNT(*) as total_pedidos,
@@ -305,40 +202,44 @@ class Producto
             return [];
         }
     }
-
-    public function buscarPedidos($criterios = [])
-    {
+    
+    /**
+     * Buscar pedidos por criterios
+     * @param array $criterios - Array con criterios de búsqueda
+     * @return array - Array de pedidos que coinciden
+     */
+    public function buscarPedidos($criterios = []) {
         try {
             $sql = "SELECT * FROM pedidos WHERE 1=1";
             $params = [];
-
+            
             if (!empty($criterios['estado'])) {
                 $sql .= " AND ped_estado = ?";
                 $params[] = $criterios['estado'];
             }
-
+            
             if (!empty($criterios['fecha_desde'])) {
                 $sql .= " AND ped_fecha >= ?";
                 $params[] = $criterios['fecha_desde'];
             }
-
+            
             if (!empty($criterios['fecha_hasta'])) {
                 $sql .= " AND ped_fecha <= ?";
                 $params[] = $criterios['fecha_hasta'];
             }
-
+            
             if (!empty($criterios['cliente'])) {
                 $sql .= " AND ped_cliente LIKE ?";
                 $params[] = '%' . $criterios['cliente'] . '%';
             }
-
+            
             if (!empty($criterios['numero_factura'])) {
                 $sql .= " AND ped_numfac LIKE ?";
                 $params[] = '%' . $criterios['numero_factura'] . '%';
             }
-
+            
             $sql .= " ORDER BY ped_fecha DESC";
-
+            
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -347,9 +248,13 @@ class Producto
             return [];
         }
     }
-
-    public function obtenerPedidoPorId($idPedido)
-    {
+    
+    /**
+     * Obtener pedido por ID
+     * @param int $idPedido - ID del pedido
+     * @return array|false - Datos del pedido o false si no existe
+     */
+    public function obtenerPedidoPorId($idPedido) {
         try {
             $sql = "SELECT * FROM pedidos WHERE id_pedido = ?";
             $stmt = $this->pdo->prepare($sql);
@@ -360,9 +265,13 @@ class Producto
             return false;
         }
     }
-
-    public function calcularTotalPedido($idPedido)
-    {
+    
+    /**
+     * Calcular total del pedido desde detalles
+     * @param int $idPedido - ID del pedido
+     * @return float - Total calculado
+     */
+    public function calcularTotalPedido($idPedido) {
         try {
             $sql = "SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?";
             $stmt = $this->pdo->prepare($sql);
@@ -375,7 +284,4 @@ class Producto
         }
     }
 }
-
-
-
-
+?>
