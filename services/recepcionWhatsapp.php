@@ -45,8 +45,13 @@ $timestamp = $mensajeData['timestamp'];
 write_log("Mensaje recibido de $telefonoCliente: $mensaje");
 
 if ($mensaje != null) {
-    $respuestaTexto = "Hola bienvenido a Multilicores, en el siguiente link podrás hacer tu pedido:\nhttps://multilicoreschapinero.com/sistema/views/categorias.php";
     
+    $respuestaTexto = "    
+    🍷 ¡Bienvenido a Multilicores! 🥂\n
+    \nTu tienda favorita de licores está a un clic 🛒
+    \nHaz tu pedido fácil y rápido aquí:
+    \n👉 https://multilicoreschapinero.com/sistema/views/categorias.php";
+
     require_once "enviar.php";
     enviar($mensaje, $respuestaTexto, $id, $timestamp, $telefonoCliente);
 
