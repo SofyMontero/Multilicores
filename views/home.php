@@ -47,7 +47,7 @@ require_once "../models/database.php";
 					</div>
 				</a>
 
-				<a href="company.php" class="tile">
+				<a href="solicitudes.php" class="tile">
 					<div class="tile-tittle">Solicitudes</div>
 					<div class="tile-icon">						
 					<i class="fas fa-shopping-cart fa-fw"></i>

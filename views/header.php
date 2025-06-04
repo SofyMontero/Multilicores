@@ -89,7 +89,7 @@ date_default_timezone_set('America/Bogota');
 						</li>
 
 						<li>
-							<a href="company.php"><i class="fas fa-shopping-cart fa-fw"></i> &nbsp; Solicitudes</a>
+							<a href="solicitudes.php"><i class="fas fa-shopping-cart fa-fw"></i> &nbsp; Solicitudes</a>
 						</li>
 						<li>
 							<a href="categorias.php"><i class="fas fa-th-large fa-fw"></i> &nbsp; Catálogo </a>							
