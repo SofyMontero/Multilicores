@@ -212,67 +212,6 @@ $productos = $producto->obtenerCategorias();
         });
     </script>
 
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const searchInfo = document.getElementById('searchInfo');
-            const searchInfoText = document.getElementById('searchInfoText');
-            const categorias = document.querySelectorAll('.card-categoria');
-
-            function highlightText(text, search) {
-                if (!search) return text;
-                const regex = new RegExp(`(${search})`, 'gi');
-                return text.replace(regex, '<span class="highlight">$1</span>');
-            }
-
-            function filterCategorias(searchTerm) {
-                const term = searchTerm.toLowerCase().trim();
-                let visibleCount = 0;
-
-                categorias.forEach(categoria => {
-                    const nombreCategoria = categoria.dataset.categoria;
-                    const tituloElement = categoria.querySelector('.categoria-nombre');
-                    const originalText = tituloElement.textContent;
-
-                    if (nombreCategoria.includes(term)) {
-                        categoria.classList.remove('hidden');
-                        visibleCount++;
-
-                        if (term) {
-                            tituloElement.innerHTML = highlightText(originalText, term);
-                        } else {
-                            tituloElement.textContent = originalText;
-                        }
-                    } else {
-                        categoria.classList.add('hidden');
-                        tituloElement.textContent = originalText;
-                    }
-                });
-
-                if (term) {
-                    searchInfo.style.display = 'block';
-                    if (visibleCount === 0) {
-                        searchInfoText.textContent = 'No se encontraron categorías.';
-                        searchInfo.className = 'search-results-info alert alert-warning';
-                    } else {
-                        searchInfoText.textContent = `${visibleCount} categoría${visibleCount !== 1 ? 's' : ''} encontrada${visibleCount !== 1 ? 's' : ''}`;
-                        searchInfo.className = 'search-results-info alert alert-info';
-                    }
-                } else {
-                    searchInfo.style.display = 'none';
-                }
-            }
-
-            searchInput.addEventListener('input', function() {
-                filterCategorias(this.value);
-            });
-
-            if (searchInput.value) {
-                filterCategorias(searchInput.value);
-            }
-        });
-    </script> -->
-
 </body>
 
 </html>

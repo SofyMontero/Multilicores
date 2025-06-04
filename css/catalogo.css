@@ -41,29 +41,7 @@
             color: var(--text-light);
             font-size: 1.1rem;
             margin: 0;
-        }
-
-        .search-container {
-            position: relative;
-            max-width: 300px;
-        }
-
-        .search-input {
-            padding-right: 45px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-        }
-
-        .search-btn {           
-            right: 4px;
-            top: 4px;
-            bottom: 4px;
-            background: var(--primary-color);
-            border: none;
-            border-radius: 4px;
-            color: white;
-            width: 36px;
-        }
+        }      
 
         .catalog-header {
             text-align: center;
@@ -628,4 +606,158 @@
     right: 20px;
     height: 1px;
     background: linear-gradient(90deg, transparent, #dee2e6, transparent);
+}
+
+
+/* /////////////Boton buscar  */
+/* Input de búsqueda mejorado */
+.search-input {
+    border-radius: 25px;
+    padding-left: 15px;
+    padding-right: 40px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    outline: none;
+}
+
+/* Botón de búsqueda */
+.btn-outline-secondary {
+    border-radius: 25px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+/* Botón de limpiar búsqueda */
+.clear-search-btn {
+    border: none;
+    background: none;
+    color: #6c757d;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.clear-search-btn:hover {
+    color: #dc3545;
+}
+
+/* Asegurar que el grid mantenga su estructura */
+#productGrid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.product-item {
+    flex: 0 0 auto;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Clase para elementos que se van a ocultar */
+.product-item.hidden {
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+}
+
+/* Animación para productos que desaparecen */
+.product-item[style*="display: none"] {
+    flex: 0 0 0% !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+/* Destacar texto encontrado */
+.highlight {
+    background-color: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+/* Contador del carrito */
+#cartCount {
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    line-height: 16px;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 20%, 60%, 100% {
+        transform: translateY(0) translateX(-50%);
+    }
+    40% {
+        transform: translateY(-10px) translateX(-50%);
+    }
+    80% {
+        transform: translateY(-5px) translateX(-50%);
+    }
+}
+
+/* Mensaje de no resultados */
+#noResults {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .search-input {
+        border-radius: 15px;
+        font-size: 14px;
+    }
+    
+    .btn-outline-secondary {
+        border-radius: 15px;
+        padding: 8px 12px;
+    }
+}
+
+/* Estados del botón agregar */
+.agregar-btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.agregar-btn.btn-success {
+    transform: scale(1.05);
+}
+
+.agregar-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.agregar-btn:active::before {
+    width: 100px;
+    height: 100px;
 }

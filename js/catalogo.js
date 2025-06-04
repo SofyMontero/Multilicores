@@ -1,4 +1,129 @@
-// Carrito de compras funcional
+// ===========================================
+// FUNCIONALIDAD DE BÚSQUEDA
+// ===========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const productGrid = document.getElementById('productGrid');
+    const noResults = document.getElementById('noResults');
+    const productItems = document.querySelectorAll('.product-item');
+
+    // Función para normalizar texto (quitar acentos y convertir a minúsculas)
+    function normalizeText(text) {
+        return text.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim();
+    }
+
+    // Función para filtrar productos con animación suave
+    function filterProducts(searchTerm) {
+        const normalizedSearch = normalizeText(searchTerm);
+        let visibleCount = 0;
+
+        productItems.forEach(item => {
+            const productName = item.getAttribute('data-name');
+            const normalizedProductName = normalizeText(productName);
+            
+            if (normalizedProductName.includes(normalizedSearch) || searchTerm === '') {
+                item.classList.remove('hidden');
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.classList.add('hidden');
+                // Usar setTimeout para animación suave
+                setTimeout(() => {
+                    if (item.classList.contains('hidden')) {
+                        item.style.display = 'none';
+                    }
+                }, 150);
+            }
+        });
+
+        // Mostrar/ocultar mensaje de "no results"
+        if (visibleCount === 0 && searchTerm !== '') {
+            setTimeout(() => {
+                noResults.style.display = 'block';
+            }, 200);
+        } else {
+            noResults.style.display = 'none';
+        }
+
+        return visibleCount;
+    }
+
+    // Event listener para búsqueda en tiempo real
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim();
+        filterProducts(searchTerm);
+    });
+
+    // Event listener para búsqueda al presionar Enter
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const searchTerm = this.value.trim();
+            filterProducts(searchTerm);
+        }
+    });
+
+    // Agregar botón de búsqueda visual (solo si no hay uno ya)
+    const existingSearchBtn = searchInput.parentNode.querySelector('.btn-outline-secondary:not([class*="fa-shopping-cart"])');
+    if (!existingSearchBtn) {
+        const searchButton = document.createElement('button');
+        searchButton.type = 'button';
+        searchButton.className = 'btn btn-outline-secondary btn-sm';
+        searchButton.innerHTML = '<i class="fas fa-search"></i>';
+        searchButton.style.marginLeft = '5px';
+        
+        // Insertar botón después del input
+        searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+        
+        // Event listener para el botón de búsqueda
+        searchButton.addEventListener('click', function() {
+            const searchTerm = searchInput.value.trim();
+            filterProducts(searchTerm);
+            searchInput.focus();
+        });
+    }
+
+    // Función para limpiar búsqueda
+    function clearSearch() {
+        searchInput.value = '';
+        filterProducts('');
+        searchInput.focus();
+    }
+
+    // Agregar botón de limpiar cuando hay texto
+    searchInput.addEventListener('input', function() {
+        const existingClearBtn = document.querySelector('.clear-search-btn');
+        
+        if (this.value.length > 0 && !existingClearBtn) {
+            const clearBtn = document.createElement('button');
+            clearBtn.type = 'button';
+            clearBtn.className = 'btn btn-link clear-search-btn p-0 position-absolute';
+            clearBtn.style.right = '45px';
+            clearBtn.style.top = '50%';
+            clearBtn.style.transform = 'translateY(-50%)';
+            clearBtn.style.zIndex = '10';
+            clearBtn.innerHTML = '<i class="fas fa-times text-muted"></i>';
+            clearBtn.title = 'Limpiar búsqueda';
+            
+            // Posicionar el input container como relative
+            searchInput.parentNode.style.position = 'relative';
+            searchInput.parentNode.appendChild(clearBtn);
+            
+            clearBtn.addEventListener('click', clearSearch);
+        } else if (this.value.length === 0 && existingClearBtn) {
+            existingClearBtn.remove();
+        }
+    });
+});
+
+// ===========================================
+// CARRITO DE COMPRAS FUNCIONAL
+// ===========================================
+
 let carrito = [];
 let totalGeneral = 0;
 
@@ -9,30 +134,30 @@ const itemsCountElement = document.getElementById('itemsCount');
 const totalAmountElement = document.getElementById('totalAmount');
 const submitBtnElement = document.getElementById('submitBtn');
 const btnItemCountElement = document.getElementById('btnItemCount');
-const searchInput = document.getElementById('searchInput');
-const productGrid = document.getElementById('productGrid');
-const noResults = document.getElementById('noResults');
 
-// Inicializar eventos
-document.addEventListener('DOMContentLoaded', function() {
-    // Agregar eventos a los botones
-    document.querySelectorAll('.agregar-btn').forEach(btn => {
-        btn.addEventListener('click', agregarAlCarrito);
-    });
+// Event listener para los botones "Agregar"
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('agregar-btn') || e.target.closest('.agregar-btn')) {
+        agregarAlCarrito(e);
+    }
+    
+    // Event listener para mostrar carrito (adaptado a tu HTML)
+    if (e.target.closest('.fa-shopping-cart') || e.target.closest('button .fas.fa-shopping-cart')) {
+        toggleCarrito();
+    }
+    
+    // También detectar click en el botón que contiene el carrito
+    const cartButton = e.target.closest('button');
+    if (cartButton && cartButton.querySelector('.fa-shopping-cart')) {
+        toggleCarrito();
+    }
+});
 
-    // Evento para el buscador
-    searchInput.addEventListener('input', filtrarProductos);
-
-    // Evento para cambio de tipo (unidad/paca)
-    document.querySelectorAll('.tipo-select').forEach(select => {
-        select.addEventListener('change', actualizarPrecioMostrado);
-    });
-
-    // Evento para el botón del carrito
-    document.querySelector('.btn-outline-secondary').addEventListener('click', toggleCarrito);
-
-    // Actualizar contador inicial
-    actualizarContadores();
+// Event listener para cambios en tipo de producto (resaltar precio)
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('tipo-select')) {
+        actualizarPrecioMostrado(e);
+    }
 });
 
 // Función para agregar productos al carrito
@@ -92,7 +217,18 @@ function agregarAlCarrito(event) {
     tipoSelect.value = '';
     cantidadInput.value = '';
     
+    // Resetear estilos de precio
+    const precioUnidadElement = productCard.querySelector('.price-unidad');
+    const precioPacaElement = productCard.querySelector('.price-paca');
+    if (precioUnidadElement && precioPacaElement) {
+        precioUnidadElement.style.fontWeight = 'normal';
+        precioUnidadElement.style.color = '';
+        precioPacaElement.style.fontWeight = 'normal';
+        precioPacaElement.style.color = '';
+    }
+    
     // Animación del botón
+    btn.classList.remove('btn-outline-success');
     btn.classList.add('btn-success');
     btn.innerHTML = '<i class="fas fa-check me-1"></i> Agregado';
     
@@ -101,6 +237,9 @@ function agregarAlCarrito(event) {
         btn.classList.add('btn-outline-success');
         btn.innerHTML = '<i class="fas fa-cart-plus me-1"></i> Agregar';
     }, 1500);
+    
+    // Guardar en localStorage
+    guardarCarrito();
 }
 
 // Función para actualizar contadores y resumen
@@ -108,27 +247,40 @@ function actualizarContadores() {
     const totalItems = carrito.length;
     totalGeneral = carrito.reduce((sum, item) => sum + item.precioTotal, 0);
     
-    // Actualizar contador del carrito
-    cartCountElement.textContent = totalItems;
-    cartCountElement.style.display = totalItems > 0 ? 'block' : 'none';
+    // Actualizar contador del carrito (adaptado a tu HTML)
+    if (cartCountElement) {
+        cartCountElement.textContent = totalItems;
+        // Mostrar/ocultar el badge según tu estructura
+        if (totalItems > 0) {
+            cartCountElement.style.display = 'inline';
+            cartCountElement.classList.remove('d-none');
+        } else {
+            cartCountElement.style.display = 'none';
+            cartCountElement.classList.add('d-none');
+        }
+    }
     
     // Actualizar resumen del pedido
     if (totalItems > 0) {
-        orderSummaryElement.style.display = 'block';
-        itemsCountElement.textContent = `${totalItems} producto${totalItems !== 1 ? 's' : ''}`;
-        totalAmountElement.textContent = new Intl.NumberFormat('es-CO').format(totalGeneral);
+        if (orderSummaryElement) orderSummaryElement.style.display = 'block';
+        if (itemsCountElement) itemsCountElement.textContent = `${totalItems} producto${totalItems !== 1 ? 's' : ''}`;
+        if (totalAmountElement) totalAmountElement.textContent = new Intl.NumberFormat('es-CO').format(totalGeneral);
         
         // Habilitar botón de envío
-        submitBtnElement.disabled = false;
-        submitBtnElement.classList.remove('btn-secondary');
-        submitBtnElement.classList.add('btn-success');
-        btnItemCountElement.textContent = `(${totalItems})`;
+        if (submitBtnElement) {
+            submitBtnElement.disabled = false;
+            submitBtnElement.classList.remove('btn-secondary');
+            submitBtnElement.classList.add('btn-success');
+        }
+        if (btnItemCountElement) btnItemCountElement.textContent = `(${totalItems})`;
     } else {
-        orderSummaryElement.style.display = 'none';
-        submitBtnElement.disabled = true;
-        submitBtnElement.classList.remove('btn-success');
-        submitBtnElement.classList.add('btn-secondary');
-        btnItemCountElement.textContent = '';
+        if (orderSummaryElement) orderSummaryElement.style.display = 'none';
+        if (submitBtnElement) {
+            submitBtnElement.disabled = true;
+            submitBtnElement.classList.remove('btn-success');
+            submitBtnElement.classList.add('btn-secondary');
+        }
+        if (btnItemCountElement) btnItemCountElement.textContent = '';
     }
 }
 
@@ -142,76 +294,153 @@ function toggleCarrito() {
     mostrarModalCarrito();
 }
 
-// Función para mostrar modal del carrito
+// Función para mostrar modal del carrito responsive
 function mostrarModalCarrito() {
     const modal = document.createElement('div');
     modal.className = 'modal fade';
     modal.setAttribute('tabindex', '-1');
     modal.innerHTML = `
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-shopping-cart me-2"></i>
-                        Carrito de Compras (${carrito.length} productos)
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i class="fas fa-shopping-cart me-2 text-success"></i>
+                        <span class="d-none d-sm-inline">Carrito de Compras</span>
+                        <span class="d-sm-none">Carrito</span>
+                        <span class="badge bg-success ms-2">${carrito.length}</span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Tipo</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio Unit.</th>
-                                    <th>Subtotal</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${carrito.map((item, index) => `
+                <div class="modal-body p-0">
+                    <!-- Vista Desktop/Tablet - Tabla -->
+                    <div class="d-none d-md-block">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light sticky-top">
                                     <tr>
-                                        <td class="fw-semibold">${item.nombre}</td>
-                                        <td>
-                                            <span class="badge bg-${item.tipo === 'paca' ? 'primary' : 'secondary'}">
-                                                ${item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
-                                            </span>
-                                        </td>
-                                        <td>${item.cantidad}</td>
-                                        <td>$${new Intl.NumberFormat('es-CO').format(item.precioUnitario)}</td>
-                                        <td class="fw-bold">$${new Intl.NumberFormat('es-CO').format(item.precioTotal)}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarDelCarrito(${index})">
+                                        <th class="border-0">Producto</th>
+                                        <th class="border-0">Tipo</th>
+                                        <th class="border-0">Cant.</th>
+                                        <th class="border-0">Precio Unit.</th>
+                                        <th class="border-0">Subtotal</th>
+                                        <th class="border-0 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${carrito.map((item, index) => `
+                                        <tr>
+                                            <td class="fw-semibold align-middle">
+                                                <div class="text-truncate" style="max-width: 200px;" title="${item.nombre}">
+                                                    ${item.nombre}
+                                                </div>
+                                            </td>
+                                            <td class="align-middle">
+                                                <span class="badge bg-${item.tipo === 'paca' ? 'primary' : 'secondary'}">
+                                                    ${item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
+                                                </span>
+                                            </td>
+                                            <td class="align-middle fw-bold">${item.cantidad}</td>
+                                            <td class="align-middle">${new Intl.NumberFormat('es-CO').format(item.precioUnitario)}</td>
+                                            <td class="align-middle fw-bold text-success">
+                                                ${new Intl.NumberFormat('es-CO').format(item.precioTotal)}
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarDelCarrito(${index})" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Vista Mobile - Cards -->
+                    <div class="d-md-none">
+                        <div class="p-3">
+                            ${carrito.map((item, index) => `
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-1 fw-bold" style="line-height: 1.2;">
+                                                ${item.nombre}
+                                            </h6>
+                                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="eliminarDelCarrito(${index})" title="Eliminar">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                            <tfoot class="table-light">
-                                <tr>
-                                    <th colspan="4" class="text-end">Total General:</th>
-                                    <th class="text-success fs-5">$${new Intl.NumberFormat('es-CO').format(totalGeneral)} COP</th>
-                                    <th></th>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                        </div>
+                                        
+                                        <div class="row g-2 text-sm">
+                                            <div class="col-6">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-tag text-muted me-1" style="font-size: 12px;"></i>
+                                                    <span class="badge bg-${item.tipo === 'paca' ? 'primary' : 'secondary'}">
+                                                        ${item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-sort-numeric-up text-muted me-1" style="font-size: 12px;"></i>
+                                                    <strong>${item.cantidad}</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-dollar-sign me-1" style="font-size: 10px;"></i>
+                                                    ${new Intl.NumberFormat('es-CO').format(item.precioUnitario)}
+                                                </div>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <div class="fw-bold text-success">
+                                                    ${new Intl.NumberFormat('es-CO').format(item.precioTotal)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Total General (común para ambas vistas) -->
+                    <div class="border-top bg-light p-3">
+                        <div class="row align-items-center">
+                            <div class="col-12 col-sm-6">
+                                <h5 class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-calculator text-success me-2"></i>
+                                    <span class="d-none d-sm-inline">Total General:</span>
+                                    <span class="d-sm-none">Total:</span>
+                                </h5>
+                            </div>
+                            <div class="col-12 col-sm-6 text-sm-end">
+                                <h4 class="mb-0 text-success fw-bold">
+                                    ${new Intl.NumberFormat('es-CO').format(totalGeneral)} COP
+                                </h4>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-danger" onclick="vaciarCarrito()">
-                        <i class="fas fa-trash me-1"></i>
-                        Vaciar Carrito
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cerrar
-                    </button>
-                    <button type="button" class="btn btn-success" onclick="procesarPedido()">
-                        <i class="fas fa-paper-plane me-1"></i>
-                        Enviar Pedido
-                    </button>
+                
+                <div class="modal-footer bg-light flex-column flex-sm-row gap-2">
+                    <!-- Botones en mobile: uno encima del otro -->
+                    <div class="d-flex flex-column flex-sm-row gap-2 w-100">
+                        <button type="button" class="btn btn-outline-danger flex-fill" onclick="vaciarCarrito()">
+                            <i class="fas fa-trash me-1"></i>
+                            <span class="d-none d-sm-inline">Vaciar Carrito</span>
+                            <span class="d-sm-none">Vaciar</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>
+                            Cerrar
+                        </button>
+                        <button type="button" class="btn btn-success flex-fill" onclick="procesarPedido()">
+                            <i class="fas fa-paper-plane me-1"></i>
+                            <span class="d-none d-sm-inline">Enviar Pedido</span>
+                            <span class="d-sm-none">Enviar</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -234,6 +463,7 @@ function eliminarDelCarrito(index) {
         carrito.splice(index, 1);
         actualizarContadores();
         mostrarAlerta(`${producto.nombre} eliminado del carrito`, 'info');
+        guardarCarrito();
         
         // Si el modal está abierto, actualizarlo
         const modal = document.querySelector('.modal.show');
@@ -257,6 +487,7 @@ function vaciarCarrito() {
         carrito = [];
         actualizarContadores();
         mostrarAlerta('Carrito vaciado', 'success');
+        guardarCarrito();
         
         // Cerrar modal si está abierto
         const modal = document.querySelector('.modal.show');
@@ -335,25 +566,6 @@ function procesarPedido() {
     form.submit();
 }
 
-// Función para filtrar productos
-function filtrarProductos() {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-    const productItems = document.querySelectorAll('.product-item');
-    let visibleCount = 0;
-    
-    productItems.forEach(item => {
-        const productName = item.dataset.name;
-        const isVisible = productName.includes(searchTerm);
-        
-        item.style.display = isVisible ? 'block' : 'none';
-        if (isVisible) visibleCount++;
-    });
-    
-    // Mostrar/ocultar mensaje de "no hay resultados"
-    noResults.style.display = visibleCount === 0 && searchTerm !== '' ? 'block' : 'none';
-    productGrid.style.display = visibleCount === 0 && searchTerm !== '' ? 'none' : 'block';
-}
-
 // Función para actualizar precio mostrado según tipo seleccionado
 function actualizarPrecioMostrado(event) {
     const select = event.target;
@@ -364,6 +576,8 @@ function actualizarPrecioMostrado(event) {
     // Resaltar el precio correspondiente
     const precioUnidadElement = productCard.querySelector('.price-unidad');
     const precioPacaElement = productCard.querySelector('.price-paca');
+    
+    if (!precioUnidadElement || !precioPacaElement) return;
     
     // Resetear estilos
     precioUnidadElement.style.fontWeight = 'normal';
@@ -404,20 +618,32 @@ function mostrarAlerta(mensaje, tipo = 'info') {
 }
 
 // Función para manejar el envío del formulario original
-document.getElementById('orderForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (carrito.length === 0) {
-        mostrarAlerta('Agrega productos al carrito antes de enviar el pedido', 'warning');
-        return;
+document.addEventListener('DOMContentLoaded', function() {
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (carrito.length === 0) {
+                mostrarAlerta('Agrega productos al carrito antes de enviar el pedido', 'warning');
+                return;
+            }
+            
+            procesarPedido();
+        });
     }
-    
-    procesarPedido();
 });
 
-// Función para persistir carrito en localStorage (opcional)
+// ===========================================
+// PERSISTENCIA EN LOCALSTORAGE
+// ===========================================
+
 function guardarCarrito() {
-    localStorage.setItem('carritoMultilicores', JSON.stringify(carrito));
+    try {
+        localStorage.setItem('carritoMultilicores', JSON.stringify(carrito));
+    } catch (e) {
+        console.error('Error al guardar carrito:', e);
+    }
 }
 
 function cargarCarrito() {
@@ -433,23 +659,7 @@ function cargarCarrito() {
     }
 }
 
-// Cargar carrito al iniciar (opcional)
-// cargarCarrito();
-
-const originalAgregarAlCarrito = agregarAlCarrito;
-agregarAlCarrito = function(event) {
-    originalAgregarAlCarrito(event);
-    guardarCarrito();
-};
-
-const originalEliminarDelCarrito = eliminarDelCarrito;
-eliminarDelCarrito = function(index) {
-    originalEliminarDelCarrito(index);
-    guardarCarrito();
-};
-
-const originalVaciarCarrito = vaciarCarrito;
-vaciarCarrito = function() {
-    originalVaciarCarrito();
-    guardarCarrito();
-};
+// Cargar carrito al iniciar la página
+document.addEventListener('DOMContentLoaded', function() {
+    cargarCarrito();
+});
