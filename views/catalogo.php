@@ -22,6 +22,7 @@ $totalPaginas = ceil($totalProductos / $limit);
 // Llamada al nuevo método paginado
 $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset);
 
+
 ?>
 
 <!DOCTYPE html>
@@ -123,10 +124,13 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                                                 class="form-select tipo-select form-select-sm"
                                                 data-index="<?php echo $index; ?>"
                                                 data-precio-unidad="<?php echo $prod['precio_unidad_producto']; ?>"
-                                                data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>">
-                                                <option value="">Tipo</option>
+                                                data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>"
+                                                data-embalaje="<?php if($prod['acti_Unidad'] == 1) {
+                                                    echo '<option value="">Tipo</option>
                                                 <option value="unidad">Unidad</option>
-                                                <option value="paca">Paca</option>
+                                                <option value="paca">Paca</option>';
+                                                } else echo '<option value="">Tipo</option>                                              
+                                                <option value="paca">Paca</option>'?>">                                              
                                             </select>
                                         </div>
                                         <div class="col-6">
