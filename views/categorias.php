@@ -46,7 +46,7 @@ $productos = $producto->obtenerCategorias();
                         <a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a>
+                        <!-- <a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a> -->
                     </li>
                     <li class="nav-item">
                         <a class="nav-link fw-semibold text-muted" href="catalogo.php">Productos</a>

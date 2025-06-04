@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ===========================================
-// CARRITO DE COMPRAS FUNCIONAL
+// CARRITO DE COMPRAS FUNCIONAL CON CANTIDAD EDITABLE
 // ===========================================
 
 let carrito = [];
@@ -135,13 +135,13 @@ const totalAmountElement = document.getElementById('totalAmount');
 const submitBtnElement = document.getElementById('submitBtn');
 const btnItemCountElement = document.getElementById('btnItemCount');
 
-// Event listener para los botones "Agregar"
+// Event listeners globales
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('agregar-btn') || e.target.closest('.agregar-btn')) {
         agregarAlCarrito(e);
     }
     
-    // Event listener para mostrar carrito (adaptado a tu HTML)
+    // Event listener para mostrar carrito
     if (e.target.closest('.fa-shopping-cart') || e.target.closest('button .fas.fa-shopping-cart')) {
         toggleCarrito();
     }
@@ -153,7 +153,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Event listener para cambios en tipo de producto (resaltar precio)
+// Event listener para cambios en tipo de producto
 document.addEventListener('change', function(e) {
     if (e.target.classList.contains('tipo-select')) {
         actualizarPrecioMostrado(e);
@@ -195,23 +195,32 @@ function agregarAlCarrito(event) {
     const precioUnitario = tipo === 'paca' ? precioPaca : precioUnidad;
     const precioTotal = precioUnitario * cantidad;
     
-    // Crear objeto del producto
-    const producto = {
-        id: id,
-        nombre: nombre,
-        tipo: tipo,
-        cantidad: cantidad,
-        precioUnitario: precioUnitario,
-        precioTotal: precioTotal,
-        timestamp: Date.now() // Para identificar productos únicos
-    };
+    // Verificar si ya existe el mismo producto con el mismo tipo
+    const existingIndex = carrito.findIndex(item => item.id === id && item.tipo === tipo);
     
-    // Agregar al carrito
-    carrito.push(producto);
+    if (existingIndex !== -1) {
+        // Si existe, sumar la cantidad
+        carrito[existingIndex].cantidad += cantidad;
+        carrito[existingIndex].precioTotal = carrito[existingIndex].precioUnitario * carrito[existingIndex].cantidad;
+        mostrarAlerta(`Cantidad actualizada: ${carrito[existingIndex].cantidad} ${tipo}s de ${nombre}`, 'success');
+    } else {
+        // Si no existe, crear nuevo producto
+        const producto = {
+            id: id,
+            nombre: nombre,
+            tipo: tipo,
+            cantidad: cantidad,
+            precioUnitario: precioUnitario,
+            precioTotal: precioTotal,
+            timestamp: Date.now()
+        };
+        
+        carrito.push(producto);
+        mostrarAlerta(`${nombre} agregado al carrito`, 'success');
+    }
     
     // Actualizar interfaz
     actualizarContadores();
-    mostrarAlerta(`${nombre} agregado al carrito`, 'success');
     
     // Limpiar formulario
     tipoSelect.value = '';
@@ -247,10 +256,9 @@ function actualizarContadores() {
     const totalItems = carrito.length;
     totalGeneral = carrito.reduce((sum, item) => sum + item.precioTotal, 0);
     
-    // Actualizar contador del carrito (adaptado a tu HTML)
+    // Actualizar contador del carrito
     if (cartCountElement) {
         cartCountElement.textContent = totalItems;
-        // Mostrar/ocultar el badge según tu estructura
         if (totalItems > 0) {
             cartCountElement.style.display = 'inline';
             cartCountElement.classList.remove('d-none');
@@ -284,6 +292,35 @@ function actualizarContadores() {
     }
 }
 
+// Función para cambiar cantidad en el carrito
+function cambiarCantidad(index, nuevaCantidad) {
+    if (index < 0 || index >= carrito.length) return;
+    
+    nuevaCantidad = parseInt(nuevaCantidad);
+    
+    if (isNaN(nuevaCantidad) || nuevaCantidad <= 0) {
+        mostrarAlerta('La cantidad debe ser un número mayor a 0', 'warning');
+        return;
+    }
+    
+    // Actualizar cantidad y recalcular precio total
+    carrito[index].cantidad = nuevaCantidad;
+    carrito[index].precioTotal = carrito[index].precioUnitario * nuevaCantidad;
+    
+    // Actualizar interfaz
+    actualizarContadores();
+    guardarCarrito();
+    
+    // Refrescar modal si está abierto
+    const modal = document.querySelector('.modal.show');
+    if (modal) {
+        modal.querySelector('.btn-close').click();
+        setTimeout(() => mostrarModalCarrito(), 300);
+    }
+    
+    mostrarAlerta(`Cantidad actualizada: ${carrito[index].nombre}`, 'success');
+}
+
 // Función para mostrar/ocultar carrito
 function toggleCarrito() {
     if (carrito.length === 0) {
@@ -294,7 +331,7 @@ function toggleCarrito() {
     mostrarModalCarrito();
 }
 
-// Función para mostrar modal del carrito responsive
+// Función para mostrar modal del carrito responsive con cantidad editable
 function mostrarModalCarrito() {
     const modal = document.createElement('div');
     modal.className = 'modal fade';
@@ -320,7 +357,7 @@ function mostrarModalCarrito() {
                                     <tr>
                                         <th class="border-0">Producto</th>
                                         <th class="border-0">Tipo</th>
-                                        <th class="border-0">Cant.</th>
+                                        <th class="border-0">Cantidad</th>
                                         <th class="border-0">Precio Unit.</th>
                                         <th class="border-0">Subtotal</th>
                                         <th class="border-0 text-center">Acciones</th>
@@ -339,7 +376,20 @@ function mostrarModalCarrito() {
                                                     ${item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
                                                 </span>
                                             </td>
-                                            <td class="align-middle fw-bold">${item.cantidad}</td>
+                                            <td class="align-middle">
+                                                <div class="input-group input-group-sm" style="width: 120px;">
+                                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="cambiarCantidad(${index}, ${item.cantidad - 1})">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="number" class="form-control text-center fw-bold" 
+                                                           value="${item.cantidad}" min="1" 
+                                                           onchange="cambiarCantidad(${index}, this.value)"
+                                                           onblur="cambiarCantidad(${index}, this.value)">
+                                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="cambiarCantidad(${index}, ${item.cantidad + 1})">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
                                             <td class="align-middle">${new Intl.NumberFormat('es-CO').format(item.precioUnitario)}</td>
                                             <td class="align-middle fw-bold text-success">
                                                 ${new Intl.NumberFormat('es-CO').format(item.precioTotal)}
@@ -362,7 +412,7 @@ function mostrarModalCarrito() {
                             ${carrito.map((item, index) => `
                                 <div class="card mb-3 shadow-sm">
                                     <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
                                             <h6 class="card-title mb-1 fw-bold" style="line-height: 1.2;">
                                                 ${item.nombre}
                                             </h6>
@@ -371,7 +421,8 @@ function mostrarModalCarrito() {
                                             </button>
                                         </div>
                                         
-                                        <div class="row g-2 text-sm">
+                                        <!-- Información del producto -->
+                                        <div class="row g-2 mb-3 text-sm">
                                             <div class="col-6">
                                                 <div class="d-flex align-items-center">
                                                     <i class="fas fa-tag text-muted me-1" style="font-size: 12px;"></i>
@@ -381,21 +432,32 @@ function mostrarModalCarrito() {
                                                 </div>
                                             </div>
                                             <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-sort-numeric-up text-muted me-1" style="font-size: 12px;"></i>
-                                                    <strong>${item.cantidad}</strong>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
                                                 <div class="text-muted small">
                                                     <i class="fas fa-dollar-sign me-1" style="font-size: 10px;"></i>
                                                     ${new Intl.NumberFormat('es-CO').format(item.precioUnitario)}
                                                 </div>
                                             </div>
-                                            <div class="col-6 text-end">
-                                                <div class="fw-bold text-success">
-                                                    ${new Intl.NumberFormat('es-CO').format(item.precioTotal)}
+                                        </div>
+
+                                        <!-- Control de cantidad -->
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-muted small me-2">Cantidad:</span>
+                                                <div class="input-group input-group-sm" style="width: 110px;">
+                                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="cambiarCantidad(${index}, ${item.cantidad - 1})">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="number" class="form-control text-center fw-bold" 
+                                                           value="${item.cantidad}" min="1"
+                                                           onchange="cambiarCantidad(${index}, this.value)"
+                                                           onblur="cambiarCantidad(${index}, this.value)">
+                                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="cambiarCantidad(${index}, ${item.cantidad + 1})">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
                                                 </div>
+                                            </div>
+                                            <div class="fw-bold text-success">
+                                                ${new Intl.NumberFormat('es-CO').format(item.precioTotal)}
                                             </div>
                                         </div>
                                     </div>
@@ -404,7 +466,7 @@ function mostrarModalCarrito() {
                         </div>
                     </div>
 
-                    <!-- Total General (común para ambas vistas) -->
+                    <!-- Total General -->
                     <div class="border-top bg-light p-3">
                         <div class="row align-items-center">
                             <div class="col-12 col-sm-6">
@@ -424,7 +486,6 @@ function mostrarModalCarrito() {
                 </div>
                 
                 <div class="modal-footer bg-light flex-column flex-sm-row gap-2">
-                    <!-- Botones en mobile: uno encima del otro -->
                     <div class="d-flex flex-column flex-sm-row gap-2 w-100">
                         <button type="button" class="btn btn-outline-danger flex-fill" onclick="vaciarCarrito()">
                             <i class="fas fa-trash me-1"></i>

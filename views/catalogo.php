@@ -60,7 +60,7 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                     <div class="collapse navbar-collapse justify-content-center mt-3 mt-lg-0" id="navbarMenu">
                         <ul class="navbar-nav gap-3">
                             <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a></li>
-                            <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a></li>
+                            <!-- <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a></li> -->
                             <li class="nav-item"><a class="nav-link fw-semibold text-decoration-underline" href="catalogo.php">Productos</a></li>
                         </ul>
                     </div>
@@ -124,7 +124,7 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                                                 class="form-select tipo-select form-select-sm"
                                                 data-index="<?php echo $index; ?>"
                                                 data-precio-unidad="<?php echo $prod['precio_unidad_producto']; ?>"
-                                                data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>"
+                                                data-precio-paca="<?php  echo $prod['precio_paca_producto']; ?>"
                                                 data-embalaje="<?php if($prod['acti_Unidad'] == 1) {
                                                     echo '<option value="">Tipo</option>
                                                 <option value="unidad">Unidad</option>
