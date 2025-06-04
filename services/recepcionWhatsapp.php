@@ -62,7 +62,7 @@ if ($mensaje != null) {
             \n¡Gracias por preferirnos! 🍾";
             $link="https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=$telefonoCliente";
 
-    $sender->enviar($mensaje, $respuestaTexto, $id, $timestamp, $telefonoCliente,$link,2);
+    $sender->enviar($mensaje, $respuestaTexto, $id, $timestamp, $telefonoCliente,$link,1);
     write_log("Mensaje de respuesta enviado a $telefonoCliente");
 }
 
