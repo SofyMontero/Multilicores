@@ -15,7 +15,7 @@ class WhatsappSender {
         file_put_contents($this->logFile, "[$fecha] $msg\n", FILE_APPEND);
     }
 
-    public function enviar($recibido, $enviado, $idWA, $timestamp, $telefonoCliente) {
+    public function enviar($recibido, $enviado, $idWA, $timestamp, $telefonoCliente,$link,$tipo) {
         $this->log("Intentando enviar mensaje a $telefonoCliente con ID WA $idWA");
 
         $sqlCantidad = "SELECT COUNT(id) AS cantidad FROM registro WHERE id_wa='" . $idWA . "';";
@@ -34,7 +34,9 @@ class WhatsappSender {
             $telefonoID = '599178349953891';
             $url = 'https://graph.facebook.com/v22.0/' . $telefonoID . '/messages';
 
-            $mensaje = json_encode([
+            if ($tipo==1) {
+
+                $mensaje = json_encode([
                 "messaging_product" => "whatsapp",
                 "recipient_type" => "individual",
                 "to" => $telefonoCliente,
@@ -43,7 +45,30 @@ class WhatsappSender {
                     "body" => $enviado,
                     "preview_url" => true
                 ]
-            ]);
+                ]);
+            }elseif ($tipo==2) {
+                $mensaje = json_encode([
+                    "messaging_product" => "whatsapp",
+                    "to" => $telefonoCliente,
+                    "type" => "interactive",
+                    "interactive" => [
+                        "type" => "button",
+                        "body" => [
+                            "text" => $enviado // tu texto principal
+                        ],
+                        "action" => [
+                            "buttons" => [
+                                [
+                                    "type" => "url",
+                                    "url" => "$link", // cambia esto por tu enlace real
+                                    "text" => "Ir a Validar Pagos"
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+            }
+
 
             $header = [
                 "Authorization: Bearer " . $token,
