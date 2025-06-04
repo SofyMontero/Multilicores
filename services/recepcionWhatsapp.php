@@ -52,10 +52,15 @@ write_log("Mensaje recibido de $telefonoCliente: $mensaje");
 if ($mensaje != null) {
     
     $respuestaTexto = "    
-    🍷 ¡Bienvenido a Multilicores! 🥂\n
-    \nTu tienda favorita de licores está a un clic 🛒
-    \nHaz tu pedido fácil y rápido aquí:
-    \n👉 https://multilicoreschapinero.com/sistema/views/categorias.php";
+        👋 ¡Hola! Bienvenido a Multilicores 🍷🥂
+
+        \nEs un gusto saludarte.
+        \nAquí puedes hacer tu pedido de forma fácil y rápida:
+
+        \n🛒 Haz clic aquí para ver nuestro catálogo y comprar:
+        \n👉 [inserta el enlace]
+
+        \n¡Gracias por preferirnos! 🍾";
 
     // require_once "enviar.php";
     // enviar($mensaje, $respuestaTexto, $id, $timestamp, $telefonoCliente);
