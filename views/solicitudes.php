@@ -416,7 +416,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                 <div class="modal-body">
                     <input type="hidden" name="action" value="rechazar_pedido">
                     <input type="hidden" name="pedido_id" id="pedido_id_rechazar">
-                    
+                    <input type="hidden" name="numCliente" id="numClientePed">
                     <div class="form-group">
                         <label>Motivo del rechazo:</label>
                         <textarea name="motivo_rechazo" class="form-control" rows="3" required
