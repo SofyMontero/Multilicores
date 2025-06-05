@@ -9,7 +9,7 @@ require_once "../models/ProductoModel.php";
 $categoria = $_GET['categoria'] ?? '';
 $nombre = $_GET['nombre'] ?? '';
 $busqueda = $_GET['id'] ?? '';
-
+$numCliente = $_GET['idCli'] ?? '';
 // Obtener productos desde la base de datos
 $producto = new Producto();
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -208,7 +208,8 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
             </nav>
         <?php endif; ?>
     </div>
-
+    <input type="text" id="numCliente" data-cliente="<?php echo $numCliente; ?>" />
+    <script src="mi-script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
     <script src="../js/catalogo.js"></script>
 </body>

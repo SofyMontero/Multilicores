@@ -621,6 +621,14 @@ function procesarPedido() {
     totalInput.name = 'total_general';
     totalInput.value = totalGeneral;
     form.appendChild(totalInput);
+
+    // Nuemro del usuario
+    const valorNumCliente = document.getElementById('clienteInfo').dataset.numcliente;
+    const numCliente = document.createElement('input');
+    numCliente.type = 'hidden';
+    numCliente.name = 'numCliente';
+    numCliente.value = valorNumCliente;
+    form.appendChild(numCliente);
     
     // Agregar formulario al DOM y enviarlo
     document.body.appendChild(form);

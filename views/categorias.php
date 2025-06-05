@@ -6,7 +6,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once "../models/ProductoModel.php";
-
+$numCliente = $_GET['idCli'] ?? '';
 // Obtener productos desde la base de datos
 $producto = new Producto();
 $productos = $producto->obtenerCategorias();
@@ -97,7 +97,7 @@ $productos = $producto->obtenerCategorias();
                                 <p class="card-descripcion">
                                     Selección premium de <?php echo strtolower(htmlspecialchars($prod['nombre_categoria'])); ?>
                                 </p>
-                                <a href="catalogo.php?categoria=<?php echo urlencode($prod['id_categoria']); ?>&nombre=<?php echo urlencode($prod['nombre_categoria']); ?>"
+                                <a href="catalogo.php?categoria=<?php echo urlencode($prod['id_categoria']); ?>&nombre=<?php echo urlencode($prod['nombre_categoria']); ?>&idCli=<?php echo urlencode($numCliente); ?>"
                                     class="btn-categoria"
                                     role="button"
                                     aria-label="Ver productos de <?php echo htmlspecialchars($prod['nombre_categoria']); ?>">
