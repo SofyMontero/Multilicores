@@ -159,7 +159,7 @@ try {
                             </div>
                             
                             <div class="d-grid gap-2 d-md-block">
-                                <a href="catalogo.php" class="btn btn-secondary btn-lg px-4 me-md-2">
+                                <a href="catalogo.php?idCli=<?php echo$numCliente; ?>" class="btn btn-secondary btn-lg px-4 me-md-2">
                                     <i class="fas fa-arrow-left me-1"></i>
                                     Volver al Catálogo
                                 </a>
