@@ -174,6 +174,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]
         ]);
         break;
+        
+                  //Servicio recogido
+        case 'recibido':
+            $textoPromo = $data['texto'];
+
+                    // Datos de la plantilla
+        $mensaje = json_encode([
+            "messaging_product" => "whatsapp",
+            "to" => $telefonoCliente,
+            "type" => "template",
+            "template" => [
+                "name" => "servicio",  // Nombre de la plantilla
+                "language" => ["code" => "es"],  // Idioma de la plantilla
+                "components" => [
+                    [
+                        "type" => "body",  // El cuerpo de la plantilla
+                        "parameters" => [
+                            [
+                                "type" => "text",
+                                "text" => $textoPromo  // Parámetro dinámico para el número de guía
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        break;
     }
 
         // TOKEN QUE NOS DA FACEBOOK

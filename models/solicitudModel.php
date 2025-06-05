@@ -253,5 +253,51 @@ class solicitud
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function enviarWhatsapp($idPromo, $texto, $telefono){
+        // $clientes = $this->getClientes();
+
+        // $resultados = [];
+
+        // foreach ($clientes as $cliente) {
+            
+
+
+        if (preg_match('/^\d{10}$/', $telefono)) {
+            $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
+
+            $data = [
+                'telefono' => $telefono,
+                'texto' => "$texto",
+                'imagen1' => "", // opcional
+                'plantilla' => 'recibido'
+            ];
+
+            $data_json = json_encode($data);
+
+            $curl = curl_init();
+
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $data_json,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer Multilicoreslicor25'
+                ],
+            ]);
+
+            $response = curl_exec($curl);
+            $error = curl_error($curl);
+            curl_close($curl);
+
+
+
+
+        }
+
+        // return $resultados;
+    }
     
 }

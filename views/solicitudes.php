@@ -11,11 +11,14 @@ $solicitudModel = new solicitud();
 // Procesamiento del formulario de aceptar pedido
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'aceptar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
-    
+    $numCliente = $_POST['numCliente'] ?? '';
+
     if (!empty($pedido_id)) {
         try {
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
+                
+                $resultados = $solicitudModel->enviarWhatsapp($id, $texto,$numCliente);
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
@@ -158,6 +161,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                             </td>
                                             <td class="text-center">
                                                 <button class="btn btn-success btn-sm aceptar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                    <input type="text" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente="<?php echo $numCliente; ?>" />
                                                     <i class="fas fa-check"></i> Aceptar
                                                 </button>
                                                 <button class="btn btn-danger btn-sm rechazar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
@@ -411,6 +415,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                 <div class="modal-body">
                     <input type="hidden" name="action" value="aceptar_pedido">
                     <input type="hidden" name="pedido_id" id="pedido_id_aceptar">
+                    <input type="hidden" name="numCliente" id="numClientePed">
                     
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle"></i>
@@ -448,7 +453,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.aceptar-pedido').forEach(button => {
         button.addEventListener('click', function() {
             const pedidoId = this.getAttribute('data-pedido');
+            const valorNumCliente = document.getElementById('numCliente'+pedidoId).dataset.numcliente;
             document.getElementById('pedido_id_aceptar').value = pedidoId;
+            document.getElementById('numClientePed').value = valorNumCliente;
+            
             $('#aceptarModal').modal('show');
         });
     });
