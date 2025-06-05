@@ -12,10 +12,10 @@ $solicitudModel = new solicitud();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'aceptar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
     $numCliente = $_POST['numCliente'] ?? '';
-    $observaciones = $_POST['observaciones'] ?? '';
-    if ($Observaciones!="") {
-        $Observaciones="Observaciones: ".$observaciones;
-    }
+    // $observaciones = $_POST['observaciones'] ?? '';
+    // if ($Observaciones!="") {
+    //     $Observaciones="Observaciones: ".$observaciones;
+    // }
 
     if (!empty($pedido_id)) {
         try {
@@ -30,12 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                     $sender = new WhatsappSender($conn);
                     
-                    $respuestaTexto = "    
+                $respuestaTexto = "    
                 📦Multilicores te informa:
                 Hemos recibido tu sulicitud con éxito.
-                Estamos preparando tu pedido con todo el cuidado que merece. 🏡🍸
-                Pronto estará en camino.
-                $Observaciones";
+                ";
                 $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
                 
 
@@ -54,10 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'rechazar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
     $numCliente = $_POST['numCliente'] ?? '';
-    $observaciones = $_POST['observaciones'] ?? '';
-    if ($Observaciones!="") {
-        $Observaciones="Observaciones: ".$observaciones;
-    }
+    // $observaciones = $_POST['observaciones'] ?? '';
+    // if ($Observaciones!="") {
+    //     $Observaciones="Observaciones: ".$observaciones;
+    // }
     
     if (!empty($pedido_id)) {
         try {
@@ -71,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     
                     $respuestaTexto = "    
                 ❌ Multilicores te informa:
-                Tu pedido ha sido rechazado. 
-                $Observaciones    
+                Tu pedido ha sido rechazado.
+                  
                 ";
                 $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
             } else {
