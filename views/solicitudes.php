@@ -18,7 +18,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 
-               echo $respuesta = $solicitudModel->enviarWhatsapp($id, $texto,$numCliente);
+
+
+
+                require_once '../services/conexion.php';
+                require_once '../services/WhatsappSender.php';
+
+                    $sender = new WhatsappSender($conn);
+                    
+                    $respuestaTexto = "    
+                📦 Multilicores te informa:
+                Hemos recibido tu pedido con éxito.
+                Estamos preparando tu pedido con todo el cuidado que merece. 🏡🍸
+                Pronto estará en camino. ";
+                $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
+                
+
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
