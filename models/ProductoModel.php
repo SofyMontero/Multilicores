@@ -103,6 +103,34 @@ class Producto
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function obtenerProductosLista($categoria)
+    {
+        if ($categoria == "0") {
+            $conde = "";
+        } else {
+            $conde = "and id_cate_producto='$categoria'";
+        }
+
+        $query = $this->db->connect()->prepare("
+        SELECT 
+        `id_producto`, 
+        `precio_unidad_producto`, 
+        `id_cate_producto`, 
+        `precio_paca_producto`, 
+        `descripcion_producto`, 
+        `cantidad_paca_producto`, 
+        `imagen_producto`, 
+        `estado_producto`,
+        `acti_Unidad`,
+        `codigo_productos`
+        FROM productos where id_producto>0 $conde
+        ORDER BY id_producto DESC
+    ");
+
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function contarProductos($categoria)
     {
         $condicion = "";
@@ -145,5 +173,58 @@ class Producto
         $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
-    }      
+    }
+
+    // Agregar estos métodos a tu clase ProductoModel
+
+    /**
+     * Verificar si existe un producto por ID
+     */
+    public function existeProducto($id_producto)
+    {
+        $query = $this->db->connect()->prepare("
+        SELECT COUNT(*) as total 
+        FROM productos 
+        WHERE id_producto = :id_producto
+    ");
+
+        $query->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
+        $query->execute();
+
+        $resultado = $query->fetch(PDO::FETCH_ASSOC);
+        return $resultado['total'] > 0;
+    }
+
+    /**
+     * Actualizar un producto existente
+     */
+    public function actualizarProducto($id_producto, $codigo_producto, $descripcion_producto, $cantidad_paca_producto, $precio_unidad, $precio_paca, $id_cate_producto, $acti_Unidad, $imagen_producto, $estado_producto)
+    {
+        $query = $this->db->connect()->prepare("
+        UPDATE productos SET 
+            codigo_productos = :codigo_producto,
+            descripcion_producto = :descripcion_producto,
+            cantidad_paca_producto = :cantidad_paca_producto,
+            precio_unidad_producto = :precio_unidad,
+            precio_paca_producto = :precio_paca,
+            id_cate_producto = :id_cate_producto,
+            acti_Unidad = :acti_Unidad,
+            imagen_producto = :imagen_producto,
+            estado_producto = :estado_producto
+        WHERE id_producto = :id_producto
+    ");
+
+        $query->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
+        $query->bindParam(':codigo_producto', $codigo_producto, PDO::PARAM_STR);
+        $query->bindParam(':descripcion_producto', $descripcion_producto, PDO::PARAM_STR);
+        $query->bindParam(':cantidad_paca_producto', $cantidad_paca_producto);
+        $query->bindParam(':precio_unidad', $precio_unidad);
+        $query->bindParam(':precio_paca', $precio_paca);
+        $query->bindParam(':id_cate_producto', $id_cate_producto);
+        $query->bindParam(':acti_Unidad', $acti_Unidad, PDO::PARAM_STR);
+        $query->bindParam(':imagen_producto', $imagen_producto, PDO::PARAM_STR);
+        $query->bindParam(':estado_producto', $estado_producto, PDO::PARAM_STR);
+
+        return $query->execute();
+    }
 }

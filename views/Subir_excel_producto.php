@@ -1,15 +1,13 @@
-
-
-
 <?php 
 include_once "header.php"; 
 require_once "../models/ProductoModel.php";
 
 // Obtener productos desde la base de datos
 $producto = new Producto();
-$productos = $producto->obtenerProductos($categoria, $busqueda, $limit = 12, $offset = 0); // Asegúrate de tener este método en tu modelo
+$productos = $producto->obtenerProductosLista(0); // Asegúrate de tener este método en tu modelo
 
 $importados = $_GET['importados'] ?? null;
+$actualizados = $_GET['actualizados'] ?? null;
 ?>
 
 <!-- Page header -->
@@ -23,9 +21,15 @@ $importados = $_GET['importados'] ?? null;
 </div>
 
 <!-- Mensaje de productos importados -->
-<?php if ($importados): ?>
+<?php if ($importados || $actualizados): ?>
 <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <strong>¡Importación exitosa!</strong> Se han importado <?php echo (int)$importados; ?> productos.
+    <strong>¡Operación exitosa!</strong> 
+    <?php if ($importados > 0): ?>
+        Se han importado <?php echo (int)$importados; ?> productos nuevos.
+    <?php endif; ?>
+    <?php if ($actualizados > 0): ?>
+        Se han actualizado <?php echo (int)$actualizados; ?> productos existentes.
+    <?php endif; ?>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -53,14 +57,17 @@ $importados = $_GET['importados'] ?? null;
 
                             <div class="d-grid">
                                 <button type="submit" name="importar" class="btn btn-success">
-                                    📤 Importar Productos
+                                    📤 Importar/Actualizar Productos
                                 </button>
                             </div>
                         </form>
                     </div>
 
                     <div class="card-footer text-muted text-center small">
-                        Asegúrate de que el archivo esté en formato .xlsx y siga la estructura correcta.
+                        <strong>Formato del Excel:</strong><br>
+                        Columna A: ID_PRODUCTO (para actualizar) | Columna B: CODIGO | Columna C: DESCRIPCION<br>
+                        Columna D: CANTIDAD_PACA | Columna E: PRECIO_UNIDAD | Columna F: PRECIO_PACA<br>
+                        Columna G: ID_CATEGORIA | Columna H: UNIDAD_PACA | Columna I: IMAGEN | Columna J: ESTADO
                     </div>
                 </div>
 
@@ -81,7 +88,7 @@ $importados = $_GET['importados'] ?? null;
                 <table class="table table-dark table-sm">
                     <thead>
                         <tr class="text-center roboto-medium">
-                            
+                            <th>ID</th>
                             <th>CODIGO</th>
                             <th>PRODUCTO</th>
                             <th>EMBALAGE</th>
@@ -91,8 +98,6 @@ $importados = $_GET['importados'] ?? null;
                             <th>U o P</th>
                             <th>IMAGEN</th>
                             <th>ESTADO</th>
-                            
-                            
                         </tr>
                     </thead>
                     <tbody>
@@ -100,6 +105,7 @@ $importados = $_GET['importados'] ?? null;
                         <?php if (!empty($productos)): ?>
                             <?php $contador = 1; foreach ($productos as $prod): ?>
                             <tr class="text-center">
+                                <td><?php echo $prod['id_producto']; ?></td>
                                 <td><?php echo $prod['codigo_productos']; ?></td>
                                 <td><?php echo $prod['descripcion_producto']; ?></td>
                                 <td><?php echo $prod['cantidad_paca_producto']; ?></td>
@@ -109,14 +115,10 @@ $importados = $_GET['importados'] ?? null;
                                 <td><?php echo $prod['acti_Unidad']; ?></td>
                                 <td><?php echo $prod['imagen_producto']; ?></td>
                                 <td><?php echo $prod['estado_producto']; ?></td>
-                                
-                                
-
-
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="6" class="text-center">No hay productos registrados</td></tr>
+                            <tr><td colspan="10" class="text-center">No hay productos registrados</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
