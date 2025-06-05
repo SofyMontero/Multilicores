@@ -263,7 +263,7 @@ class solicitud
             
 
 
-        if (preg_match('/^\d{10}$/', $telefono)) {
+        // if (preg_match('/^\d{10}$/', $telefono)) {
             $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
 
             $data = [
@@ -295,7 +295,7 @@ class solicitud
 
 
 
-        }
+        // }
 
         // return $resultados;
     }
