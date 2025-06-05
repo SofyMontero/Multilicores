@@ -161,7 +161,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                             </td>
                                             <td class="text-center">
                                                 <button class="btn btn-success btn-sm aceptar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
-                                                    <input type="text" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente="<?php echo $numCliente; ?>" />
+                                                    <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente="<?php echo$pedido['ped_numCliente']; ?>" />
                                                     <i class="fas fa-check"></i> Aceptar
                                                 </button>
                                                 <button class="btn btn-danger btn-sm rechazar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
