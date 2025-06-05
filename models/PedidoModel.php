@@ -41,7 +41,7 @@ class Pedido
                 ped_fecha, 
                 ped_numfac,
                 ped_total,
-                ped_numCiente
+                ped_numCliente
             ) VALUES (?, ?, NOW(), ?, ?,?)";
 
             $clienteInfo = 1;
