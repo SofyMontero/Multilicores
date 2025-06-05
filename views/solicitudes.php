@@ -31,10 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $sender = new WhatsappSender($conn);
                     
                     $respuestaTexto = "    
-                📦 Multilicores te informa:
+                📦Multilicores te informa:
                 Hemos recibido tu sulicitud con éxito.
                 Estamos preparando tu pedido con todo el cuidado que merece. 🏡🍸
-                Pronto estará en camino. 
+                Pronto estará en camino.
                 $Observaciones";
                 $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
                 
