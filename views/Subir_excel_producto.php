@@ -4,11 +4,27 @@ require_once "../models/ProductoModel.php";
 
 // Obtener productos desde la base de datos
 $producto = new Producto();
-$productos = $producto->obtenerProductosLista(0); // Asegúrate de tener este método en tu modelo
+$productos = $producto->obtenerProductosLista(0);
 
-$importados = $_GET['importados'] ?? null;
-$actualizados = $_GET['actualizados'] ?? null;
+// Capturar parámetros de resultado
+$importados = $_GET['importados'] ?? 0;
+$actualizados = $_GET['actualizados'] ?? 0;
+$errores = $_GET['errores'] ?? 0;
+$success = $_GET['success'] ?? null;
+$error = $_GET['error'] ?? null;
+$erroresDetalle = isset($_GET['errores_detalle']) ? explode('|', $_GET['errores_detalle']) : [];
+$filasVacias = $_GET['filas_vacias'] ?? 0;
+$delimitador = $_GET['delimitador'] ?? null;
+$encabezado = $_GET['encabezado'] ?? null;
+$preciosActualizados = $_GET['precios_actualizados'] ?? 0;
 ?>
+
+<!-- Estilos para notificaciones toast -->
+<link href="../css/subir_excel.css" rel="stylesheet" type="text/css" />
+
+
+<!-- Container para las notificaciones toast -->
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- Page header -->
 <div class="full-box page-header">
@@ -16,23 +32,33 @@ $actualizados = $_GET['actualizados'] ?? null;
         <i class="fas fa-box-open fa-fw"></i> &nbsp; PRODUCTOS
     </h3>
     <p class="text-justify">
-        A continuación se presenta la lista de productos disponibles. Puede cargar productos en lote desde un archivo Excel o gestionar los existentes.
+        A continuación se presenta la lista de productos disponibles. Puede cargar productos en lote desde un archivo CSV.
     </p>
 </div>
 
-<!-- Mensaje de productos importados -->
-<?php if ($importados || $actualizados): ?>
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <strong>¡Operación exitosa!</strong> 
-    <?php if ($importados > 0): ?>
-        Se han importado <?php echo (int)$importados; ?> productos nuevos.
-    <?php endif; ?>
-    <?php if ($actualizados > 0): ?>
-        Se han actualizado <?php echo (int)$actualizados; ?> productos existentes.
-    <?php endif; ?>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
+<!-- Estadísticas rápidas -->
+<?php if ($success): ?>
+<div class="stats-card">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="stat-item">
+                <span class="stat-number"><?php echo $importados; ?></span>
+                <span class="stat-label">Nuevos productos</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-item">
+                <span class="stat-number"><?php echo $actualizados; ?></span>
+                <span class="stat-label">Productos actualizados</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-item">
+                <span class="stat-number"><?php echo count($productos); ?></span>
+                <span class="stat-label">Total productos</span>
+            </div>
+        </div>
+    </div>
 </div>
 <?php endif; ?>
 
@@ -44,31 +70,31 @@ $actualizados = $_GET['actualizados'] ?? null;
             <div class="col-md-6">
 
                 <div class="card shadow-lg border-0 rounded-4">
-                    <div class="card-header bg-primary text-white text-center rounded-top-4">
-                        <h4 class="mb-0">📦 Importar Productos desde Excel</h4>
+                    <div class="card-header bg-gradient text-white text-center rounded-top-4" style="background:  #009688 ;">
+                        <h4 class="mb-0">💰 Actualización Masiva de Precios</h4>
+                        <small>Importa productos y actualiza precios automáticamente</small>
                     </div>
 
                     <div class="card-body p-4">
-                        <form action="../controllers/ProductoController.php" method="POST" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label for="archivo_excel" class="form-label">Selecciona el archivo Excel</label>
-                                <input type="file" name="archivo_excel" id="archivo_excel" class="form-control" accept=".xlsx,.xls" required>
+                        <form id="uploadForm" action="../controllers/ProductoController.php" method="POST" enctype="multipart/form-data">
+                            <div class="upload-zone" onclick="document.getElementById('archivo_excel').click()">
+                                <div class="upload-icon">💰</div>
+                                <h5>Arrastra tu archivo CSV de precios aquí</h5>
+                                <p class="text-muted">El sistema actualizará automáticamente los productos existentes</p>
+                                <input type="file" name="archivo_excel" id="archivo_excel" class="file-input" accept=".csv" required>
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
                             </div>
 
-                            <div class="d-grid">
-                                <button type="submit" name="importar" class="btn btn-success">
-                                    📤 Importar/Actualizar Productos
+                            <div class="mt-3 text-center">
+                                <button type="submit" name="importar" class="btn btn-success btn-lg" id="submitBtn">
+                                    <i class="fas fa-upload"></i> Procesar Archivo
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    <div class="card-footer text-muted text-center small">
-                        <strong>Formato del Excel:</strong><br>
-                        Columna A: ID_PRODUCTO (para actualizar) | Columna B: CODIGO | Columna C: DESCRIPCION<br>
-                        Columna D: CANTIDAD_PACA | Columna E: PRECIO_UNIDAD | Columna F: PRECIO_PACA<br>
-                        Columna G: ID_CATEGORIA | Columna H: UNIDAD_PACA | Columna I: IMAGEN | Columna J: ESTADO
-                    </div>
                 </div>
 
             </div>
@@ -128,3 +154,163 @@ $actualizados = $_GET['actualizados'] ?? null;
 </div>
 
 <?php include_once "footer.php"; ?>
+
+<script>
+// Sistema de notificaciones toast
+function showToast(type, title, message, details = []) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toastId = 'toast-' + Date.now();
+    
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️'
+    };
+    
+    let detailsHtml = '';
+    if (details.length > 0) {
+        detailsHtml = '<div class="toast-details">' + details.map(d => '• ' + d).join('<br>') + '</div>';
+    }
+    
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type]}</span>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+            ${detailsHtml}
+        </div>
+        <button class="toast-close" onclick="closeToast('${toastId}')">&times;</button>
+        <div class="toast-progress"></div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto cerrar después de 5 segundos
+    setTimeout(() => closeToast(toastId), 5000);
+}
+
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+    }
+}
+
+// Mostrar notificaciones según los parámetros URL
+<?php if ($success): ?>
+    <?php if ($importados > 0 || $actualizados > 0): ?>
+        let message = '';
+        if (<?php echo $importados; ?> > 0) message += '<?php echo $importados; ?> productos importados. ';
+        if (<?php echo $actualizados; ?> > 0) message += '<?php echo $actualizados; ?> productos actualizados.';
+        
+        <?php if ($errores > 0): ?>
+            showToast('warning', 'Proceso completado', message + ' <?php echo $errores; ?> errores encontrados.', <?php echo json_encode($erroresDetalle); ?>);
+        <?php else: ?>
+            showToast('success', '¡Éxito!', message);
+        <?php endif; ?>
+    <?php endif; ?>
+<?php endif; ?>
+
+<?php if ($error): ?>
+    showToast('error', 'Error', <?php echo json_encode($error); ?>);
+<?php endif; ?>
+
+// Drag and drop functionality
+const uploadZone = document.querySelector('.upload-zone');
+const fileInput = document.getElementById('archivo_excel');
+const uploadForm = document.getElementById('uploadForm');
+const submitBtn = document.getElementById('submitBtn');
+const progressBar = document.querySelector('.progress-bar');
+const progressFill = document.querySelector('.progress-fill');
+
+// Drag and drop events
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        handleFileSelect();
+    }
+});
+
+// File selection handler
+fileInput.addEventListener('change', handleFileSelect);
+
+function handleFileSelect() {
+    const file = fileInput.files[0];
+    if (file) {
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        // Verificar extensión
+        if (!fileName.toLowerCase().endsWith('.csv')) {
+            showToast('error', 'Archivo inválido', 'Solo se permiten archivos CSV');
+            fileInput.value = '';
+            return;
+        }
+        
+        // Verificar tamaño
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('error', 'Archivo muy grande', 'El archivo no debe superar los 5MB');
+            fileInput.value = '';
+            return;
+        }
+        
+        // Actualizar UI
+        uploadZone.querySelector('h5').textContent = fileName;
+        uploadZone.querySelector('p').textContent = `${fileSize} MB - Listo para procesar`;
+        uploadZone.querySelector('.upload-icon').textContent = '📄✅';
+        
+        showToast('success', 'Archivo seleccionado', `${fileName} (${fileSize} MB)`);
+    }
+}
+
+// Form submission with progress
+uploadForm.addEventListener('submit', (e) => {
+    if (!fileInput.files[0]) {
+        e.preventDefault();
+        showToast('error', 'Sin archivo', 'Selecciona un archivo CSV para continuar');
+        return;
+    }
+    
+    // Mostrar progreso
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    progressBar.style.display = 'block';
+    
+    // Simular progreso
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress > 90) progress = 90;
+        progressFill.style.width = progress + '%';
+    }, 100);
+    
+    // El formulario se enviará normalmente
+    setTimeout(() => {
+        clearInterval(interval);
+        progressFill.style.width = '100%';
+    }, 1000);
+});
+
+// Limpiar parámetros URL después de mostrar notificaciones
+if (window.location.search) {
+    const url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({path: url}, '', url);
+}
+</script>
