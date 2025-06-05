@@ -135,6 +135,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                     <th>Estado</th>
                                     <th>Ver Productos</th>
                                     <th>Acciones</th>
+                                    <tr>Telefono</tr>
                                 </tr>
                             </thead>
                             <tbody>
@@ -163,6 +164,8 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                                     <i class="fas fa-times"></i> Rechazar
                                                 </button>
                                             </td>
+                                            <td><?php echo $pedido['ped_numCliente']; ?></td>
+                                            
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
