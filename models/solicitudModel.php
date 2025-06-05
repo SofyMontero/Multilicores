@@ -22,7 +22,8 @@ class solicitud
                 ped_cliente, 
                 ped_fecha, 
                 ped_total, 
-                ped_estado
+                ped_estado,
+                ped_numCliente
             FROM pedidos 
             WHERE ped_estado = 'pendiente' OR ped_estado = '1' OR ped_estado = 1
             ORDER BY ped_fecha DESC
@@ -44,7 +45,8 @@ class solicitud
                 ped_cliente, 
                 ped_fecha, 
                 ped_total, 
-                ped_estado
+                ped_estado,
+                ped_numCliente
             FROM pedidos 
             WHERE ped_estado = 'aceptado' OR ped_estado = '2' OR ped_estado = 2
             ORDER BY ped_fecha DESC
@@ -241,7 +243,8 @@ class solicitud
                 ped_cliente, 
                 ped_fecha, 
                 ped_total, 
-                ped_estado
+                ped_estado,
+                ped_numCliente
             FROM pedidos 
             WHERE ped_estado = 'rechazado' OR ped_estado = '3' OR ped_estado = 3
             ORDER BY ped_fecha DESC
