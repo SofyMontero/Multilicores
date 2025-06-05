@@ -12,6 +12,10 @@ $solicitudModel = new solicitud();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'aceptar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
     $numCliente = $_POST['numCliente'] ?? '';
+    $observaciones = $_POST['observaciones'] ?? '';
+    if ($Observaciones!="") {
+        $Observaciones="Observaciones: ".$observaciones;
+    }
 
     if (!empty($pedido_id)) {
         try {
@@ -30,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 📦 Multilicores te informa:
                 Hemos recibido tu pedido con éxito.
                 Estamos preparando tu pedido con todo el cuidado que merece. 🏡🍸
-                Pronto estará en camino. ";
+                Pronto estará en camino. 
+                $Observaciones";
                 $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
                 
 
@@ -48,11 +53,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Procesamiento del formulario de rechazar pedido
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'rechazar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
+    $numCliente = $_POST['numCliente'] ?? '';
+    $observaciones = $_POST['observaciones'] ?? '';
+    if ($Observaciones!="") {
+        $Observaciones="Observaciones: ".$observaciones;
+    }
     
     if (!empty($pedido_id)) {
         try {
             if ($solicitudModel->rechazarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido rechazado exitosamente";
+
+                require_once '../services/conexion.php';
+                require_once '../services/WhatsappSender.php';
+
+                    $sender = new WhatsappSender($conn);
+                    
+                    $respuestaTexto = "    
+                ❌ Multilicores te informa:
+                Tu pedido ha sido rechazado. 
+                $Observaciones    
+                ";
+                $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
             } else {
                 $errores[] = "Error al rechazar el pedido";
             }
@@ -481,7 +503,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.rechazar-pedido').forEach(button => {
         button.addEventListener('click', function() {
             const pedidoId = this.getAttribute('data-pedido');
+            const valorNumCliente = document.getElementById('numCliente'+pedidoId).dataset.numcliente;
             document.getElementById('pedido_id_rechazar').value = pedidoId;
+            document.getElementById('numClientePed').value = valorNumCliente;
+
             $('#rechazarModal').modal('show');
         });
     });
