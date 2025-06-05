@@ -623,7 +623,7 @@ function procesarPedido() {
     form.appendChild(totalInput);
 
     // Nuemro del usuario
-    const valorNumCliente = document.getElementById('clienteInfo').dataset.numcliente;
+    const valorNumCliente = document.getElementById('numCliente').dataset.numcliente;
     const numCliente = document.createElement('input');
     numCliente.type = 'hidden';
     numCliente.name = 'numCliente';
