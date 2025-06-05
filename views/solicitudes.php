@@ -22,8 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 
-                $solicitudModel->enviarPromo($idPromo, "", "",$numCliente);
-
+                $respuesta= $solicitudModel->enviarPromo($idPromo, "", "",$numCliente);
+                echo "<pre>";
+                print_r($respuesta);
+                echo "</pre>";
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
