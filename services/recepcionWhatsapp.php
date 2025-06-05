@@ -53,11 +53,11 @@ if ($mensaje != null) {
     $link="https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=$telefonoCliente";
     $respuestaTexto = "    
         🍷 ¡Bienvenido a Multilicores!
-    Tu experiencia en licores comienza aquí.
-    Haz tu pedido en segundos y recíbelo sin complicaciones. 🚚💨
-    📲 Ver catálogo y comprar ahora:
-    👉 $link
-    🥂 ¡Salud por las buenas decisiones!";
+Tu experiencia en licores comienza aquí.
+Haz tu pedido en segundos y recíbelo sin complicaciones. 🚚💨
+📲 Ver catálogo y comprar ahora:
+👉 $link
+🥂 ¡Salud por las buenas decisiones!";
 
             
 
