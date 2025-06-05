@@ -208,7 +208,7 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
             </nav>
         <?php endif; ?>
     </div>
-    <input type="text" id="numCliente" data-cliente="<?php echo $numCliente; ?>" />
+    <input type="text" id="numCliente" data-numcliente="<?php echo $numCliente; ?>" />
     <script src="mi-script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
     <script src="../js/catalogo.js"></script>
