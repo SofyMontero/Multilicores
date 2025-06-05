@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     
                     $respuestaTexto = "    
                 📦 Multilicores te informa:
-                Hemos recibido tu pedido con éxito.
+                Hemos recibido tu sulicitud con éxito.
                 Estamos preparando tu pedido con todo el cuidado que merece. 🏡🍸
                 Pronto estará en camino. 
                 $Observaciones";
