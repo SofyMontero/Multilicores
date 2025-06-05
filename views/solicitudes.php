@@ -192,6 +192,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                                     <i class="fas fa-check-circle"></i> Procesado
                                                 </span>
                                             </td>
+                                            <td><?php echo $pedido['ped_numCliente']; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -218,6 +219,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                                     <i class="fas fa-times-circle"></i> Rechazado
                                                 </span>
                                             </td>
+                                            <td><?php echo $pedido['ped_numCliente']; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
