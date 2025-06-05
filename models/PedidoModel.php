@@ -15,7 +15,7 @@ class Pedido
         }
     }
 
-    public function crearPedido($datosCliente, $productos, $total)
+    public function crearPedido($datosCliente, $productos, $total,$numCliente)
     {
         try {
             // Iniciar transacción
@@ -40,8 +40,9 @@ class Pedido
                 ped_estado, 
                 ped_fecha, 
                 ped_numfac,
-                ped_total
-            ) VALUES (?, ?, NOW(), ?, ?)";
+                ped_total,
+                ped_numCiente
+            ) VALUES (?, ?, NOW(), ?, ?,?)";
 
             $clienteInfo = 1;
 
@@ -50,7 +51,9 @@ class Pedido
                 $clienteInfo,        // ← asegúrate de tener este valor disponible
                 1, 
                 $numeroFactura,
-                $total
+                $total,
+                $numCliente
+
             ]);
 
             $idPedido = $this->pdo->lastInsertId();
