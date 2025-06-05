@@ -32,7 +32,7 @@ try {
     }
     
     // Datos del cliente simplificados (sin formulario)
-    $numCliente = floatval($_POST['numCliente'] ?? 0);
+    $numCliente = $_POST['numCliente'] ?? 0;
     $datosCliente = [
         'nombre' => 'Cliente Web',
         'email' => 'pedido@multilicores.com'
