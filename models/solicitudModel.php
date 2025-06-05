@@ -258,7 +258,7 @@ function enviarPromo($idPromo, $descripcion, $imagen,$telefono): array {
             
 
 
-        if (preg_match('/^\d{10}$/', $telefono)) {
+        
             $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
 
             $data = [
@@ -292,7 +292,7 @@ function enviarPromo($idPromo, $descripcion, $imagen,$telefono): array {
                 'telefono' => $telefono,
                 'resultado' => $error ?: $response
             ];
-        }
+        
 
         
 
