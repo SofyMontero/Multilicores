@@ -50,17 +50,18 @@ $sender = new WhatsappSender($conn);
 write_log("Mensaje recibido de $telefonoCliente: $mensaje");
 
 if ($mensaje != null) {
-    
+    $link="https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=$telefonoCliente";
     $respuestaTexto = "    
-        👋 ¡Hola! Bienvenido a Multilicores 🍷🥂
+        🍷 ¡Bienvenido a Multilicores!
+            Tu experiencia en licores comienza aquí.
+            Haz tu pedido en segundos y recíbelo sin complicaciones. 🚚💨
+            📲 Ver catálogo y comprar ahora:
 
-            \nEs un gusto saludarte.
-            \nAquí puedes hacer tu pedido de forma fácil y rápida:
-            \n🛒 Haz clic aquí para ver nuestro catálogo y comprar:
-             \n👉 👉 https://multilicoreschapinero.com/sistema/views/categorias.php 
+             \n👉 $link
 
-            \n¡Gracias por preferirnos! 🍾";
-            $link="https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=$telefonoCliente";
+            🥂 ¡Salud por las buenas decisiones!";
+
+            
 
     $sender->enviar($mensaje, $respuestaTexto, $id, $timestamp, $telefonoCliente,$link,1);
     write_log("Mensaje de respuesta enviado a $telefonoCliente");
