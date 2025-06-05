@@ -22,20 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 
-
-
-
-                require_once '../services/conexion.php';
-                require_once '../services/WhatsappSender.php';
-
-                    $sender = new WhatsappSender($conn);
-                    
-                $respuestaTexto = "    
-                📦Multilicores te informa:
-                Hemos recibido tu sulicitud con éxito.
-                ";
-                $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
-                
+                $solicitudModel->enviarPromo($idPromo, "", "",$numCliente);
 
             } else {
                 $errores[] = "Error al actualizar el pedido";
@@ -69,8 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     
                     $respuestaTexto = "    
                 ❌ Multilicores te informa:
-                Tu pedido ha sido rechazado.
-                  
+                Tu pedido ha sido rechazado.             
                 ";
                 $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
             } else {

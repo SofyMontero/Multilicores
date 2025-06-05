@@ -176,30 +176,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         break;
         
                   //Servicio recogido
-        case 'recibido':
-            $textoPromo = $data['texto'];
 
-                    // Datos de la plantilla
-        $mensaje = json_encode([
-            "messaging_product" => "whatsapp",
-            "to" => $telefonoCliente,
-            "type" => "template",
-            "template" => [
-                "name" => "servicio",  // Nombre de la plantilla
-                "language" => ["code" => "es"],  // Idioma de la plantilla
-                "components" => [
-                    [
-                        "type" => "body",  // El cuerpo de la plantilla
-                        "parameters" => [
-                            [
-                                "type" => "text",
-                                "text" => $textoPromo  // Parámetro dinámico para el número de guía
-                            ]
-                        ]
+         case 'recibido':
+
+            $mensaje = json_encode([
+                "messaging_product" => "whatsapp",
+                "to" => $telefonoCliente,  // Número de teléfono del cliente
+                "type" => "template",
+                "template" => [
+                    "name" => "recibido",  // Nombre de tu plantilla en WhatsApp
+                    "language" => [
+                        "code" => "es"  // Código de idioma, en este caso español (es)
                     ]
                 ]
-            ]
-        ]);
+            ]);
         break;
     }
 
