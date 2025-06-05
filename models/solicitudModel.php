@@ -292,12 +292,12 @@ class solicitud
             $error = curl_error($curl);
             curl_close($curl);
 
-
+            $resultados = $error ?: $response;
 
 
         // }
 
-        // return $resultados;
+        return $resultados;
     }
     
 }

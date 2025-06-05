@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 
-                $resultados = $solicitudModel->enviarWhatsapp($id, $texto,$numCliente);
+               echo $respuesta = $solicitudModel->enviarWhatsapp($id, $texto,$numCliente);
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
