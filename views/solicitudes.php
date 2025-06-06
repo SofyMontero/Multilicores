@@ -22,11 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 $plantilla="recibido";
-                $respuesta= $solicitudModel->enviarPromo($idPromo, "", "",$numCliente,$plantilla);
+                enviarPromo("", "", "",$numCliente,$plantilla);
                 
-                echo '<pre>';
-                print_r($respuesta);
-                echo '</pre>';
+
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
@@ -77,6 +75,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $pedidos_pendientes = $solicitudModel->obtenerPedidosPendientes();
 $pedidos_aceptados = $solicitudModel->obtenerPedidosAceptados();
 $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
+
+function enviarPromo($idPromo, $descripcion, $imagen,$telefono,$plantilla): array {
+ 
+            
+
+
+        
+            $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
+
+            $data = [
+                'telefono' => $telefono,
+                'texto' => "$descripcion",
+                'imagen1' => "$imagen", // opcional
+                'plantilla' => "$plantilla"
+            ];
+
+            $data_json = json_encode($data);
+
+            $curl = curl_init();
+
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $data_json,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer Multilicoreslicor25'
+                ],
+            ]);
+
+            $response = curl_exec($curl);
+            $error = curl_error($curl);
+            curl_close($curl);
+
+            $resultados[] = [
+                'cliente' => $telefono,
+                'telefono' => $telefono,
+                'resultado' => $error ?: $response
+            ];
+        
+
+        
+
+        return $resultados;
+    }
 ?>
 
 <!-- Page header -->
