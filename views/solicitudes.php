@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $respuesta = $solicitudModel->enviarPromo($pedido_id, "", "", $numCliente, $plantilla);
 
                 echo json_encode($respuesta);
+                exit;
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
