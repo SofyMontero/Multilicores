@@ -188,7 +188,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                                 <button class="btn btn-success btn-sm aceptar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
                                                     <i class="fas fa-check"></i> Aceptar
                                                 </button>
-                                                <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" value="<?php echo$pedido['ped_numCliente']; ?>" />
+                                                <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente=" <?php echo$pedido['ped_numCliente']; ?>" />
 
                                                 <button class="btn btn-danger btn-sm rechazar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
                                                     <i class="fas fa-times"></i> Rechazar
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.aceptar-pedido').forEach(button => {
         button.addEventListener('click', function() {
             const pedidoId = this.getAttribute('data-pedido');
-            const valorNumCliente = document.getElementById('numCliente'+pedidoId).value;
+            const valorNumCliente = document.getElementById('numCliente'+pedidoId).dataset.numcliente;
             document.getElementById('pedido_id_aceptar').value = pedidoId;
             document.getElementById('numClientePed').value = valorNumCliente;
             
