@@ -253,50 +253,56 @@ class solicitud
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function enviarPromo($idPromo, $descripcion, $imagen,$telefono,$plantilla): array {
- 
-            
+   public function enviarPromo($idPromo, $descripcion, $imagen, $telefono, $plantilla): array
+{
+    $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
 
+    $data = [
+        'telefono' => $telefono,
+        'texto' => "$descripcion",
+        'imagen1' => "", // opcional
+        'plantilla' => "$plantilla"
+    ];
 
-        
-            $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
+    $data_json = json_encode($data);
 
-            $data = [
-                'telefono' => $telefono,
-                'texto' => "$descripcion",
-                'imagen1' => "", // opcional
-                'plantilla' => "$plantilla"
-            ];
+    $curl = curl_init();
 
-            $data_json = json_encode($data);
+    curl_setopt_array($curl, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $data_json,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer Multilicoreslicor25'
+        ],
+    ]);
 
-            $curl = curl_init();
+    $response = curl_exec($curl);
+    $error = curl_error($curl);
+    curl_close($curl);
 
-            curl_setopt_array($curl, [
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $data_json,
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer Multilicoreslicor25'
-                ],
-            ]);
+    $resultado = $error ?: $response;
 
-            $response = curl_exec($curl);
-            $error = curl_error($curl);
-            curl_close($curl);
+    $resultados[] = [
+        'cliente' => $telefono,
+        'telefono' => $telefono,
+        'resultado' => $resultado
+    ];
 
-            $resultados[] = [
-                'cliente' => $telefono,
-                'telefono' => $telefono,
-                'resultado' => $error ?: $response
-            ];
-        
+    // 📝 Crear log de la solicitud
+    $logData = "=============================\n";
+    $logData .= "Fecha: " . date("Y-m-d H:i:s") . "\n";
+    $logData .= "Telefono: $telefono\n";
+    $logData .= "Plantilla: $plantilla\n";
+    $logData .= "Data JSON Enviado: $data_json\n";
+    $logData .= "Respuesta: $resultado\n";
+    $logData .= "=============================\n\n";
 
-        
+    file_put_contents(__DIR__ . "/log_envios.txt", $logData, FILE_APPEND);
 
-        return $resultados;
-    }
+    return $resultados;
+}
     
 }
