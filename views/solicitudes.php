@@ -12,7 +12,7 @@ $solicitudModel = new solicitud();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'aceptar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
     $numCliente = $_POST['numCliente'] ?? '';
-    // $observaciones = $_POST['observaciones'] ?? '';
+    $observaciones = $_POST['observaciones'] ?? '';
     // if ($Observaciones!="") {
     //     $Observaciones="Observaciones: ".$observaciones;
     // }
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 $plantilla="recibido";
 
-                $respuesta = $solicitudModel->enviarPromo($pedido_id, "", "", "$numCliente", $plantilla);
+                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$observaciones", "", "$numCliente", $plantilla);
                 error_log(print_r($respuesta, true));
                 echo json_encode($respuesta);
                 exit;
