@@ -253,7 +253,7 @@ class solicitud
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
-function enviarPromo($idPromo, $descripcion, $imagen,$telefono): array {
+function enviarPromo($idPromo, $descripcion, $imagen,$telefono,$plantilla): array {
  
             
 
@@ -265,7 +265,7 @@ function enviarPromo($idPromo, $descripcion, $imagen,$telefono): array {
                 'telefono' => $telefono,
                 'texto' => "$descripcion",
                 'imagen1' => "$imagen", // opcional
-                'plantilla' => 'servicio'
+                'plantilla' => "$plantilla"
             ];
 
             $data_json = json_encode($data);

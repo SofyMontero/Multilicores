@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         try {
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
+                $plantilla="recibido";
+                $respuesta= $solicitudModel->enviarPromo($idPromo, "", "",$numCliente,$plantilla);
                 
-                $respuesta= $solicitudModel->enviarPromo($idPromo, "", "",$numCliente);
-                $respuesta = $solicitudModel->enviarPromo($idPromo, "", "", $numCliente);
 
                 // Accedemos al primer (y único) resultado
                 $resultado = $respuesta[0]['resultado'];
