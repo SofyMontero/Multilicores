@@ -2,32 +2,33 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function enviarPromoSincrono(idPromo, descripcion, imagen, telefono, plantilla) {
-            var data = JSON.stringify({
-                telefono: telefono,
-                texto: descripcion,
-                imagen1: imagen,
-                plantilla: plantilla
-            });
+        alert('oki');
+            // var data = JSON.stringify({
+            //     telefono: telefono,
+            //     texto: descripcion,
+            //     imagen1: imagen,
+            //     plantilla: plantilla
+            // });
 
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php", false); // false = síncrono
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.setRequestHeader("Authorization", "Bearer Multilicoreslicor25");
+            // var xhr = new XMLHttpRequest();
+            // xhr.open("POST", "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php", false); // false = síncrono
+            // xhr.setRequestHeader("Content-Type", "application/json");
+            // xhr.setRequestHeader("Authorization", "Bearer Multilicoreslicor25");
 
-            try {
-                xhr.send(data);
-                return {
-                cliente: telefono,
-                telefono: telefono,
-                resultado: xhr.responseText
-                };
-            } catch (error) {
-                return {
-                cliente: telefono,
-                telefono: telefono,
-                resultado: "Error: " + error.message
-                };
-            }
+            // try {
+            //     xhr.send(data);
+            //     return {
+            //     cliente: telefono,
+            //     telefono: telefono,
+            //     resultado: xhr.responseText
+            //     };
+            // } catch (error) {
+            //     return {
+            //     cliente: telefono,
+            //     telefono: telefono,
+            //     resultado: "Error: " + error.message
+            //     };
+            // }
         }
 </script>
 <?php
