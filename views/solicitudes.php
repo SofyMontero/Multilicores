@@ -1,7 +1,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function enviarPromoSincrono(idPromo, descripcion, imagen, telefono, plantilla) {
+    function enviarPromoSincrono() {
         alert('oki');
             // var data = JSON.stringify({
             //     telefono: telefono,
@@ -62,13 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                 
                 echo "<script>
-                enviarPromoSincrono(
-                    " . json_encode($idPromo) . ",
-                    " . json_encode($descripcion) . ",
-                    " . json_encode($imagen) . ",
-                    " . json_encode($numCliente) . ",
-                    " . json_encode($plantilla) . "
-                );
+                enviarPromoSincrono();
                 </script>";
                 
 
