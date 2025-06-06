@@ -47,7 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     // if ($Observaciones!="") {
     //     $Observaciones="Observaciones: ".$observaciones;
     // }
-
+    echo "<script>
+    enviarPromoSincrono();
+    </script>";
     if (!empty($pedido_id)) {
         try {
 
@@ -61,9 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 
                 
-                echo "<script>
-                enviarPromoSincrono();
-                </script>";
+
                 
 
             } else {
