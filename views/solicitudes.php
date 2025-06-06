@@ -1,11 +1,44 @@
 <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>    
+function enviarPromoSincrono() {
+    alert('Gueno');
+//   var data = JSON.stringify({
+//     telefono: telefono,
+//     texto: descripcion,
+//     imagen1: imagen,
+//     plantilla: plantilla
+//   });
+
+//   var xhr = new XMLHttpRequest();
+//   xhr.open("POST", "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php", false); // false = síncrono
+//   xhr.setRequestHeader("Content-Type", "application/json");
+//   xhr.setRequestHeader("Authorization", "Bearer Multilicoreslicor25");
+
+//   try {
+//     xhr.send(data);
+//     return {
+//       cliente: telefono,
+//       telefono: telefono,
+//       resultado: xhr.responseText
+//     };
+//   } catch (error) {
+//     return {
+//       cliente: telefono,
+//       telefono: telefono,
+//       resultado: "Error: " + error.message
+//     };
+//   }
+}
 <?php
 include_once "header.php";
 require_once "../models/database.php";
 require_once "../models/solicitudModel.php";
-                echo "<script>
-                enviarPromoSincrono();
+
+echo "<script>
+                enviarPromoSincrono(
+
+                );
                 </script>";
 // Instanciar la clase Solicitud
 $solicitudModel = new solicitud();
@@ -631,7 +664,6 @@ async function enviarPromo(idPromo, descripcion, imagen, telefono, plantilla) {
     };
   }
 }
-enviarPromoSincrono();
 function enviarPromoSincrono() {
     alert('Gueno');
 //   var data = JSON.stringify({
