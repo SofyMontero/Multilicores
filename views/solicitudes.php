@@ -441,7 +441,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                 <div class="modal-body">
                     <input type="hidden" name="action" value="aceptar_pedido">
                     <input type="hidden" name="pedido_id" id="pedido_id_aceptar">
-                    <input type="hidden" name="numCliente" id="numClientePed" valie="">
+                    <input type="hidden" name="numCliente" id="numClientePed" >
                     
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle"></i>
