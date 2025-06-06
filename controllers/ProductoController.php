@@ -2,6 +2,11 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+// Configurar codificación UTF-8
+mb_internal_encoding('UTF-8');
+ini_set('default_charset', 'UTF-8');
+
 require_once "../models/ProductoModel.php";
 
 // Función para detectar el delimitador del CSV
@@ -28,21 +33,92 @@ function detectarDelimitador($archivo) {
     return ',';
 }
 
-// Función para limpiar y convertir valores
+// Función para detectar y convertir encoding del archivo
+function detectarYConvertirEncoding($contenido) {
+    $encodings = ['UTF-8', 'ISO-8859-1', 'Windows-1252', 'CP1252'];
+    
+    foreach ($encodings as $encoding) {
+        if (mb_check_encoding($contenido, $encoding)) {
+            if ($encoding !== 'UTF-8') {
+                return mb_convert_encoding($contenido, 'UTF-8', $encoding);
+            }
+            return $contenido;
+        }
+    }
+    
+    // Si no se puede detectar, intentar convertir desde ISO-8859-1
+    return mb_convert_encoding($contenido, 'UTF-8', 'ISO-8859-1');
+}
+
+// Función para limpiar BOM (Byte Order Mark) si existe
+function eliminarBOM($contenido) {
+    $bom = pack('H*','EFBBBF');
+    $contenido = preg_replace("/^$bom/", '', $contenido);
+    return $contenido;
+}
+
+// Función para limpiar y convertir valores con soporte UTF-8
 function limpiarValor($valor, $tipo = 'string') {
-    $valor = trim($valor);
+    // Primero asegurar que el valor esté en UTF-8
+    if (!mb_check_encoding($valor, 'UTF-8')) {
+        $valor = mb_convert_encoding($valor, 'UTF-8', 'auto');
+    }
+    
+    // Limpiar espacios en blanco, incluyendo espacios Unicode
+    $valor = preg_replace('/^[\s\xA0\x{00A0}\x{2000}-\x{200F}\x{2028}-\x{202F}]+|[\s\xA0\x{00A0}\x{2000}-\x{200F}\x{2028}-\x{202F}]+$/u', '', $valor);
     
     switch ($tipo) {
         case 'int':
             return is_numeric($valor) && $valor != '' ? (int)$valor : null;
         case 'float':
-            // Manejar diferentes formatos de números
-            $valor = str_replace([','], ['.'], $valor); // Cambiar coma decimal por punto
+            // Manejar diferentes formatos de números con caracteres especiales
+            $valor = str_replace([',', ' '], ['.', ''], $valor); // Cambiar coma decimal por punto y quitar espacios
             $valor = preg_replace('/[^\d.-]/', '', $valor); // Quitar caracteres no numéricos excepto punto y guión
             return is_numeric($valor) && $valor != '' ? (float)$valor : 0;
         default:
+            // Normalizar caracteres Unicode si es necesario
+            if (class_exists('Normalizer')) {
+                $valor = Normalizer::normalize($valor, Normalizer::FORM_C);
+            }
             return $valor;
     }
+}
+
+// Función mejorada para leer CSV con soporte UTF-8
+function leerCSVConUTF8($archivo, $delimitador = ',') {
+    $datos = [];
+    
+    // Leer el archivo completo
+    $contenido = file_get_contents($archivo);
+    
+    if ($contenido === false) {
+        throw new Exception("No se pudo leer el archivo");
+    }
+    
+    // Eliminar BOM si existe
+    $contenido = eliminarBOM($contenido);
+    
+    // Detectar y convertir encoding
+    $contenido = detectarYConvertirEncoding($contenido);
+    
+    // Dividir en líneas manteniendo UTF-8
+    $lineas = preg_split('/\R/', $contenido);
+    
+    foreach ($lineas as $linea) {
+        if (trim($linea) !== '') {
+            // Usar str_getcsv con soporte UTF-8
+            $fila = str_getcsv($linea, $delimitador, '"', '\\');
+            
+            // Limpiar cada campo
+            $fila = array_map(function($campo) {
+                return limpiarValor($campo);
+            }, $fila);
+            
+            $datos[] = $fila;
+        }
+    }
+    
+    return $datos;
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
@@ -71,21 +147,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
 
     if (is_uploaded_file($archivo)) {
         try {
-            $datos = [];
-            
-            // Detectar delimitador automáticamente
+            // Detectar delimitador
             $delimitador = detectarDelimitador($archivo);
             
-            // Leer archivo CSV con el delimitador detectado
-            if (($handle = fopen($archivo, "r")) !== FALSE) {
-                while (($fila = fgetcsv($handle, 1000, $delimitador)) !== FALSE) {
-                    $datos[] = $fila;
-                }
-                fclose($handle);
-            } else {
-                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Error al leer el archivo CSV"));
-                exit;
-            }
+            // Leer archivo CSV con soporte UTF-8
+            $datos = leerCSVConUTF8($archivo, $delimitador);
             
             if (empty($datos)) {
                 header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("El archivo está vacío"));
@@ -98,13 +164,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
             
             // Verificar si la primera fila es encabezado
             if (!empty($primeraFila[0])) {
-                $primerValor = strtolower(trim($primeraFila[0]));
+                $primerValor = mb_strtolower(trim($primeraFila[0]), 'UTF-8');
                 // Es encabezado si contiene palabras clave
                 if (!is_numeric($primerValor) || 
-                    strpos($primerValor, 'id') !== false || 
-                    strpos($primerValor, 'codigo') !== false ||
-                    strpos($primerValor, 'producto') !== false ||
-                    strpos($primerValor, 'descripcion') !== false) {
+                    mb_strpos($primerValor, 'id', 0, 'UTF-8') !== false || 
+                    mb_strpos($primerValor, 'codigo', 0, 'UTF-8') !== false ||
+                    mb_strpos($primerValor, 'producto', 0, 'UTF-8') !== false ||
+                    mb_strpos($primerValor, 'descripcion', 0, 'UTF-8') !== false) {
                     $tieneEncabezado = true;
                     array_shift($datos);
                 }
@@ -133,17 +199,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
                         $fila[] = '';
                     }
                     
-                    // Mapear datos según tu estructura de BD
-                    $id_producto             = limpiarValor($fila[0], 'int'); // ID específico (opcional)
-                    $codigo_productos        = limpiarValor($fila[1]); // CÓDIGO - IDENTIFICADOR PRINCIPAL
-                    $descripcion_producto    = limpiarValor($fila[2]); // Descripción
-                    $cantidad_paca_producto  = limpiarValor($fila[3], 'float'); // Cantidad
-                    $precio_unidad_producto  = limpiarValor($fila[4], 'float'); // Precio unitario
-                    $precio_paca_producto    = limpiarValor($fila[5], 'float'); // Precio por paca
-                    $id_cate_producto        = limpiarValor($fila[6], 'int') ?: 1; // Categoría
-                    $acti_Unidad             = limpiarValor($fila[7]) ?: '1'; // Unidad
-                    $imagen_producto         = limpiarValor($fila[8]); // Imagen
-                    $estado_producto         = limpiarValor($fila[9]) ?: '1'; // Estado
+                    // Mapear datos según tu estructura de BD con limpieza UTF-8
+                    $id_producto             = limpiarValor($fila[0], 'int');
+                    $codigo_productos        = limpiarValor($fila[1]);
+                    $descripcion_producto    = limpiarValor($fila[2]);
+                    $cantidad_paca_producto  = limpiarValor($fila[3], 'float');
+                    $precio_unidad_producto  = limpiarValor($fila[4], 'float');
+                    $precio_paca_producto    = limpiarValor($fila[5], 'float');
+                    $id_cate_producto        = limpiarValor($fila[6], 'int') ?: 1;
+                    $acti_Unidad             = limpiarValor($fila[7]) ?: '1';
+                    $imagen_producto         = limpiarValor($fila[8]);
+                    $estado_producto         = limpiarValor($fila[9]) ?: '1';
 
                     // Validaciones básicas
                     $erroresFila = [];
