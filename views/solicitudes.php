@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'rechazar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
     $numCliente = $_POST['numCliente'] ?? '';
-    $observaciones = $_POST['observaciones'] ?? '';
+    $observaciones = $_POST['motivo_rechazo'] ?? '';
     // if ($Observaciones!="") {
     //     $Observaciones="Observaciones: ".$observaciones;
     // }
