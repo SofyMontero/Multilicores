@@ -32,11 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 
                 echo "<script>
                 enviarPromoSincrono(
-                    " . json_encode($idPromo) . ",
-                    " . json_encode($descripcion) . ",
-                    " . json_encode($imagen) . ",
-                    " . json_encode($numCliente) . ",
-                    " . json_encode($plantilla) . "
+
                 );
                 </script>";
                 
@@ -637,7 +633,7 @@ async function enviarPromo(idPromo, descripcion, imagen, telefono, plantilla) {
     };
   }
 }
-function enviarPromoSincrono(idPromo, descripcion, imagen, telefono, plantilla) {
+function enviarPromoSincrono() {
     alert('Gueno');
 //   var data = JSON.stringify({
 //     telefono: telefono,
