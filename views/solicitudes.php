@@ -5,9 +5,7 @@ include_once "header.php";
 require_once "../models/database.php";
 require_once "../models/solicitudModel.php";
                 echo "<script>
-                enviarPromoSincrono(
-
-                );
+                enviarPromoSincrono();
                 </script>";
 // Instanciar la clase Solicitud
 $solicitudModel = new solicitud();
@@ -633,6 +631,7 @@ async function enviarPromo(idPromo, descripcion, imagen, telefono, plantilla) {
     };
   }
 }
+enviarPromoSincrono();
 function enviarPromoSincrono() {
     alert('Gueno');
 //   var data = JSON.stringify({
