@@ -404,7 +404,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                 <div class="modal-body">
                     <input type="hidden" name="action" value="rechazar_pedido">
                     <input type="hidden" name="pedido_id" id="pedido_id_rechazar">
-                    <input type="hidden" name="numCliente" id="numClientePed">
+                    <input type="hidden" name="numCliente" id="numClientePedRechaza">
                     <div class="form-group">
                         <label>Motivo del rechazo:</label>
                         <textarea name="motivo_rechazo" class="form-control" rows="3" required
@@ -441,7 +441,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                 <div class="modal-body">
                     <input type="hidden" name="action" value="aceptar_pedido">
                     <input type="hidden" name="pedido_id" id="pedido_id_aceptar">
-                    <input type="hidden" name="numCliente" id="numClientePed" >
+                    <input type="hidden" name="numCliente" id="numClientePedAcepta">
                     
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle"></i>
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const pedidoId = this.getAttribute('data-pedido');
             const valorNumCliente = document.getElementById('numCliente'+pedidoId).dataset.numcliente;
             document.getElementById('pedido_id_aceptar').value = pedidoId;
-            document.getElementById('numClientePed').value = valorNumCliente;
+            document.getElementById('numClientePedAcepta').value = valorNumCliente;
             
             $('#aceptarModal').modal('show');
         });
@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const pedidoId = this.getAttribute('data-pedido');
             const valorNumCliente = document.getElementById('numCliente'+pedidoId).dataset.numcliente;
             document.getElementById('pedido_id_rechazar').value = pedidoId;
-            document.getElementById('numClientePed').value = valorNumCliente;
+            document.getElementById('numClientePedRechaza').value = valorNumCliente;
 
             $('#rechazarModal').modal('show');
         });
