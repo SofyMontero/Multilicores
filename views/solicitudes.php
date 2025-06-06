@@ -562,7 +562,9 @@ function cargarProductosPedido(pedidoId) {
             
             data.productos.forEach(producto => {
                 html += `<tr>
+                    <td>${producto.codigo_productos}</td>
                     <td>${producto.nombre_producto}</td>
+                    <td class="text-center">${producto.tipo_producto}</td>
                     <td class="text-center">${producto.cantidad}</td>
                     <td class="text-right">$${parseFloat(producto.precio_unitario).toFixed(2)}</td>
                     <td class="text-right">$${parseFloat(producto.subtotal).toFixed(2)}</td>
