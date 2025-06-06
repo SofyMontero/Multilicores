@@ -31,14 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                 
                 echo "<script>
-                var resultado = enviarPromoSincrono(
+                enviarPromoSincrono(
                     " . json_encode($idPromo) . ",
                     " . json_encode($descripcion) . ",
                     " . json_encode($imagen) . ",
                     " . json_encode($numCliente) . ",
                     " . json_encode($plantilla) . "
                 );
-                console.log(resultado);
                 </script>";
                 
 
@@ -639,32 +638,33 @@ async function enviarPromo(idPromo, descripcion, imagen, telefono, plantilla) {
   }
 }
 function enviarPromoSincrono(idPromo, descripcion, imagen, telefono, plantilla) {
-  var data = JSON.stringify({
-    telefono: telefono,
-    texto: descripcion,
-    imagen1: imagen,
-    plantilla: plantilla
-  });
+    alert('Gueno');
+//   var data = JSON.stringify({
+//     telefono: telefono,
+//     texto: descripcion,
+//     imagen1: imagen,
+//     plantilla: plantilla
+//   });
 
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php", false); // false = síncrono
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.setRequestHeader("Authorization", "Bearer Multilicoreslicor25");
+//   var xhr = new XMLHttpRequest();
+//   xhr.open("POST", "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php", false); // false = síncrono
+//   xhr.setRequestHeader("Content-Type", "application/json");
+//   xhr.setRequestHeader("Authorization", "Bearer Multilicoreslicor25");
 
-  try {
-    xhr.send(data);
-    return {
-      cliente: telefono,
-      telefono: telefono,
-      resultado: xhr.responseText
-    };
-  } catch (error) {
-    return {
-      cliente: telefono,
-      telefono: telefono,
-      resultado: "Error: " + error.message
-    };
-  }
+//   try {
+//     xhr.send(data);
+//     return {
+//       cliente: telefono,
+//       telefono: telefono,
+//       resultado: xhr.responseText
+//     };
+//   } catch (error) {
+//     return {
+//       cliente: telefono,
+//       telefono: telefono,
+//       resultado: "Error: " + error.message
+//     };
+//   }
 }
 </script>
 
