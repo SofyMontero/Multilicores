@@ -19,10 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if (!empty($pedido_id)) {
         try {
+
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 $plantilla="recibido";
-                enviarPromo("", "", "",$numCliente,$plantilla);
+                $idPromo = 0; // o vacío
+                $descripcion = ""; // texto opcional
+                $imagen = ""; // URL opcional
+                
+
+
+                
+                echo "<script>
+                var resultado = enviarPromoSincrono(
+                    " . json_encode($idPromo) . ",
+                    " . json_encode($descripcion) . ",
+                    " . json_encode($imagen) . ",
+                    " . json_encode($numCliente) . ",
+                    " . json_encode($plantilla) . "
+                );
+                console.log(resultado);
+                </script>";
                 
 
             } else {
@@ -76,51 +93,7 @@ $pedidos_pendientes = $solicitudModel->obtenerPedidosPendientes();
 $pedidos_aceptados = $solicitudModel->obtenerPedidosAceptados();
 $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
 
-function enviarPromo($idPromo, $descripcion, $imagen,$telefono,$plantilla): array {
- 
-            
 
-
-        
-            $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
-
-            $data = [
-                'telefono' => $telefono,
-                'texto' => "$descripcion",
-                'imagen1' => "$imagen", // opcional
-                'plantilla' => "$plantilla"
-            ];
-
-            $data_json = json_encode($data);
-
-            $curl = curl_init();
-
-            curl_setopt_array($curl, [
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $data_json,
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer Multilicoreslicor25'
-                ],
-            ]);
-
-            $response = curl_exec($curl);
-            $error = curl_error($curl);
-            curl_close($curl);
-
-            $resultados[] = [
-                'cliente' => $telefono,
-                'telefono' => $telefono,
-                'resultado' => $error ?: $response
-            ];
-        
-
-        
-
-        return $resultados;
-    }
 ?>
 
 <!-- Page header -->
@@ -630,6 +603,68 @@ function cargarProductosPedido(pedidoId) {
         content.innerHTML = '<div class="alert alert-danger">Error al cargar los productos.</div>';
         $('#productosModal').modal('show');
     });
+}
+
+async function enviarPromo(idPromo, descripcion, imagen, telefono, plantilla) {
+  const data = {
+    telefono: telefono,
+    texto: descripcion,
+    imagen1: imagen,
+    plantilla: plantilla
+  };
+
+  try {
+    const response = await fetch('https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer Multilicoreslicor25'
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.text(); // o usa .json() si el backend retorna JSON
+
+    return {
+      cliente: telefono,
+      telefono: telefono,
+      resultado: result
+    };
+  } catch (error) {
+    return {
+      cliente: telefono,
+      telefono: telefono,
+      resultado: 'Error: ' + error.message
+    };
+  }
+}
+function enviarPromoSincrono(idPromo, descripcion, imagen, telefono, plantilla) {
+  var data = JSON.stringify({
+    telefono: telefono,
+    texto: descripcion,
+    imagen1: imagen,
+    plantilla: plantilla
+  });
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php", false); // false = síncrono
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.setRequestHeader("Authorization", "Bearer Multilicoreslicor25");
+
+  try {
+    xhr.send(data);
+    return {
+      cliente: telefono,
+      telefono: telefono,
+      resultado: xhr.responseText
+    };
+  } catch (error) {
+    return {
+      cliente: telefono,
+      telefono: telefono,
+      resultado: "Error: " + error.message
+    };
+  }
 }
 </script>
 
