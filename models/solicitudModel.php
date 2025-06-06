@@ -296,6 +296,7 @@ class solicitud
     $logData .= "Fecha: " . date("Y-m-d H:i:s") . "\n";
     $logData .= "Telefono: $telefono\n";
     $logData .= "Plantilla: $plantilla\n";
+    $logData .= "Texto: $descripcion\n";
     $logData .= "Data JSON Enviado: $data_json\n";
     $logData .= "Respuesta: $resultado\n";
     $logData .= "=============================\n\n";
