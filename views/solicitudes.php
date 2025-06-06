@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 $plantilla="recibido";
 
-                $respuesta = $solicitudModel->enviarPromo($pedido_id, "", "", $numCliente, $plantilla);
+                $respuesta = $solicitudModel->enviarPromo($pedido_id, "", "", "3125215864", $plantilla);
                 error_log(print_r($respuesta, true));
                 echo json_encode($respuesta);
                 exit;
