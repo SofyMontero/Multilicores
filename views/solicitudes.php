@@ -1,36 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function enviarPromoSincrono() {
-        alert('oki');
-            // var data = JSON.stringify({
-            //     telefono: telefono,
-            //     texto: descripcion,
-            //     imagen1: imagen,
-            //     plantilla: plantilla
-            // });
-
-            // var xhr = new XMLHttpRequest();
-            // xhr.open("POST", "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php", false); // false = síncrono
-            // xhr.setRequestHeader("Content-Type", "application/json");
-            // xhr.setRequestHeader("Authorization", "Bearer Multilicoreslicor25");
-
-            // try {
-            //     xhr.send(data);
-            //     return {
-            //     cliente: telefono,
-            //     telefono: telefono,
-            //     resultado: xhr.responseText
-            //     };
-            // } catch (error) {
-            //     return {
-            //     cliente: telefono,
-            //     telefono: telefono,
-            //     resultado: "Error: " + error.message
-            //     };
-            // }
-        }
-</script>
 <?php
 include_once "header.php";
 require_once "../models/database.php";
@@ -47,25 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     // if ($Observaciones!="") {
     //     $Observaciones="Observaciones: ".$observaciones;
     // }
-    echo "<script>
-    enviarPromoSincrono();
-    </script>";
+
     if (!empty($pedido_id)) {
         try {
-
             if ($solicitudModel->aceptarPedido($pedido_id)) {
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 $plantilla="recibido";
-                $idPromo = 0; // o vacío
-                $descripcion = ""; // texto opcional
-                $imagen = ""; // URL opcional
-                
 
+                $respuesta = $model->enviarPromo($pedido_id, "", "", $numCliente, $plantilla);
 
-                
-
-                
-
+                echo json_encode($respuesta);
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
@@ -116,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $pedidos_pendientes = $solicitudModel->obtenerPedidosPendientes();
 $pedidos_aceptados = $solicitudModel->obtenerPedidosAceptados();
 $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
-
 
 ?>
 
@@ -628,41 +587,6 @@ function cargarProductosPedido(pedidoId) {
         $('#productosModal').modal('show');
     });
 }
-
-async function enviarPromo(idPromo, descripcion, imagen, telefono, plantilla) {
-  const data = {
-    telefono: telefono,
-    texto: descripcion,
-    imagen1: imagen,
-    plantilla: plantilla
-  };
-
-  try {
-    const response = await fetch('https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer Multilicoreslicor25'
-      },
-      body: JSON.stringify(data)
-    });
-
-    const result = await response.text(); // o usa .json() si el backend retorna JSON
-
-    return {
-      cliente: telefono,
-      telefono: telefono,
-      resultado: result
-    };
-  } catch (error) {
-    return {
-      cliente: telefono,
-      telefono: telefono,
-      resultado: 'Error: ' + error.message
-    };
-  }
-}
-
 </script>
 
 <?php include_once "footer.php"; ?>
