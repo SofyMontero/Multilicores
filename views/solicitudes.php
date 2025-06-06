@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $plantilla="recibido";
 
                 $respuesta = $solicitudModel->enviarPromo($pedido_id, "", "", $numCliente, $plantilla);
-
+                error_log(print_r($respuesta, true));
                 echo json_encode($respuesta);
                 exit;
             } else {
