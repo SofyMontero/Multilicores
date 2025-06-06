@@ -106,10 +106,15 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                                 <div class="p-3">
                                     <h5 class="product-title"><?php echo htmlspecialchars($prod['descripcion_producto']); ?></h5>
 
+
                                     <div class="price-container">
                                         <div class="price-row">
-                                            <span class="price-label">Precio Unidad:</span>
-                                            <span class="price-unidad">$<?php echo number_format($prod['precio_unidad_producto'], 0, ',', '.'); ?> COP</span>
+                                            <?php if ($prod['acti_Unidad'] != 0): ?>
+                                                <span class="price-label">Precio Unidad:</span>
+                                                <span class="price-unidad">
+                                                    $<?php echo number_format($prod['precio_unidad_producto'], 0, ',', '.'); ?> COP
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="price-row">
                                             <span class="price-label">Precio Paca:</span>
@@ -124,13 +129,13 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                                                 class="form-select tipo-select form-select-sm"
                                                 data-index="<?php echo $index; ?>"
                                                 data-precio-unidad="<?php echo $prod['precio_unidad_producto']; ?>"
-                                                data-precio-paca="<?php  echo $prod['precio_paca_producto']; ?>"
-                                                data-embalaje="<?php if($prod['acti_Unidad'] == 1) {
-                                                    echo '<option value="">Tipo</option>
+                                                data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>"
+                                                data-embalaje="<?php if ($prod['acti_Unidad'] == 1) {
+                                                                    echo '<option value="">Tipo</option>
                                                 <option value="unidad">Unidad</option>
                                                 <option value="paca">Paca</option>';
-                                                } else echo '<option value="">Tipo</option>                                              
-                                                <option value="paca">Paca</option>'?>">                                              
+                                                                } else echo '<option value="">Tipo</option>                                              
+                                                <option value="paca">Paca</option>' ?>">
                                             </select>
                                         </div>
                                         <div class="col-6">
@@ -210,7 +215,7 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
     </div>
     <input type="text" id="numCliente" data-numcliente="<?php echo $numCliente; ?>" />
     <script src="mi-script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/catalogo.js"></script>
 </body>
 

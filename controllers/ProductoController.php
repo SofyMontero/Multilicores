@@ -254,9 +254,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
                         $productoExistente = $producto->obtenerProductoPorCodigo($codigo_productos);
                     }
 
-                    if ($productoExistente) {
-
-                        echo "entro a actualizar";
+                    if ($productoExistente) {                        
                         // ACTUALIZAR producto existente
                         $actualizar = false;
                         $cambios = [];
