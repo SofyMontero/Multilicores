@@ -23,9 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 
                 $respuesta= $solicitudModel->enviarPromo($idPromo, "", "",$numCliente);
-                echo "<pre>";
-                print_r($respuesta);
-                echo "</pre>";
+                $respuesta = $solicitudModel->enviarPromo($idPromo, "", "", $numCliente);
+
+                // Accedemos al primer (y único) resultado
+                $resultado = $respuesta[0]['resultado'];
+
+                echo '
+                <div class="alert alert-info" role="alert">
+                Respuesta del servidor: ' . htmlspecialchars($resultado) . '
+                </div>';
             } else {
                 $errores[] = "Error al actualizar el pedido";
             }
