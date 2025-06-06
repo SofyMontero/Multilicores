@@ -4,7 +4,11 @@
 include_once "header.php";
 require_once "../models/database.php";
 require_once "../models/solicitudModel.php";
+                echo "<script>
+                enviarPromoSincrono(
 
+                );
+                </script>";
 // Instanciar la clase Solicitud
 $solicitudModel = new solicitud();
 
@@ -30,11 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 
                 
-                echo "<script>
-                enviarPromoSincrono(
 
-                );
-                </script>";
                 
 
             } else {
