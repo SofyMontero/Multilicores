@@ -12,7 +12,7 @@ $bar = new Bar();
 $clientes = $bar->obtenerClientes();
 $errores = []; // 🔸 Inicializamos el arreglo de errores
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["action"] === "insert") {
     $razon_social = trim($_POST["cliente_nombre"]);
     $telefono = trim($_POST["cliente_telefono"]);
     $direccion = trim($_POST["cliente_direccion"]);
@@ -27,9 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
                 $barInsertado = $bar->insertarBar(
                     $nombre_bar,
                     $direccion,
-                    $telefono,
-                    "", // email opcional
-                    "Agregado desde cliente"
                 );
                 if ($barInsertado) {
                     $bar_id = $bar->obtenerUltimoIdInsertado();
@@ -37,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
                     $errores[] = "No se pudo insertar el bar.";
                 }
             } else {
-                // Obtener el ID del bar existente
+
                 $barExistente = $bar->buscarBaresPorNombre($nombre_bar);
                 if (count($barExistente) > 0) {
                     $bar_id = $barExistente[0]["id_bar"];
@@ -61,6 +58,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
         $errores[] = "Error interno: " . $e->getMessage();
         // Opcional: guarda el error en un archivo log
         file_put_contents("log.txt", "[" . date("Y-m-d H:i:s") . "] " . $e->getMessage() . PHP_EOL, FILE_APPEND);
+    }
+}
+if ($_POST["action"] === "delete") {
+    $cliente_id = $_POST["cliente_id"] ?? null;
+
+    if ($cliente_id) {
+        $eliminado = $bar->eliminarCliente($cliente_id);
+
+        if ($eliminado) {
+            header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
+            exit;
+        } else {
+            $errores[] = "No se pudo eliminar el cliente.";
+        }
+    } else {
+        $errores[] = "ID del cliente no válido.";
+    }
+}
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["action"] === "update") {
+    $id_cliente = $_POST["id_cliente"];
+    $bar_id     = $_POST["bar_id"];
+    $nombre     = $_POST["cliente_nombre"];
+    $telefono   = $_POST["cliente_telefono"];
+    $direccion  = $_POST["cliente_direccion"];
+    $zona       = $_POST["cliente_zona"];
+
+    if ($bar->actualizarCliente($id_cliente, $bar_id, $nombre, $telefono, $direccion, $zona)) {
+        header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
+        exit;
+    } else {
+        $errores[] = "No se pudo actualizar el cliente.";
     }
 }
 ?>
@@ -132,25 +160,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
                                     <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="cliente_nombre" class="bmd-label-floating">Cliente</label>
-                                            <input type="text" class="form-control" name="cliente_nombre" id="cliente_nombre" maxlength="20">
+                                            <input type="text" class="form-control" name="cliente_nombre" id="cliente_nombre" maxlength="20" required>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="cliente_telefono" class="bmd-label-floating">Teléfono</label>
-                                            <input type="text" pattern="[0-9()+]{1,20}" class="form-control" name="cliente_telefono" id="cliente_telefono" maxlength="20">
+                                            <input type="text" pattern="[0-9()+]{1,20}" class="form-control" name="cliente_telefono" id="cliente_telefono" maxlength="20" required>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="cliente_direccion" class="bmd-label-floating">Dirección</label>
-                                            <input type="text" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ#- ]{1,150}" class="form-control" name="cliente_direccion" id="cliente_direccion" maxlength="150">
+                                            <input type="text" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ#- ]{1,150}" class="form-control" name="cliente_direccion" id="cliente_direccion" maxlength="150" required>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="cliente_zona" class="bmd-label-floating">Zona</label>
-                                            <input type="text" pattern="[a-zA-Z0-9-]{1,27}" class="form-control" name="cliente_zona" id="cliente_zona" maxlength="27">
+                                            <select class="form-control" name="cliente_zona" id="cliente_zona" required>
+                                                <option value="" disabled selected>Seleccione una zona</option>
+                                                <option value="Chapinero">Chapinero</option>
+                                                <option value="Centro">Centro</option>
+                                                <option value="Zona T">Zona T</option>
+                                                <option value="45">45</option>
+                                                <option value="Otra">Otra</option>
+                                                <!-- Agrega más opciones según tu necesidad -->
+                                            </select>
                                         </div>
                                     </div>
 
@@ -184,7 +220,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
                             <thead>
                                 <tr class="text-center roboto-medium">
                                     <th>#</th>
-                                    <th>RAZÓN SOCIAL</th>
+                                    <th>BAR</th>
+                                    <th>CLIENTE</th>
                                     <th>TELÉFONO</th>
                                     <th>DIRECCIÓN</th>
                                     <th>ZONA</th>
@@ -196,15 +233,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
                                 <?php foreach ($clientes as $index => $cliente): ?>
                                     <tr class="text-center">
                                         <td><?= $index + 1 ?></td>
-                                        <td><?= htmlspecialchars($cliente['razon_social']) ?></td>
-                                        <td><?= htmlspecialchars($cliente['telefono']) ?></td>
-                                        <td><?= htmlspecialchars($cliente['direccion']) ?></td>
-                                        <td><?= htmlspecialchars($cliente['zona']) ?></td>
-                                        <td><?= date('d/m/Y', strtotime($cliente['fecha_registro'])) ?></td>
+                                        <td><?= htmlspecialchars($cliente['cli_Bar']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['cli_nombre']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['cli_telefono']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['cli_direccion']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['cli_zona']) ?></td>
+                                        <td><?= date('d/m/Y', strtotime($cliente['cli_fecha_registro'])) ?></td>
                                         <td>
-                                            <a href="cliente-edit.php?id=<?= $cliente['id_cliente'] ?>" class="btn btn-success btn-sm mr-1" title="Editar">
+                                            <button type="button"
+                                                class="btn btn-success btn-sm mr-1 edit-btn"
+                                                data-toggle="modal"
+                                                data-target="#editModal"
+                                                data-id="<?= $cliente['id_cliente'] ?>"
+                                                data-nombre="<?= $cliente['cli_nombre'] ?>"
+                                                data-telefono="<?= $cliente['cli_telefono'] ?>"
+                                                data-direccion="<?= $cliente['cli_direccion'] ?>"
+                                                data-zona="<?= $cliente['cli_zona'] ?>"
+                                                data-bar="<?= $cliente['cli_Bar'] ?>"
+                                                title="Editar">
                                                 <i class="fas fa-edit"></i>
-                                            </a>
+                                            </button>
                                             <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="<?= $cliente['id_cliente'] ?>" title="Eliminar">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
@@ -258,6 +306,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
                 </form>
             </div>
         </div>
+    </div>
+</div>
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form method="POST" class="modal-content">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="id_cliente" id="edit_id_cliente">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar Cliente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="cliente_nombre" id="edit_nombre" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" name="cliente_telefono" id="edit_telefono" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" name="cliente_direccion" id="edit_direccion" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Zona</label>
+                    <input type="text" name="cliente_zona" id="edit_zona" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Bar ID</label>
+                    <input type="text" name="bar_id" id="edit_bar_id" class="form-control">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -443,6 +534,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
                 barIdInput.value = '';
                 autocompleteList.style.display = 'none';
             }, 10);
+        });
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.getElementById('edit_id_cliente').value = this.dataset.id;
+            document.getElementById('edit_nombre').value = this.dataset.nombre;
+            document.getElementById('edit_telefono').value = this.dataset.telefono;
+            document.getElementById('edit_direccion').value = this.dataset.direccion;
+            document.getElementById('edit_zona').value = this.dataset.zona;
+            document.getElementById('edit_bar_id').value = this.dataset.bar;
         });
     });
 </script>

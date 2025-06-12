@@ -17,56 +17,36 @@ class Bar
     /**
      * Insertar un nuevo bar
      */
-    public function insertarBar(
-        $nombre_bar,
-        $direccion,
-        $telefono,
-        $email,
-        $descripcion,
-        $estado = 1
-    ) {
+    public function insertarBar($nombre_bar, $direccion)
+    {
         $query = $this->pdo->prepare("
-            INSERT INTO bares (
-                nombre_bar, 
-                direccion,
-                telefono,
-                email,
-                descripcion,
-                estado,
-                fecha_registro
-            ) VALUES (
-                :nombre_bar,
-                :direccion,
-                :telefono,
-                :email,
-                :descripcion,
-                :estado,
-                NOW()
-            )
-        ");
+        INSERT INTO bares (
+            nombre_bar, 
+            direccion_bar
+        ) VALUES (
+            :nombre_bar,
+            :direccion           
+        )
+    ");
 
         return $query->execute([
             "nombre_bar" => $nombre_bar,
-            "direccion" => $direccion,
-            "telefono" => $telefono,
-            "email" => $email,
-            "descripcion" => $descripcion,
-            "estado" => $estado
+            "direccion" => $direccion
         ]);
     }
 
     /**
      * Obtener todos los bares activos
      */
-    public function obtenerBares($estado = 1)
+    public function obtenerBares()
     {
         $query = $this->pdo->prepare("
             SELECT * FROM bares 
-            WHERE estado = :estado 
+            WHERE 
             ORDER BY nombre_bar ASC
         ");
 
-        $query->execute(["estado" => $estado]);
+        $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -76,10 +56,9 @@ class Bar
     public function buscarBaresPorNombre($termino)
     {
         $query = $this->pdo->prepare("
-            SELECT id_bar, nombre_bar, direccion, telefono, email 
+            SELECT id_bar, nombre_bar, direccion_bar
             FROM bares 
-            WHERE nombre_bar LIKE :termino 
-            AND estado = 1 
+            WHERE nombre_bar LIKE :termino            
             ORDER BY nombre_bar ASC 
             LIMIT 10
         ");
@@ -116,21 +95,14 @@ class Bar
         $query = $this->pdo->prepare("
             UPDATE bares SET
                 nombre_bar = :nombre_bar,
-                direccion = :direccion,
-                telefono = :telefono,
-                email = :email,
-                descripcion = :descripcion,
-                fecha_actualizacion = NOW()
+                direccion_bar = :direccion               
             WHERE id_bar = :id_bar
         ");
 
         return $query->execute([
             "id_bar" => $id_bar,
             "nombre_bar" => $nombre_bar,
-            "direccion" => $direccion,
-            "telefono" => $telefono,
-            "email" => $email,
-            "descripcion" => $descripcion
+            "direccion_bar" => $direccion
         ]);
     }
 
@@ -140,9 +112,7 @@ class Bar
     public function eliminarBar($id_bar)
     {
         $query = $this->pdo->prepare("
-            UPDATE bares SET
-                estado = 0,
-                fecha_actualizacion = NOW()
+            DELETE FROM bares 
             WHERE id_bar = :id_bar
         ");
 
@@ -154,7 +124,7 @@ class Bar
      */
     public function existeBar($nombre_bar, $id_excluir = null)
     {
-        $sql = "SELECT COUNT(*) FROM bares WHERE nombre_bar = :nombre_bar AND estado = 1";
+        $sql = "SELECT COUNT(*) FROM bares WHERE nombre_bar = :nombre_bar ";
         $params = ["nombre_bar" => $nombre_bar];
 
         if ($id_excluir) {
@@ -170,10 +140,9 @@ class Bar
     public function obtenerClientes()
     {
         $query = $this->pdo->prepare("
-        SELECT id_cliente, razon_social, telefono, direccion, zona, fecha_registro 
-        FROM clientes 
-        WHERE estado = 1 
-        ORDER BY fecha_registro DESC
+        SELECT id_cliente, cli_nombre, cli_telefono, cli_direccion, cli_zona, cli_fecha_registro, cli_Bar
+        FROM clientes
+        ORDER BY cli_fecha_registro DESC
     ");
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
@@ -182,21 +151,51 @@ class Bar
     public function insertarCliente($id_bar, $razon_social, $telefono, $direccion, $zona)
     {
         $query = $this->pdo->prepare("
-            INSERT INTO clientes (
-                id_bar, razon_social, telefono, direccion, zona, estado, fecha_registro
-            ) VALUES (
-                :id_bar, :razon_social, :telefono, :direccion, :zona, 1, NOW()
-            )
-        ");
+        INSERT INTO clientes (
+            cli_Bar, cli_nombre, cli_telefono, cli_direccion, cli_zona
+        ) VALUES (
+            :id_bar, :razon_social, :telefono, :direccion, :zona
+        )
+    ");
 
         return $query->execute([
-            "id_bar" => $id_bar,
+            "id_bar"       => $id_bar,
             "razon_social" => $razon_social,
-            "telefono" => $telefono,
-            "direccion" => $direccion,
-            "zona" => $zona
+            "telefono"     => $telefono,
+            "direccion"    => $direccion,
+            "zona"         => $zona
         ]);
     }
+    public function eliminarCliente($id_cliente)
+    {
+        $query = $this->pdo->prepare("
+        DELETE FROM clientes 
+        WHERE id_cliente = :id_cliente
+    ");
+
+        return $query->execute(["id_cliente" => $id_cliente]);
+    }
+    public function actualizarCliente($id_cliente, $bar_id, $nombre, $telefono, $direccion, $zona)
+{
+    $query = $this->pdo->prepare("
+        UPDATE clientes SET
+            cli_Bar = :bar_id,
+            cli_nombre = :nombre,
+            cli_telefono = :telefono,
+            cli_direccion = :direccion,
+            cli_zona = :zona
+        WHERE id_cliente = :id_cliente
+    ");
+
+    return $query->execute([
+        'bar_id'     => $bar_id,
+        'nombre'     => $nombre,
+        'telefono'   => $telefono,
+        'direccion'  => $direccion,
+        'zona'       => $zona,
+        'id_cliente' => $id_cliente
+    ]);
+}
     public function obtenerUltimoIdInsertado()
     {
         return $this->pdo->lastInsertId();
