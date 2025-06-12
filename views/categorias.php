@@ -8,16 +8,9 @@ error_reporting(E_ALL);
 require_once "../models/ProductoModel.php";
 $numCliente = $_GET['idCli'] ?? '';
 
-$mostrarModalCliente = "existe";
 
-if (!empty($numCliente)) {
-    $pedido = new Producto(); // Asegúrate de que tu clase tiene $this->pdo inicializado
-    if (!$pedido->clienteExistePorTelefono($numCliente)) {
-        $mostrarModalCliente = "no_existe"; // cliente no existe
-    }
-} else {
-    $mostrarModalCliente = "no_llego"; // no vino el número
-}
+
+
 // Obtener productos desde la base de datos
 $producto = new Producto();
 $productos = $producto->obtenerCategorias();
@@ -54,13 +47,13 @@ $productos = $producto->obtenerCategorias();
             <div class="collapse navbar-collapse mt-3 mt-lg-0" id="navbarContent">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-4">
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a>
+                        <a class="nav-link fw-semibold text-muted" href="categorias.php?idCli=<?php echo urlencode($numCliente); ?>">Categorías</a>
                     </li>
                     <li class="nav-item">
                         <!-- <a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a> -->
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold text-muted" href="catalogo.php">Productos</a>
+                        <a class="nav-link fw-semibold text-muted" href="catalogo.php?idCli=<?php echo urlencode($numCliente); ?>">Productos</a>
                     </li>
                 </ul>
 
@@ -128,165 +121,7 @@ $productos = $producto->obtenerCategorias();
             <?php endif; ?>
         </div>
     </section>
-<!-- Modal Cliente -->
-<div class="modal fade" id="modalCliente" tabindex="-1" aria-labelledby="modalClienteLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="formCliente" method="POST" action="guardar_cliente.php">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalClienteLabel">Registra tus datos</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
 
-          <div class="mb-3">
-            <label for="cli_identificacion" class="form-label">Identificación</label>
-            <input type="text" class="form-control" name="cli_identificacion" id="cli_identificacion" required>
-          </div>
-
-          <div class="mb-3">
-            <label for="cli_nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" name="cli_nombre" id="cli_nombre" required>
-          </div>
-
-          <div class="mb-3">
-            <label for="cli_telefono" class="form-label">Teléfono</label>
-            <input type="text" class="form-control" name="cli_telefono" id="cli_telefono" required>
-          </div>
-
-          <div class="mb-3">
-            <label for="cli_direccion" class="form-label">Dirección</label>
-            <input type="text" class="form-control" name="cli_direccion" id="cli_direccion" required>
-          </div>
-
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Cliente</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!-- Modal de búsqueda de cliente -->
-<div class="modal fade" id="modalBuscarTelefono" tabindex="-1" aria-labelledby="modalBuscarTelefonoLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalBuscarTelefonoLabel">Ingresar número de teléfono</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <label for="inputTelefono" class="form-label">Teléfono del cliente</label>
-        <input type="text" class="form-control" id="inputTelefono" placeholder="Ej: 3001234567" maxlength="15" required>
-        <div id="resultadoBusqueda" class="mt-2 text-muted small"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    <?php if ($mostrarModalCliente=="no_existe"): ?>
-        const modalCliente = new bootstrap.Modal(document.getElementById('modalCliente'));
-        modalCliente.show();
-    <?php endif; ?>
-});
-let numcliente = null;
-
-document.addEventListener('DOMContentLoaded', function () {
-    const inputTelefono = document.getElementById('inputTelefono');
-    const resultadoBusqueda = document.getElementById('resultadoBusqueda');
-
-    // Mostrar el modal si no hay número
-    <?php if ($mostrarModalCliente == "no_llego"): ?>
-        const modalBuscar = new bootstrap.Modal(document.getElementById('modalBuscarTelefono'));
-        modalBuscar.show();
-    <?php endif; ?>
-
-    inputTelefono.addEventListener('input', function () {
-        const numero = inputTelefono.value.trim();
-        resultadoBusqueda.textContent = '';
-
-        if (numero.length >= 10) {
-            fetch(`../controllers/ajax/buscar_cliente.php?telefono=${numero}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.existe) {
-                        resultadoBusqueda.textContent = `Cliente encontrado: ${data.nombre}`;
-                        numcliente = numero;
-
-                        setTimeout(() => {
-                            bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
-                            console.log("Cliente asignado:", numcliente);
-
-                            // Actualizar todos los enlaces con ?idCli=
-                            const links = document.querySelectorAll('a[href*="catalogo.php"]');
-                            links.forEach(link => {
-                                const url = new URL(link.href, window.location.origin);
-                                url.searchParams.set('idCli', numcliente);
-                                link.href = url.toString();
-                            });
-
-                        }, 1000);
-                    } else {
-                        resultadoBusqueda.textContent = 'Cliente no encontrado. Mostrando formulario...';
-                        setTimeout(() => {
-                            bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
-                            new bootstrap.Modal(document.getElementById('modalCliente')).show();
-                        }, 1000);
-                    }
-                })
-                .catch(() => {
-                    resultadoBusqueda.textContent = 'Error al buscar cliente.';
-                });
-        }
-    });
-});
-document.addEventListener('DOMContentLoaded', function () {
-  const formCliente = document.getElementById('formCliente');
-
-  formCliente.addEventListener('submit', function (e) {
-    e.preventDefault(); // Evita el envío tradicional
-
-    const formData = new FormData(formCliente);
-
-    fetch('../controllers/ajax/guardar_cliente.php', {
-      method: 'POST',
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.exito) {
-        // Oculta el modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('modalCliente'));
-        modal.hide();
-
-        // Opcional: actualiza variable numcliente y enlaces
-        const telefono = document.getElementById('cli_telefono').value;
-        numcliente = telefono;
-
-        // Actualiza los links con el nuevo idCli
-        const links = document.querySelectorAll('a[href*="catalogo.php"]');
-        links.forEach(link => {
-          const url = new URL(link.href, window.location.origin);
-          url.searchParams.set('idCli', numcliente);
-          link.href = url.toString();
-        });
-
-        alert('Cliente guardado exitosamente');
-
-      } else {
-        alert('Error al guardar el cliente: ' + (data.mensaje || ''));
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error al guardar el cliente');
-    });
-  });
-});
-</script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>

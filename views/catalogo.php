@@ -55,9 +55,9 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                     </button>
                     <div class="collapse navbar-collapse justify-content-center mt-3 mt-lg-0" id="navbarMenu">
                         <ul class="navbar-nav gap-3">
-                            <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="categorias.php">Categorías</a></li>
+                            <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="categorias.php?idCli=<?php echo urlencode($numCliente); ?>">Categorías</a></li>
                             <!-- <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a></li> -->
-                            <li class="nav-item"><a class="nav-link fw-semibold text-decoration-underline" href="catalogo.php">Productos</a></li>
+                            <li class="nav-item"><a class="nav-link fw-semibold text-decoration-underline" href="catalogo.php?idCli=<?php echo urlencode($numCliente); ?>">Productos</a></li>
                         </ul>
                     </div>
                 </nav>

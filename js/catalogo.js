@@ -568,7 +568,7 @@ function procesarPedido() {
     // Crear formulario dinámico con los productos del carrito
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = 'procesar_pedido.php';
+    form.action = 'procesar_telefono_cliente.php';
     
     // Agregar productos al formulario
     carrito.forEach((item, index) => {
