@@ -158,7 +158,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                     <th>Estado</th>
                                     <th>Ver Productos</th>
                                     <th>Acciones</th>
-                                    <th>Telefono</th>
+                                    <th>Cliente</th>
                                 </tr>
                             </thead>
                             <tbody>
