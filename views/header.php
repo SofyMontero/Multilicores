@@ -60,9 +60,9 @@ date_default_timezone_set('America/Bogota');
 			<div class="full-box nav-lateral-content">
 				<figure class="full-box nav-lateral-avatar">
 					<i class="far fa-times-circle show-nav-lateral"></i>
-					<img src="../assets/avatar/Avatar.png" class="img-fluid" alt="Avatar">
+					<img src="../assets/img/logoM.png" class="img-fluid" alt="Avatar">
 					<figcaption class="roboto-medium text-center">
-						Carlos Alfaro <br><small class="roboto-condensed-light">Web Developer</small>
+						Multilicores <br><small class="roboto-condensed-light">Administración</small>
 					</figcaption>
 				</figure>
 				<div class="full-box nav-lateral-bar"></div>
