@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${promo.pro_patrocinador || '-'}</td>
                     <td><span class="status-badge ${statusClass}">${promo.pro_estado}</span></td>
                     <td>
-                      <span class="text-muted" style="display: inline-block; white-space: normal;">
+                      <span class="text-muted" style="max-width: 200px; display: inline-block; word-wrap: break-word; white-space: normal;">
                         ${promo.pro_descripcion}
                       </span>
                     </td>
