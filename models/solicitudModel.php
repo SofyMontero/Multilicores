@@ -17,14 +17,17 @@ class solicitud
     {
         $query = $this->pdo->prepare("
              SELECT 
-                 id_pedido, 
-                 ped_numfac, 
-                 ped_cliente, 
-                 ped_fecha, 
-                 ped_total, 
-                 ped_estado,
-                 ped_numCliente
-             FROM pedidos 
+                 P.id_pedido, 
+                 P.ped_numfac, 
+                 P.ped_cliente, 
+                 P.ped_fecha, 
+                 P.ped_total, 
+                 P.ped_estado,
+                 P.ped_numCliente,
+                 B.nombre_bar
+             FROM pedidos P
+             INNER JOIN clientes C ON C.id_cliente = P.ped_cliente
+             INNER JOIN bares B ON B.id_bar = C.cli_Bar 
              WHERE (
                  ped_estado = 'pendiente' 
                  OR ped_estado = '1' 
@@ -44,14 +47,17 @@ class solicitud
     {
         $query = $this->pdo->prepare("
             SELECT 
-                id_pedido, 
-                ped_numfac, 
-                ped_cliente, 
-                ped_fecha, 
-                ped_total, 
-                ped_estado,
-                ped_numCliente
-            FROM pedidos 
+                P.id_pedido, 
+                P.ped_numfac, 
+                P.ped_cliente, 
+                P.ped_fecha, 
+                P.ped_total, 
+                P.ped_estado,
+                P.ped_numCliente,
+                B.nombre_bar
+            FROM pedidos P
+            INNER JOIN clientes C ON C.id_cliente = P.ped_cliente
+            INNER JOIN bares B ON B.id_bar = C.cli_Bar 
             WHERE ped_estado = 'aceptado' OR ped_estado = '2' OR ped_estado = 2
             ORDER BY ped_fecha DESC
         ");
@@ -245,14 +251,17 @@ class solicitud
     {
         $query = $this->pdo->prepare("
             SELECT 
-                id_pedido, 
-                ped_numfac, 
-                ped_cliente, 
-                ped_fecha, 
-                ped_total, 
-                ped_estado,
-                ped_numCliente
-            FROM pedidos 
+                P.id_pedido, 
+                P.ped_numfac, 
+                P.ped_cliente, 
+                P.ped_fecha, 
+                P.ped_total, 
+                P.ped_estado,
+                P.ped_numCliente,
+                B.nombre_bar
+            FROM pedidos P
+            INNER JOIN clientes C ON C.id_cliente = P.ped_cliente
+            INNER JOIN bares B ON B.id_bar = C.cli_Bar 
             WHERE ped_estado = 'rechazado' OR ped_estado = '3' OR ped_estado = 3
             ORDER BY ped_fecha DESC
         ");

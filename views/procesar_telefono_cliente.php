@@ -1,7 +1,7 @@
 <?php
 $productosPOST = [];
 foreach ($_POST['productos'] as $index => $producto) {
-    $productosPOST[] = $producto; // Normaliza el array
+  $productosPOST[] = $producto; // Normaliza el array
 }
 ?>
 
@@ -16,20 +16,20 @@ error_reporting(E_ALL);
 require_once "../models/ProductoModel.php";
 // Verificar que se recibieron datos
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['productos'])) {
-    header('Location: catalogo.php?error=sin_productos');
-    exit;
+  header('Location: catalogo.php?error=sin_productos');
+  exit;
 }
 $numCliente = $_POST['numCliente'] ?? '';
 
 $mostrarModalCliente = "existe";
 
 if (!empty($numCliente)) {
-    $pedido = new Producto(); // Asegúrate de que tu clase tiene $this->pdo inicializado
-    if (!$pedido->clienteExistePorTelefono($numCliente)) {
-        $mostrarModalCliente = "no_existe"; // cliente no existe
-    }
+  $pedido = new Producto(); // Asegúrate de que tu clase tiene $this->pdo inicializado
+  if (!$pedido->clienteExistePorTelefono($numCliente)) {
+    $mostrarModalCliente = "no_existe"; // cliente no existe
+  }
 } else {
-    $mostrarModalCliente = "no_llego"; // no vino el número
+  $mostrarModalCliente = "no_llego"; // no vino el número
 }
 
 
@@ -42,12 +42,12 @@ $productos = $producto->obtenerCategorias();
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multilicores</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/categoria.css" rel="stylesheet" type="text/css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multilicores</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="../css/categoria.css" rel="stylesheet" type="text/css" />
 </head>
 
 
@@ -64,8 +64,8 @@ $productos = $producto->obtenerCategorias();
 
         <div class="modal-body p-4">
           <div class="mb-3">
-            
-            <input type="hidden" class="form-control" name="cli_identificacion" id="cli_identificacion" >
+
+            <input type="hidden" class="form-control" name="cli_identificacion" id="cli_identificacion">
           </div>
 
           <div class="mb-3">
@@ -83,20 +83,22 @@ $productos = $producto->obtenerCategorias();
             <input type="text" class="form-control" name="cli_direccion" id="cli_direccion" required>
           </div>
           <div class="mb-3">
-          <select class="form-control" name="cli_zona" id="cliente_zona" required>
-                                                <option value="" disabled selected>Seleccione una zona</option>
-                                                <option value="Chapinero">Chapinero</option>
-                                                <option value="Centro">Centro</option>
-                                                <option value="Zona T">Zona T</option>
-                                                <option value="45">45</option>
-                                                <option value="Otra">Otra</option>
-                                                <!-- Agrega más opciones según tu necesidad -->
-                                            </select>
-            </div>
+            <select class="form-control" name="cli_zona" id="cliente_zona" required>
+              <option value="" disabled selected>Seleccione una zona</option>
+              <option value="Chapinero">Chapinero</option>
+              <option value="Centro">Centro</option>
+              <option value="Zona T">Zona T</option>
+              <option value="45">45</option>
+              <option value="Otra">Otra</option>
+              <!-- Agrega más opciones según tu necesidad -->
+            </select>
+          </div>
           <!-- ✅ Nuevo campo Bar -->
-          <div class="mb-3">
-            <label for="nombre_bar" class="form-label">Bar <span class="text-danger">*</span></label>
+          <div class="mb-3 position-relative">
+            <label for="cli_bar" class="form-label">Bar <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="cli_bar" id="cli_bar" maxlength="40" required>
+            <input type="hidden" name="bar_id" id="cli_bar_id">
+            <div id="cli_bar_autocomplete" class="autocomplete-suggestions" style="display: none;"></div>
           </div>
         </div>
 
@@ -133,243 +135,355 @@ $productos = $producto->obtenerCategorias();
 
 
 <script>
-    const totalGeneral = <?php echo json_encode($_POST['total_general'] ?? 0); ?>;
-    const productosPOST = <?php echo json_encode($productosPOST); ?>;
-    console.log("🧾 ProductosPOST:", productosPOST);
+  const totalGeneral = <?php echo json_encode($_POST['total_general'] ?? 0); ?>;
+  const productosPOST = <?php echo json_encode($productosPOST); ?>;
+  console.log("🧾 ProductosPOST:", productosPOST);
 
-    function enviarPedido() {
-        if (!numcliente) {             // Asegúrate de tener el número
-            alert('No se encontró numCliente; no se envía el pedido.');
-            return;
-        }
-
-        // 1. Crea el formulario
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'procesar_pedido.php';   // <-- cámbialo si tu ruta es distinta
-
-        // 2. Agrega productos[]
-        productosPOST.forEach((producto, i) => {
-        for (const clave in producto) {
-            const input = document.createElement('input');
-            input.type  = 'hidden';
-            input.name  = `productos[${i}][${clave}]`;
-            input.value = producto[clave];
-            form.appendChild(input);
-        }
-        });
-
-        // 3. Agrega numCliente
-        const inputCli = document.createElement('input');
-        inputCli.type  = 'hidden';
-        inputCli.name  = 'numCliente';      // nombre que procesar_pedido.php recibirá
-        inputCli.value = numcliente;
-        form.appendChild(inputCli);
-
-            // 4. Agrega total_general
-            const inputTotal = document.createElement('input');
-            inputTotal.type = 'hidden';
-            inputTotal.name = 'total_general';
-            inputTotal.value = totalGeneral;
-            form.appendChild(inputTotal);
-
-        // 5. Envía
-        document.body.appendChild(form);
-        form.submit();
+  function enviarPedido() {
+    if (!numcliente) { // Asegúrate de tener el número
+      alert('No se encontró numCliente; no se envía el pedido.');
+      return;
     }
 
-document.addEventListener("DOMContentLoaded", function () {
-    <?php if ($mostrarModalCliente=="no_existe"): ?>
-        const modalCliente = new bootstrap.Modal(document.getElementById('modalCliente'));
-        modalCliente.show();
+    // 1. Crea el formulario
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'procesar_pedido.php'; // <-- cámbialo si tu ruta es distinta
+
+    // 2. Agrega productos[]
+    productosPOST.forEach((producto, i) => {
+      for (const clave in producto) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `productos[${i}][${clave}]`;
+        input.value = producto[clave];
+        form.appendChild(input);
+      }
+    });
+
+    // 3. Agrega numCliente
+    const inputCli = document.createElement('input');
+    inputCli.type = 'hidden';
+    inputCli.name = 'numCliente'; // nombre que procesar_pedido.php recibirá
+    inputCli.value = numcliente;
+    form.appendChild(inputCli);
+
+    // 4. Agrega total_general
+    const inputTotal = document.createElement('input');
+    inputTotal.type = 'hidden';
+    inputTotal.name = 'total_general';
+    inputTotal.value = totalGeneral;
+    form.appendChild(inputTotal);
+
+    // 5. Envía
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    <?php if ($mostrarModalCliente == "no_existe"): ?>
+      const modalCliente = new bootstrap.Modal(document.getElementById('modalCliente'));
+      modalCliente.show();
     <?php endif; ?>
-});
-let numcliente = null;
-document.addEventListener("DOMContentLoaded", function () {
-    <?php if ($mostrarModalCliente=="existe"): ?>
-        numcliente = <?php echo json_encode($numCliente); ?>;
-        console.log("Cliente ya existe. Enviando pedido directamente...");
-            enviarPedido();
-            return;
+  });
+  let numcliente = null;
+  document.addEventListener("DOMContentLoaded", function() {
+    <?php if ($mostrarModalCliente == "existe"): ?>
+      numcliente = <?php echo json_encode($numCliente); ?>;
+      console.log("Cliente ya existe. Enviando pedido directamente...");
+      enviarPedido();
+      return;
     <?php endif; ?>
-});
+  });
 
 
 
-document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const inputTelefono = document.getElementById('inputTelefono');
     const resultadoBusqueda = document.getElementById('resultadoBusqueda');
 
     // Mostrar el modal si no hay número
     <?php if ($mostrarModalCliente == "no_llego"): ?>
-        const modalBuscar = new bootstrap.Modal(document.getElementById('modalBuscarTelefono'));
-        modalBuscar.show();
+      const modalBuscar = new bootstrap.Modal(document.getElementById('modalBuscarTelefono'));
+      modalBuscar.show();
     <?php endif; ?>
 
-    inputTelefono.addEventListener('input', function () {
-        const numero = inputTelefono.value.trim();
-        resultadoBusqueda.textContent = '';
+    inputTelefono.addEventListener('input', function() {
+      const numero = inputTelefono.value.trim();
+      resultadoBusqueda.textContent = '';
 
-        if (numero.length >= 10) {
-            fetch(`../controllers/ajax/buscar_cliente.php?telefono=${numero}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.existe) {
-                        resultadoBusqueda.textContent = `Cliente encontrado: ${data.nombre}`;
-                        numcliente = numero;
+      if (numero.length >= 10) {
+        fetch(`../controllers/ajax/buscar_cliente.php?telefono=${numero}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.existe) {
+              resultadoBusqueda.textContent = `Cliente encontrado: ${data.nombre}`;
+              numcliente = numero;
 
-                        setTimeout(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
-                        console.log('Cliente asignado:', numcliente);
+              setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
+                console.log('Cliente asignado:', numcliente);
 
-                        // 🚀  Una vez asignado, enviamos el pedido
-                        enviarPedido();
-                        }, 1000);
-                    } else {
-                        resultadoBusqueda.textContent = 'Cliente no encontrado. Mostrando formulario...';
-                        setTimeout(() => {
-                            bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
-                            new bootstrap.Modal(document.getElementById('modalCliente')).show();
-                        }, 1000);
-                    }
-                })
-                .catch(() => {
-                    resultadoBusqueda.textContent = 'Error al buscar cliente.';
-                });
-        }
+                // 🚀  Una vez asignado, enviamos el pedido
+                enviarPedido();
+              }, 1000);
+            } else {
+              resultadoBusqueda.textContent = 'Cliente no encontrado. Mostrando formulario...';
+              setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
+                new bootstrap.Modal(document.getElementById('modalCliente')).show();
+              }, 1000);
+            }
+          })
+          .catch(() => {
+            resultadoBusqueda.textContent = 'Error al buscar cliente.';
+          });
+      }
     });
-});
-document.addEventListener('DOMContentLoaded', function () {
-  const formCliente = document.getElementById('formCliente');
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    const formCliente = document.getElementById('formCliente');
 
-  formCliente.addEventListener('submit', function (e) {
-    e.preventDefault();
+    formCliente.addEventListener('submit', function(e) {
+      e.preventDefault();
 
-    const formData = new FormData(formCliente);
-    const telefonoInput = document.getElementById('cli_telefono');
-    const telefono = telefonoInput.value.trim();
+      const formData = new FormData(formCliente);
+      const telefonoInput = document.getElementById('cli_telefono');
+      const telefono = telefonoInput.value.trim();
 
-    if (telefono.length < 10) {
-      alert("Número de teléfono inválido");
+      if (telefono.length < 10) {
+        alert("Número de teléfono inválido");
+        return;
+      }
+
+      fetch('../controllers/ajax/guardar_cliente.php', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.exito) {
+            alert('Cliente guardado exitosamente');
+            numcliente = telefono;
+            enviarPedido();
+          } else {
+            alert('Error al guardar el cliente: ' + (data.mensaje || ''));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error al guardar el cliente');
+        });
+    });
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.querySelector('.search-btn');
+
+    function redirigirBusqueda() {
+      const termino = searchInput.value.trim();
+      if (termino.length > 0) {
+        const encodedTerm = encodeURIComponent(termino);
+        window.location.href = `catalogo.php?busqueda=${encodedTerm}`;
+      }
+    }
+    searchButton.addEventListener('click', redirigirBusqueda);
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        redirigirBusqueda();
+      }
+    });
+  });
+
+  // autocompletar
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchList = document.getElementById('autocompleteList');
+    const searchButton = document.querySelector('.search-btn');
+
+    function redirigirBusqueda(nombre, id) {
+      const productoId = id || null;
+      const encoded = encodeURIComponent(nombre || searchInput.value.trim());
+
+      if (productoId) {
+        window.location.href = `catalogo.php?id=${productoId}`;
+      } else if (encoded) {
+        window.location.href = `catalogo.php?busqueda=${encoded}`;
+      }
+    }
+
+    function mostrarSugerencias(sugerencias) {
+      searchList.innerHTML = '';
+      if (sugerencias.length === 0) {
+        searchList.style.display = 'none';
+        return;
+      }
+
+      sugerencias.forEach(producto => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item list-group-item-action';
+        li.textContent = producto.descripcion_producto;
+        li.dataset.id = producto.id_producto;
+        li.addEventListener('click', () => redirigirBusqueda(null, producto.id_producto));
+        searchList.appendChild(li);
+      });
+
+      searchList.style.display = 'block';
+    }
+
+    let timeout;
+    searchInput.addEventListener('input', function() {
+      const termino = this.value.trim();
+
+      if (termino.length < 2) {
+        searchList.style.display = 'none';
+        return;
+      }
+
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        fetch(`../controllers/buscar_sugerencias.php?q=${encodeURIComponent(termino)}`)
+          .then(res => res.json())
+          .then(data => mostrarSugerencias(data))
+          .catch(() => searchList.style.display = 'none');
+      }, 200);
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        redirigirBusqueda();
+      }
+    });
+
+    searchButton.addEventListener('click', () => redirigirBusqueda());
+
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !searchList.contains(e.target)) {
+        searchList.style.display = 'none';
+      }
+    });
+  });
+
+  /////////////autocompletar///////////
+  document.addEventListener('DOMContentLoaded', function () {
+  const inputBar = document.getElementById('cli_bar');
+  const hiddenBarId = document.getElementById('cli_bar_id');
+  const list = document.getElementById('cli_bar_autocomplete');
+
+  let selectedIndex = -1;
+
+  function buscarBares(query) {
+    if (query.length < 2) {
+      list.style.display = 'none';
       return;
     }
 
-    fetch('../controllers/ajax/guardar_cliente.php', {
+    fetch('../controllers/buscar_bar.php', {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'query=' + encodeURIComponent(query)
     })
     .then(res => res.json())
-    .then(data => {
-      if (data.exito) {
-        alert('Cliente guardado exitosamente');
-        numcliente = telefono;
-        enviarPedido();
-      } else {
-        alert('Error al guardar el cliente: ' + (data.mensaje || ''));
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error al guardar el cliente');
+    .then(data => mostrarSugerencias(data))
+    .catch(() => list.style.display = 'none');
+  }
+
+  function mostrarSugerencias(data) {
+    list.innerHTML = '';
+    if (!Array.isArray(data) || data.length === 0) {
+      list.style.display = 'none';
+      return;
+    }
+
+    data.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'autocomplete-suggestion';
+      div.textContent = item.label || item.value;
+      div.dataset.id = item.id;
+
+      div.addEventListener('click', () => {
+        inputBar.value = item.label;
+        hiddenBarId.value = item.id;
+        list.style.display = 'none';
+      });
+
+      list.appendChild(div);
     });
+
+    list.style.display = 'block';
+  }
+
+  inputBar.addEventListener('input', () => {
+    const value = inputBar.value.trim();
+    hiddenBarId.value = ''; // Reinicia ID si cambia texto
+    buscarBares(value);
+  });
+
+  inputBar.addEventListener('keydown', (e) => {
+    const suggestions = list.querySelectorAll('.autocomplete-suggestion');
+    if (suggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % suggestions.length;
+        actualizarSeleccion(suggestions);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + suggestions.length) % suggestions.length;
+        actualizarSeleccion(suggestions);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0) suggestions[selectedIndex].click();
+        break;
+    }
+  });
+
+  function actualizarSeleccion(suggestions) {
+    suggestions.forEach((el, i) => {
+      el.classList.toggle('selected', i === selectedIndex);
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!list.contains(e.target) && e.target !== inputBar) {
+      list.style.display = 'none';
+    }
   });
 });
 
-
 </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.querySelector('.search-btn');
+<style>
+  .autocomplete-suggestions {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+}
 
-            function redirigirBusqueda() {
-                const termino = searchInput.value.trim();
-                if (termino.length > 0) {
-                    const encodedTerm = encodeURIComponent(termino);
-                    window.location.href = `catalogo.php?busqueda=${encodedTerm}`;
-                }
-            }
-            searchButton.addEventListener('click', redirigirBusqueda);
+.autocomplete-suggestion {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
 
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    redirigirBusqueda();
-                }
-            });
-        });
-
-        // autocompletar
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const searchList = document.getElementById('autocompleteList');
-            const searchButton = document.querySelector('.search-btn');
-
-            function redirigirBusqueda(nombre, id) {
-                const productoId = id || null;
-                const encoded = encodeURIComponent(nombre || searchInput.value.trim());
-
-                if (productoId) {
-                    window.location.href = `catalogo.php?id=${productoId}`;
-                } else if (encoded) {
-                    window.location.href = `catalogo.php?busqueda=${encoded}`;
-                }
-            }
-
-            function mostrarSugerencias(sugerencias) {
-                searchList.innerHTML = '';
-                if (sugerencias.length === 0) {
-                    searchList.style.display = 'none';
-                    return;
-                }
-
-                sugerencias.forEach(producto => {
-                    const li = document.createElement('li');
-                    li.className = 'list-group-item list-group-item-action';
-                    li.textContent = producto.descripcion_producto;
-                    li.dataset.id = producto.id_producto;
-                    li.addEventListener('click', () => redirigirBusqueda(null, producto.id_producto));
-                    searchList.appendChild(li);
-                });
-
-                searchList.style.display = 'block';
-            }
-
-            let timeout;
-            searchInput.addEventListener('input', function() {
-                const termino = this.value.trim();
-
-                if (termino.length < 2) {
-                    searchList.style.display = 'none';
-                    return;
-                }
-
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    fetch(`../controllers/buscar_sugerencias.php?q=${encodeURIComponent(termino)}`)
-                        .then(res => res.json())
-                        .then(data => mostrarSugerencias(data))
-                        .catch(() => searchList.style.display = 'none');
-                }, 200);
-            });
-
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    redirigirBusqueda();
-                }
-            });
-
-            searchButton.addEventListener('click', () => redirigirBusqueda());
-
-            document.addEventListener('click', function(e) {
-                if (!searchInput.contains(e.target) && !searchList.contains(e.target)) {
-                    searchList.style.display = 'none';
-                }
-            });
-        });
-    </script>
+.autocomplete-suggestion:hover,
+.autocomplete-suggestion.selected {
+    background-color: #f0f0f0;
+}
+</style>
 
 </body>
 

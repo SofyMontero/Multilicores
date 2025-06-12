@@ -24,13 +24,19 @@ class Pedido
             // Iniciar transacción
             $this->pdo->beginTransaction();
 
+            // obtener id cliente
+            $sqlidClinte = "SELECT id_cliente FROM clientes WHERE cli_telefono = ?";
+            $stmtCheck = $this->pdo->prepare($sqlidClinte);
+            $stmtCheck->execute([$numCliente]);
+            $clienteInfo = $stmtCheck->fetchColumn();
+
             // Generar número de factura único
             $numeroFactura = 'PED-' . date('Ymd') . '-' . sprintf('%04d', rand(1000, 9999));
 
             // Verificar que el número no exista (prevenir duplicados)
             $sqlCheck = "SELECT COUNT(*) FROM pedidos WHERE ped_numfac = ?";
             $stmtCheck = $this->pdo->prepare($sqlCheck);
-            $stmtCheck->execute([$numeroFactura]);
+            $stmtCheck->execute([$numeroFactura]);             
 
             if ($stmtCheck->fetchColumn() > 0) {
                 // Si existe, generar uno nuevo
@@ -50,8 +56,7 @@ class Pedido
                 ped_total,
                 ped_numCliente
             ) VALUES (?, ?, NOW(), ?, ?,?)";
-
-            $clienteInfo = 1;
+           
 
             $stmtPedido = $this->pdo->prepare($sqlPedido);
             $stmtPedido->execute([
