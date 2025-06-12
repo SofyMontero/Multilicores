@@ -37,6 +37,10 @@ class Pedido
                 $numeroFactura = 'PED-' . date('Ymd') . '-' . sprintf('%04d', rand(1000, 9999));
             }
 
+            $telefono = trim($numCliente);
+            if (substr($telefono, 0, 2) !== '57') {
+                $telefono = '57' . $telefono;
+            }
             // Insertar pedido principal
             $sqlPedido = "INSERT INTO pedidos (
                 ped_cliente, 
@@ -55,7 +59,7 @@ class Pedido
                 1, 
                 $numeroFactura,
                 $total,
-                $numCliente
+                $telefono
 
             ]);
 
@@ -355,5 +359,6 @@ class Pedido
 
         return $errores;
     }
+
 }
 
