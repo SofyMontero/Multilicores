@@ -64,8 +64,8 @@ $productos = $producto->obtenerCategorias();
 
         <div class="modal-body p-4">
           <div class="mb-3">
-            <label for="cli_identificacion" class="form-label">Identificación</label>
-            <input type="text" class="form-control" name="cli_identificacion" id="cli_identificacion" required>
+            
+            <input type="hidden" class="form-control" name="cli_identificacion" id="cli_identificacion" >
           </div>
 
           <div class="mb-3">
@@ -82,11 +82,21 @@ $productos = $producto->obtenerCategorias();
             <label for="cli_direccion" class="form-label">Dirección</label>
             <input type="text" class="form-control" name="cli_direccion" id="cli_direccion" required>
           </div>
-
+          <div class="mb-3">
+          <select class="form-control" name="cli_zona" id="cliente_zona" required>
+                                                <option value="" disabled selected>Seleccione una zona</option>
+                                                <option value="Chapinero">Chapinero</option>
+                                                <option value="Centro">Centro</option>
+                                                <option value="Zona T">Zona T</option>
+                                                <option value="45">45</option>
+                                                <option value="Otra">Otra</option>
+                                                <!-- Agrega más opciones según tu necesidad -->
+                                            </select>
+            </div>
           <!-- ✅ Nuevo campo Bar -->
           <div class="mb-3">
             <label for="nombre_bar" class="form-label">Bar <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="nombre_bar" id="nombre_bar" maxlength="40" required>
+            <input type="text" class="form-control" name="cli_bar" id="cli_bar" maxlength="40" required>
           </div>
         </div>
 
