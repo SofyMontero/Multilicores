@@ -95,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <select class="form-select" id="estado" name="estado">
                             <option value="Activa" selected>Activa</option>
                             <option value="Inactiva">Inactiva</option>
-                            <option value="Programada">Programada</option>
                         </select>
                     </div>
                     
