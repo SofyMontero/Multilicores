@@ -1,3 +1,4 @@
+
 <?php
 class Pedido
 {
@@ -15,7 +16,9 @@ class Pedido
         }
     }
 
+
     public function crearPedido($datosCliente, $productos, $total,$numCliente)
+
     {
         try {
             // Iniciar transacción
@@ -353,3 +356,4 @@ class Pedido
         return $errores;
     }
 }
+

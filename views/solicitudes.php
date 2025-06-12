@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'rechazar_pedido') {
     $pedido_id = $_POST['pedido_id'] ?? '';
     $numCliente = $_POST['numCliente'] ?? '';
-    // $observaciones = $_POST['observaciones'] ?? '';
+    $observaciones = $_POST['motivo_rechazo'] ?? '';
     // if ($Observaciones!="") {
     //     $Observaciones="Observaciones: ".$observaciones;
     // }
@@ -50,18 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (!empty($pedido_id)) {
         try {
             if ($solicitudModel->rechazarPedido($pedido_id)) {
-                $mensaje_exito = "El pedido ha sido rechazado exitosamente";
+                $mensaje_exito = "El pedido ha sido aceptado exitosamente";
+                $plantilla="rechazado";
 
-                require_once '../services/conexion.php';
-                require_once '../services/WhatsappSender.php';
-
-                    $sender = new WhatsappSender($conn);
-                    
-                    $respuestaTexto = "    
-                ❌ Multilicores te informa:
-                Tu pedido ha sido rechazado.             
-                ";
-                $sender->enviar("", $respuestaTexto, $pedido_id, $timestamp, $numCliente,"",1);
+                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$observaciones", "", "$numCliente", $plantilla);
+                error_log(print_r($respuesta, true));
+                echo json_encode($respuesta);
+                exit;
             } else {
                 $errores[] = "Error al rechazar el pedido";
             }
@@ -567,7 +562,9 @@ function cargarProductosPedido(pedidoId) {
             
             data.productos.forEach(producto => {
                 html += `<tr>
+                    <td>${producto.codigo_productos}</td>
                     <td>${producto.nombre_producto}</td>
+                    <td class="text-center">${producto.tipo_producto}</td>
                     <td class="text-center">${producto.cantidad}</td>
                     <td class="text-right">$${parseFloat(producto.precio_unitario).toFixed(2)}</td>
                     <td class="text-right">$${parseFloat(producto.subtotal).toFixed(2)}</td>

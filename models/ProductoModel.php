@@ -271,38 +271,28 @@ class Producto
     /**
      * Actualizar producto por código (para actualizaciones masivas de precios)
      */
-    public function actualizarProductoPorCodigo($codigo_productos, $descripcion_producto, $cantidad_paca_producto, $precio_unidad_producto, $precio_paca_producto, $id_cate_producto, $acti_Unidad, $imagen_producto, $estado_producto)
+
+    public function actualizarProductoPorCodigo($codigo_productos, $precio_unidad_producto, $precio_paca_producto)
     {
         try {
             $query = $this->db->connect()->prepare("
             UPDATE productos SET 
-                descripcion_producto = :descripcion_producto,
-                cantidad_paca_producto = :cantidad_paca_producto,
                 precio_unidad_producto = :precio_unidad_producto,
-                precio_paca_producto = :precio_paca_producto,
-                id_cate_producto = :id_cate_producto,
-                acti_Unidad = :acti_Unidad,
-                imagen_producto = :imagen_producto,
-                estado_producto = :estado_producto
+                precio_paca_producto = :precio_paca_producto
             WHERE codigo_productos = :codigo_productos
         ");
 
             $query->bindParam(':codigo_productos', $codigo_productos, PDO::PARAM_STR);
-            $query->bindParam(':descripcion_producto', $descripcion_producto, PDO::PARAM_STR);
-            $query->bindParam(':cantidad_paca_producto', $cantidad_paca_producto);
             $query->bindParam(':precio_unidad_producto', $precio_unidad_producto);
             $query->bindParam(':precio_paca_producto', $precio_paca_producto);
-            $query->bindParam(':id_cate_producto', $id_cate_producto);
-            $query->bindParam(':acti_Unidad', $acti_Unidad, PDO::PARAM_STR);
-            $query->bindParam(':imagen_producto', $imagen_producto, PDO::PARAM_STR);
-            $query->bindParam(':estado_producto', $estado_producto, PDO::PARAM_STR);
 
             return $query->execute();
         } catch (Exception $e) {
-            error_log("Error en actualizarProductoPorCodigo: " . $e->getMessage());
+            error_log("Error en actualizarPreciosPorCodigo: " . $e->getMessage());
             return false;
         }
     }
+
 
     /**
      * Verificar si existe un producto por código
@@ -325,5 +315,5 @@ class Producto
             error_log("Error en existeProductoPorCodigo: " . $e->getMessage());
             return false;
         }
-    }
+    } 
 }

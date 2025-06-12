@@ -13,22 +13,26 @@ class solicitud
     /**
      * Obtener todos los pedidos pendientes
      */
-     public function obtenerPedidosPendientes()
+    public function obtenerPedidosPendientes()
     {
         $query = $this->pdo->prepare("
-            SELECT 
-                id_pedido, 
-                ped_numfac, 
-                ped_cliente, 
-                ped_fecha, 
-                ped_total, 
-                ped_estado,
-                ped_numCliente
-            FROM pedidos 
-            WHERE ped_estado = 'pendiente' OR ped_estado = '1' OR ped_estado = 1
-            ORDER BY ped_fecha DESC
-        ");
-        
+             SELECT 
+                 id_pedido, 
+                 ped_numfac, 
+                 ped_cliente, 
+                 ped_fecha, 
+                 ped_total, 
+                 ped_estado,
+                 ped_numCliente
+             FROM pedidos 
+             WHERE (
+                 ped_estado = 'pendiente' 
+                 OR ped_estado = '1' 
+                 OR ped_estado = 1
+             ) 
+             AND ped_fecha >= CURDATE()
+             ORDER BY ped_fecha DESC
+            ");
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -51,7 +55,7 @@ class solicitud
             WHERE ped_estado = 'aceptado' OR ped_estado = '2' OR ped_estado = 2
             ORDER BY ped_fecha DESC
         ");
-        
+
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -62,17 +66,20 @@ class solicitud
     public function obtenerProductosPedido($pedido_id)
     {
         $query = $this->pdo->prepare("
-            SELECT 
-                id_producto,
-                nombre_producto,
-                cantidad,
-                precio_unitario,
-                subtotal
-            FROM detalle_pedidos
-            WHERE id_pedido = :pedido_id
-            ORDER BY id_detalle
-        ");
-        
+                 SELECT 
+                     DT.id_producto,
+                     DT.nombre_producto,
+                     DT.tipo_producto,
+                     DT.cantidad,
+                     DT.precio_unitario,
+                     DT.subtotal,
+                     P.codigo_productos
+                 FROM detalle_pedidos DT
+                 INNER JOIN productos P ON DT.id_producto = P.id_producto
+                 WHERE DT.id_pedido = :pedido_id
+                 ORDER BY DT.id_detalle
+                ");
+
         $query->execute(['pedido_id' => $pedido_id]);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -86,7 +93,7 @@ class solicitud
             SELECT * FROM pedidos 
             WHERE id_pedido = :pedido_id
         ");
-        
+
         $query->execute(['pedido_id' => $pedido_id]);
         return $query->fetch(PDO::FETCH_ASSOC);
     }
@@ -155,7 +162,7 @@ class solicitud
             ");
             $query->bindParam(':estado', $estado);
         }
-        
+
         $query->execute();
         $resultado = $query->fetch(PDO::FETCH_ASSOC);
         return $resultado['total'];
@@ -174,7 +181,7 @@ class solicitud
             FROM pedidos 
             GROUP BY ped_estado
         ");
-        
+
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -196,7 +203,7 @@ class solicitud
             WHERE ped_cliente LIKE :cliente
             ORDER BY ped_fecha DESC
         ");
-        
+
         $query->execute(['cliente' => "%$cliente%"]);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -217,24 +224,24 @@ class solicitud
             FROM pedidos 
             WHERE DATE(ped_fecha) BETWEEN :fecha_inicio AND :fecha_fin
         ";
-        
+
         $params = [
             'fecha_inicio' => $fecha_inicio,
             'fecha_fin' => $fecha_fin
         ];
-        
+
         if ($estado) {
             $sql .= " AND ped_estado = :estado";
             $params['estado'] = $estado;
         }
-        
+
         $sql .= " ORDER BY ped_fecha DESC";
-        
+
         $query = $this->pdo->prepare($sql);
         $query->execute($params);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
-       public function obtenerPedidosRechazados()
+    public function obtenerPedidosRechazados()
     {
         $query = $this->pdo->prepare("
             SELECT 
@@ -249,60 +256,60 @@ class solicitud
             WHERE ped_estado = 'rechazado' OR ped_estado = '3' OR ped_estado = 3
             ORDER BY ped_fecha DESC
         ");
-        
+
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
-   public function enviarPromo($idPromo, $descripcion, $imagen, $telefono, $plantilla): array
-{
-    $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
+    public function enviarPromo($idPromo, $descripcion, $imagen, $telefono, $plantilla): array
+    {
+        $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
 
-    $data = [
-        'telefono' => $telefono,
-        'texto' => "$descripcion",
-        'imagen1' => "", // opcional
-        'plantilla' => "$plantilla"
-    ];
+        $data = [
+            'telefono' => $telefono,
+            'texto' => "$descripcion",
+            'imagen1' => "", // opcional
+            'plantilla' => "$plantilla"
+        ];
 
-    $data_json = json_encode($data);
+        $data_json = json_encode($data);
 
-    $curl = curl_init();
+        $curl = curl_init();
 
-    curl_setopt_array($curl, [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => $data_json,
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer Multilicoreslicor25'
-        ],
-    ]);
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $data_json,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer Multilicoreslicor25'
+            ],
+        ]);
 
-    $response = curl_exec($curl);
-    $error = curl_error($curl);
-    curl_close($curl);
+        $response = curl_exec($curl);
+        $error = curl_error($curl);
+        curl_close($curl);
 
-    $resultado = $error ?: $response;
+        $resultado = $error ?: $response;
 
-    $resultados[] = [
-        'cliente' => $telefono,
-        'telefono' => $telefono,
-        'resultado' => $resultado
-    ];
+        $resultados[] = [
+            'cliente' => $telefono,
+            'telefono' => $telefono,
+            'resultado' => $resultado
+        ];
 
-    // 📝 Crear log de la solicitud
-    $logData = "=============================\n";
-    $logData .= "Fecha: " . date("Y-m-d H:i:s") . "\n";
-    $logData .= "Telefono: $telefono\n";
-    $logData .= "Plantilla: $plantilla\n";
-    $logData .= "Data JSON Enviado: $data_json\n";
-    $logData .= "Respuesta: $resultado\n";
-    $logData .= "=============================\n\n";
+        // 📝 Crear log de la solicitud
+        $logData = "=============================\n";
+        $logData .= "Fecha: " . date("Y-m-d H:i:s") . "\n";
+        $logData .= "Telefono: $telefono\n";
+        $logData .= "Plantilla: $plantilla\n";
+        $logData .= "Texto: $descripcion\n";
+        $logData .= "Data JSON Enviado: $data_json\n";
+        $logData .= "Respuesta: $resultado\n";
+        $logData .= "=============================\n\n";
 
-    file_put_contents(__DIR__ . "/log_envios.txt", $logData, FILE_APPEND);
+        file_put_contents(__DIR__ . "/log_envios.txt", $logData, FILE_APPEND);
 
-    return $resultados;
-}
-    
+        return $resultados;
+    }
 }

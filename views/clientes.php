@@ -1,41 +1,68 @@
-<?php 
-include_once "header.php"; 
-require_once "../models/database.php";
+<?php
+// Mostrar errores en entorno de desarrollo (comentarlos en producción)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Procesamiento del formulario de inserción
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'insert') {
-    // Obtener datos del formulario
-    $razon_social = $_POST['cliente_nombre'] ?? '';
-    $telefono = $_POST['cliente_telefono'] ?? '';
-    $direccion = $_POST['cliente_direccion'] ?? '';
-    $zona = $_POST['cliente_zona'] ?? '';
-    
-    // Validación básica
-    $errores = [];
-    if (empty($razon_social)) {
-        $errores[] = "La razón social es obligatoria";
-    }
-    
-    // Si no hay errores, proceder con la inserción
-    if (empty($errores)) {
-        // Preparar la consulta SQL
-        // $sql_insert = "INSERT INTO clientes (razon_social, telefono, direccion, zona, fecha_registro) 
-        //                VALUES ('$razon_social', '$telefono', '$direccion', '$zona', NOW())";
-        
-        // if ($conexion->query($sql_insert) === TRUE) {
-        //     $mensaje_exito = "El cliente ha sido registrado exitosamente";
-        // } else {
-        //     $errores[] = "Error al insertar: " . $conexion->error;
-        // }
-        
-        // Simulación (eliminar en producción)
-        $mensaje_exito = "El cliente ha sido registrado exitosamente";
+include_once "header.php";
+require_once "../models/database.php";
+require_once "../models/BarModel.php";
+
+$bar = new Bar();
+$clientes = $bar->obtenerClientes();
+$errores = []; // 🔸 Inicializamos el arreglo de errores
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && $_POST["action"] === "insert") {
+    $razon_social = trim($_POST["cliente_nombre"]);
+    $telefono = trim($_POST["cliente_telefono"]);
+    $direccion = trim($_POST["cliente_direccion"]);
+    $zona = trim($_POST["cliente_zona"]);
+    $nombre_bar = trim($_POST["nombre_bar"]);
+    $bar_id = trim($_POST["bar_id"]);
+
+    try {
+        // Si no se seleccionó un bar de la lista, verificar si existe por nombre
+        if (empty($bar_id)) {
+            if (!$bar->existeBar($nombre_bar)) {
+                $barInsertado = $bar->insertarBar(
+                    $nombre_bar,
+                    $direccion,
+                    $telefono,
+                    "", // email opcional
+                    "Agregado desde cliente"
+                );
+                if ($barInsertado) {
+                    $bar_id = $bar->obtenerUltimoIdInsertado();
+                } else {
+                    $errores[] = "No se pudo insertar el bar.";
+                }
+            } else {
+                // Obtener el ID del bar existente
+                $barExistente = $bar->buscarBaresPorNombre($nombre_bar);
+                if (count($barExistente) > 0) {
+                    $bar_id = $barExistente[0]["id_bar"];
+                } else {
+                    $errores[] = "No se encontró el bar existente.";
+                }
+            }
+        }
+
+        if (empty($errores)) {
+            $clienteInsertado = $bar->insertarCliente($bar_id, $razon_social, $telefono, $direccion, $zona);
+
+            if ($clienteInsertado) {
+                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
+                exit;
+            } else {
+                $errores[] = "No se pudo registrar el cliente.";
+            }
+        }
+    } catch (Exception $e) {
+        $errores[] = "Error interno: " . $e->getMessage();
+        // Opcional: guarda el error en un archivo log
+        file_put_contents("log.txt", "[" . date("Y-m-d H:i:s") . "] " . $e->getMessage() . PHP_EOL, FILE_APPEND);
     }
 }
-
-// Consulta para obtener los clientes existentes
-// $sql = "SELECT id, razon_social, telefono, direccion, zona, fecha_registro FROM clientes ORDER BY id DESC";
-// $resultado = $conexion->query($sql);
 ?>
 
 <!-- Page header -->
@@ -49,34 +76,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 </div>
 
 <!-- Mensaje de éxito o error -->
-<?php if (isset($mensaje_exito)): ?>
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <strong>¡Éxito!</strong> <?php echo $mensaje_exito; ?>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+<?php if (isset($_GET['success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>¡Éxito!</strong> Cliente registrado correctamente.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
 <?php endif; ?>
 
 <?php if (!empty($errores)): ?>
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <strong>¡Error!</strong>
-    <ul>
-        <?php foreach ($errores as $error): ?>
-            <li><?php echo $error; ?></li>
-        <?php endforeach; ?>
-    </ul>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>¡Error!</strong>
+        <ul>
+            <?php foreach ($errores as $error): ?>
+                <li><?php echo $error; ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
 <?php endif; ?>
+
+
 
 <!-- Content here-->
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="card">
+
                 <div class="card-header">
                     <h5 class="card-title"><i class="fas fa-plus"></i> &nbsp; Nuevo Cliente</h5>
                 </div>
@@ -86,13 +117,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <fieldset>
                             <legend><i class="fas fa-user"></i> &nbsp; Información básica</legend>
                             <div class="container-fluid">
-                                <div class="row">								
+                                <div class="row">
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-group position-relative">
+                                            <label for="nombre_bar" class="bmd-label-floating">Bar <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="nombre_bar" id="nombre_bar" maxlength="40" required>
+                                            <input type="hidden" name="bar_id" id="bar_id" value="">
+                                            <!-- Lista de sugerencias -->
+                                            <div id="autocomplete-list" class="autocomplete-suggestions" style="display: none;">
+                                                <!-- Las sugerencias se cargarán aquí dinámicamente -->
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="col-12 col-md-6">
                                         <div class="form-group">
-                                            <label for="cliente_nombre" class="bmd-label-floating">Razón Social <span class="text-danger">*</span></label>
-                                            <input type="text" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{1,40}" class="form-control" name="cliente_nombre" id="cliente_nombre" maxlength="40" required>
+                                            <label for="cliente_nombre" class="bmd-label-floating">Cliente</label>
+                                            <input type="text" class="form-control" name="cliente_nombre" id="cliente_nombre" maxlength="20">
                                         </div>
-                                    </div>								
+                                    </div>
                                     <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="cliente_telefono" class="bmd-label-floating">Teléfono</label>
@@ -111,6 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                             <input type="text" pattern="[a-zA-Z0-9-]{1,27}" class="form-control" name="cliente_zona" id="cliente_zona" maxlength="27">
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </fieldset>
@@ -150,100 +193,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                // Mostrar los datos de clientes desde la base de datos
-                                // if($resultado && $resultado->num_rows > 0) {
-                                //     $contador = 1;
-                                //     while($row = $resultado->fetch_assoc()) {
-                                //         echo '<tr class="text-center">';
-                                //         echo '<td>'.$contador.'</td>';
-                                //         echo '<td>'.$row['razon_social'].'</td>';
-                                //         echo '<td>'.$row['telefono'] ? $row['telefono'] : 'N/A'.'</td>';
-                                //         echo '<td>'.$row['direccion'] ? $row['direccion'] : 'N/A'.'</td>';
-                                //         echo '<td>'.$row['zona'] ? $row['zona'] : 'N/A'.'</td>';
-                                //         echo '<td>'.date('d/m/Y', strtotime($row['fecha_registro'])).'</td>';
-                                //         echo '<td>';
-                                //         echo '<a href="cliente-edit.php?id='.$row['id'].'" class="btn btn-success btn-sm mr-1" title="Editar">';
-                                //         echo '<i class="fas fa-edit"></i>';
-                                //         echo '</a>';
-                                //         echo '<button type="button" class="btn btn-danger btn-sm delete-btn" data-id="'.$row['id'].'" title="Eliminar">';
-                                //         echo '<i class="fas fa-trash-alt"></i>';
-                                //         echo '</button>';
-                                //         echo '</td>';
-                                //         echo '</tr>';
-                                //         $contador++;
-                                //     }
-                                // } else {
-                                //     echo '<tr><td colspan="7" class="text-center">No hay clientes registrados</td></tr>';
-                                // }
-                                ?>
-                                
-                                <!-- Ejemplos estáticos -->
-                                <tr class="text-center">
-                                    <td>1</td>
-                                    <td>Empresa XYZ S.A.</td>
-                                    <td>+57 301 234 5678</td>
-                                    <td>Calle 123 #45-67</td>
-                                    <td>Norte</td>
-                                    <td>25/04/2025</td>
-                                    <td>
-                                        <a href="cliente-edit.php?id=1" class="btn btn-success btn-sm mr-1" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="1" title="Eliminar">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="text-center">
-                                    <td>2</td>
-                                    <td>Comercial ABC Ltda.</td>
-                                    <td>+57 320 987 6543</td>
-                                    <td>Avenida Principal #78-90</td>
-                                    <td>Sur</td>
-                                    <td>20/04/2025</td>
-                                    <td>
-                                        <a href="cliente-edit.php?id=2" class="btn btn-success btn-sm mr-1" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="2" title="Eliminar">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="text-center">
-                                    <td>3</td>
-                                    <td>Distribuidora Centro</td>
-                                    <td>+57 310 456 7890</td>
-                                    <td>Carrera 45 #12-34</td>
-                                    <td>Centro</td>
-                                    <td>18/04/2025</td>
-                                    <td>
-                                        <a href="cliente-edit.php?id=3" class="btn btn-success btn-sm mr-1" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="3" title="Eliminar">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="text-center">
-                                    <td>4</td>
-                                    <td>Almacenes del Valle</td>
-                                    <td>+57 315 789 0123</td>
-                                    <td>Diagonal 67 #89-12</td>
-                                    <td>Occidente</td>
-                                    <td>15/04/2025</td>
-                                    <td>
-                                        <a href="cliente-edit.php?id=4" class="btn btn-success btn-sm mr-1" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="4" title="Eliminar">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                                <?php foreach ($clientes as $index => $cliente): ?>
+                                    <tr class="text-center">
+                                        <td><?= $index + 1 ?></td>
+                                        <td><?= htmlspecialchars($cliente['razon_social']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['telefono']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['direccion']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['zona']) ?></td>
+                                        <td><?= date('d/m/Y', strtotime($cliente['fecha_registro'])) ?></td>
+                                        <td>
+                                            <a href="cliente-edit.php?id=<?= $cliente['id_cliente'] ?>" class="btn btn-success btn-sm mr-1" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="<?= $cliente['id_cliente'] ?>" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
                             </tbody>
+
                         </table>
                     </div>
                 </div>
@@ -292,9 +261,172 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </div>
 </div>
 
+<!-- Estilos CSS para el autocompletable -->
+<style>
+    .autocomplete-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ccc;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .autocomplete-suggestion {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        color: #333;
+    }
+
+    .autocomplete-suggestion:hover,
+    .autocomplete-suggestion.selected {
+        background-color: #f0f0f0;
+    }
+
+    .autocomplete-suggestion:last-child {
+        border-bottom: none;
+    }
+
+    .form-group.position-relative {
+        position: relative;
+    }
+</style>
+
 <script>
-    // Script para manejar la confirmación de eliminación
     document.addEventListener('DOMContentLoaded', function() {
+        const clienteNombreInput = document.getElementById('nombre_bar');
+        const barIdInput = document.getElementById('bar_id');
+        const autocompleteList = document.getElementById('autocomplete-list');
+        let selectedIndex = -1;
+
+        // Función para buscar bares
+        function buscarBares(query) {
+            if (query.length < 2) {
+                autocompleteList.style.display = 'none';
+                return;
+            }
+
+            // Realizar petición AJAX
+            fetch('../controllers/buscar_bar.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'query=' + encodeURIComponent(query)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    mostrarSugerencias(data);
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    autocompleteList.style.display = 'none';
+                });
+        }
+
+        // Función para mostrar sugerencias
+        function mostrarSugerencias(data) {
+            const autocompleteList = document.getElementById('autocomplete-list');
+            autocompleteList.innerHTML = ''; // Limpia anteriores
+
+            if (!Array.isArray(data) || data.length === 0) {
+                autocompleteList.style.display = 'none';
+                return;
+            }
+
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('autocomplete-suggestion');
+                div.textContent = item.label || item.value || 'Sin nombre';
+
+                div.addEventListener('click', () => {
+                    document.getElementById('nombre_bar').value = item.label;
+                    document.getElementById('bar_id').value = item.id;
+                    autocompleteList.innerHTML = '';
+                    autocompleteList.style.display = 'none';
+                });
+
+                autocompleteList.appendChild(div);
+            });
+
+            autocompleteList.style.display = 'block';
+        }
+
+        // Función para seleccionar un bar
+        function seleccionarBar(element) {
+            clienteNombreInput.value = element.dataset.nombre;
+            barIdInput.value = element.dataset.id;
+
+            // Auto-llenar otros campos si están disponibles
+            if (element.dataset.direccion) {
+                document.getElementById('cliente_direccion').value = element.dataset.direccion;
+            }
+            if (element.dataset.telefono) {
+                document.getElementById('cliente_telefono').value = element.dataset.telefono;
+            }
+
+            autocompleteList.style.display = 'none';
+        }
+
+        // Event listeners
+        clienteNombreInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            buscarBares(query);
+        });
+
+        clienteNombreInput.addEventListener('keydown', function(e) {
+            const suggestions = autocompleteList.querySelectorAll('.autocomplete-suggestion');
+
+            if (suggestions.length === 0) return;
+
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1) % suggestions.length;
+                    updateSelection(suggestions);
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedIndex = selectedIndex <= 0 ? suggestions.length - 1 : selectedIndex - 1;
+                    updateSelection(suggestions);
+                    break;
+
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                        seleccionarBar(suggestions[selectedIndex]);
+                    }
+                    break;
+
+                case 'Escape':
+                    autocompleteList.style.display = 'none';
+                    selectedIndex = -1;
+                    break;
+            }
+        });
+
+        // Función para actualizar la selección visual
+        function updateSelection(suggestions) {
+            suggestions.forEach((suggestion, index) => {
+                suggestion.classList.toggle('selected', index === selectedIndex);
+            });
+        }
+
+        // Ocultar sugerencias al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!clienteNombreInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+                autocompleteList.style.display = 'none';
+            }
+        });
+
         // Configurar los botones de eliminación para abrir el modal
         const deleteButtons = document.querySelectorAll('.delete-btn');
         deleteButtons.forEach(button => {
@@ -304,12 +436,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $('#deleteModal').modal('show');
             });
         });
+
+        // Limpiar campos al reset
+        document.querySelector('button[type="reset"]').addEventListener('click', function() {
+            setTimeout(() => {
+                barIdInput.value = '';
+                autocompleteList.style.display = 'none';
+            }, 10);
+        });
     });
 </script>
 
 </section>
 </main>
-	
+
 <?php
 include_once "footer.php";
 ?>

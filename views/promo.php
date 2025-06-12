@@ -124,17 +124,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                         <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Descripción detallada de la promoción" required></textarea>
                                         <div class="form-group mt-2">
                                         <button type="button" id="abrir-emojis" class="btn btn-sm btn-secondary">😊 Agregar Emoji</button>
-                                        <div id="emoji-box" style="display: none; position: absolute; z-index: 1000; background: #fff; border: 1px solid #ccc; padding: 10px; max-width: 250px; max-height: 200px; overflow-y: auto; border-radius: 8px;">
-                                            <!-- Emojis aquí -->
-                                            <span class="emoji">😀</span> <span class="emoji">😁</span> <span class="emoji">😂</span>
-                                            <span class="emoji">🤣</span> <span class="emoji">😊</span> <span class="emoji">😍</span>
-                                            <span class="emoji">😎</span> <span class="emoji">😢</span> <span class="emoji">😡</span>
-                                            <span class="emoji">🥳</span> <span class="emoji">😴</span> <span class="emoji">👍</span>
-                                            <span class="emoji">🙏</span> <span class="emoji">🔥</span> <span class="emoji">🌟</span>
-                                            <span class="emoji">💯</span> <span class="emoji">🎉</span> <span class="emoji">🚀</span>
-                                            <span class="emoji">💖</span> <span class="emoji">🍕</span> <span class="emoji">🌈</span>
-                                            <span class="emoji">🐶</span> <span class="emoji">🐱</span> <span class="emoji">⚽</span>
-                                            <!-- Agrega más si quieres -->
+                                        <div id="emoji-box" style="display: none; position: absolute; z-index: 1000; background: #fff; border: 1px solid #ccc; padding: 10px; max-width: 280px; max-height: 220px; overflow-y: auto; border-radius: 8px;">
+                                        <!-- Emojis de licor y fiesta -->
+                                        <span class="emoji">🍺</span> <span class="emoji">🍻</span> <span class="emoji">🥂</span>
+                                        <span class="emoji">🍷</span> <span class="emoji">🥃</span> <span class="emoji">🍸</span>
+                                        <span class="emoji">🍹</span> <span class="emoji">🍾</span> <span class="emoji">🧉</span>
+                                        <span class="emoji">🍶</span> <span class="emoji">🥴</span> <span class="emoji">😵</span>
+
+                                        <!-- Fiesta y celebración -->
+                                        <span class="emoji">🎉</span> <span class="emoji">🎊</span> <span class="emoji">🎈</span>
+                                        <span class="emoji">🥳</span> <span class="emoji">🔥</span> <span class="emoji">🎵</span>
+                                        <span class="emoji">🎶</span> <span class="emoji">💃</span> <span class="emoji">🕺</span>
+
+                                        <!-- Emociones y reacciones -->
+                                        <span class="emoji">😎</span> <span class="emoji">😍</span> <span class="emoji">😂</span>
+                                        <span class="emoji">🤣</span> <span class="emoji">😁</span> <span class="emoji">🥰</span>
+                                        <span class="emoji">🤩</span> <span class="emoji">💯</span> <span class="emoji">👍</span>
+
+                                        <!-- Comida y complementos -->
+                                        <span class="emoji">🍕</span> <span class="emoji">🌮</span> <span class="emoji">🍔</span>
+                                        <span class="emoji">🍟</span> <span class="emoji">🌭</span> <span class="emoji">🍗</span>
+
+                                        <!-- Otros divertidos -->
+                                        <span class="emoji">🚬</span> <span class="emoji">💵</span> <span class="emoji">🤑</span>
+                                        <span class="emoji">💥</span> <span class="emoji">💫</span> <span class="emoji">🌟</span>
+                                        <span class="emoji">🎯</span> <span class="emoji">📸</span> <span class="emoji">🕹️</span>
                                         </div>
                                     
                                     </div>

@@ -191,6 +191,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]
             ]);
         break;
+                  //Servicio recogido
+        case 'rechazado':
+            $textoPromo = $data['texto'];
+
+        // Servicio Rechazado
+        $mensaje = json_encode([
+            "messaging_product" => "whatsapp",
+            "to" => $telefonoCliente,
+            "type" => "template",
+            "template" => [
+                "name" => "rechazado",  // Nombre de la plantilla
+                "language" => ["code" => "es"],  // Idioma de la plantilla
+                "components" => [
+                    [
+                        "type" => "body",  // El cuerpo de la plantilla
+                        "parameters" => [
+                            [
+                                "type" => "text",
+                                "text" => $textoPromo  // Parámetro dinámico para el número de guía
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        break;
+        case 'promocion':
+            if (!isset($data['imagen1']) || !isset($data['texto'])) {
+
+                echo json_encode(['error' => 'Faltan datos: imagen o texto']);
+                exit;
+            }
+            $imagen=$data['imagen1'];
+            $texto=$data['texto'];
+            $mensaje = json_encode([
+                    "messaging_product" => "whatsapp",
+                    "to" => $telefonoCliente,
+                    "type" => "template",
+                    "template" => [
+                        "name" => "devuelto",
+                        "language" => [
+                            "code" => "es"
+                        ],
+                        "components" => [
+                            [
+                                "type" => "header",
+                                "parameters" => [
+                                    [
+                                        "type" => "image",
+                                        "image" => [
+                                            "link" => "https://multilicoreschapinero.com/sistema/uploads/$imagen"  // URL pública de la imagen
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            [
+                                "type" => "body",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => "$texto"  // Valor para la variable {{1}}
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+        break;
+
+
+
+
     }
 
         // TOKEN QUE NOS DA FACEBOOK
