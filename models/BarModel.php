@@ -140,9 +140,13 @@ class Bar
     public function obtenerClientes()
     {
         $query = $this->pdo->prepare("
-        SELECT id_cliente, cli_nombre, cli_telefono, cli_direccion, cli_zona, cli_fecha_registro, cli_Bar
-        FROM clientes
-        ORDER BY cli_fecha_registro DESC
+        SELECT  C.id_cliente, C.cli_nombre, C.cli_telefono, C.cli_direccion, C.cli_zona, C.cli_fecha_registro, B.nombre_bar
+            FROM 
+                clientes C
+            INNER JOIN 
+                bares B ON C.cli_Bar = B.id_bar
+            ORDER BY 
+                C.cli_fecha_registro DESC;
     ");
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);

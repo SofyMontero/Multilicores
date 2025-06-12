@@ -233,7 +233,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
                                 <?php foreach ($clientes as $index => $cliente): ?>
                                     <tr class="text-center">
                                         <td><?= $index + 1 ?></td>
-                                        <td><?= htmlspecialchars($cliente['cli_Bar']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['nombre_bar']) ?></td>
                                         <td><?= htmlspecialchars($cliente['cli_nombre']) ?></td>
                                         <td><?= htmlspecialchars($cliente['cli_telefono']) ?></td>
                                         <td><?= htmlspecialchars($cliente['cli_direccion']) ?></td>
