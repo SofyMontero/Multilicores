@@ -9,7 +9,14 @@ require_once "../models/database.php";
 require_once "../models/BarModel.php";
 
 $bar = new Bar();
-$clientes = $bar->obtenerClientes();
+$pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
+$limite = 10; // cantidad por página
+$offset = ($pagina - 1) * $limite;
+
+$totalClientes = $bar->contarTotalClientes();
+$totalPaginas = ceil($totalClientes / $limite);
+
+$clientes = $bar->obtenerClientesPaginado($limite, $offset);
 $errores = []; // 🔸 Inicializamos el arreglo de errores
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["action"] === "insert") {
@@ -265,16 +272,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
                     </div>
                 </div>
                 <div class="card-footer">
-                    <nav aria-label="Page navigation example">
+                    <nav aria-label="Page navigation">
                         <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                            <li class="page-item <?= $pagina <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?pagina=<?= $pagina - 1 ?>">Anterior</a>
                             </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Siguiente</a>
+
+                            <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                                <li class="page-item <?= $pagina == $i ? 'active' : '' ?>">
+                                    <a class="page-link" href="?pagina=<?= $i ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <li class="page-item <?= $pagina >= $totalPaginas ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?pagina=<?= $pagina + 1 ?>">Siguiente</a>
                             </li>
                         </ul>
                     </nav>

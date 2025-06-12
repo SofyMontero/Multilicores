@@ -180,8 +180,8 @@ class Bar
         return $query->execute(["id_cliente" => $id_cliente]);
     }
     public function actualizarCliente($id_cliente, $bar_id, $nombre, $telefono, $direccion, $zona)
-{
-    $query = $this->pdo->prepare("
+    {
+        $query = $this->pdo->prepare("
         UPDATE clientes SET
             cli_Bar = :bar_id,
             cli_nombre = :nombre,
@@ -191,17 +191,41 @@ class Bar
         WHERE id_cliente = :id_cliente
     ");
 
-    return $query->execute([
-        'bar_id'     => $bar_id,
-        'nombre'     => $nombre,
-        'telefono'   => $telefono,
-        'direccion'  => $direccion,
-        'zona'       => $zona,
-        'id_cliente' => $id_cliente
-    ]);
-}
+        return $query->execute([
+            'bar_id'     => $bar_id,
+            'nombre'     => $nombre,
+            'telefono'   => $telefono,
+            'direccion'  => $direccion,
+            'zona'       => $zona,
+            'id_cliente' => $id_cliente
+        ]);
+    }
     public function obtenerUltimoIdInsertado()
     {
         return $this->pdo->lastInsertId();
+    }
+
+    public function obtenerClientesPaginado($limite, $offset)
+    {
+        $query = $this->pdo->prepare("
+        SELECT c.*, b.nombre_bar 
+        FROM clientes c
+        INNER JOIN bares b ON c.cli_Bar = b.id_bar
+        ORDER BY c.id_cliente DESC
+        LIMIT :limite OFFSET :offset
+    ");
+
+        $query->bindParam(':limite', $limite, PDO::PARAM_INT);
+        $query->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $query->execute();
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function contarTotalClientes()
+    {
+        $query = $this->pdo->query("SELECT COUNT(*) as total FROM clientes");
+        $resultado = $query->fetch(PDO::FETCH_ASSOC);
+        return $resultado['total'] ?? 0;
     }
 }
