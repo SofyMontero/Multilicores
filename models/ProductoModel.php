@@ -316,4 +316,17 @@ class Producto
             return false;
         }
     } 
+    public function clienteExistePorTelefono($telefono)
+    {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM clientes WHERE cli_telefono = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$telefono]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return intval($resultado['total']) > 0;
+        } catch (Exception $e) {
+            error_log("Error en clienteExistePorTelefono: " . $e->getMessage());
+            return false;
+        }
+    }
 }
