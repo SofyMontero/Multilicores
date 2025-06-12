@@ -290,7 +290,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td><span class="fw-medium">${promo.pro_nombre}</span></td>
                     <td>${promo.pro_patrocinador || '-'}</td>
                     <td><span class="status-badge ${statusClass}">${promo.pro_estado}</span></td>
-                    <td><span class="text-muted" style="max-width: 200px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${promo.pro_descripcion}</span></td>
+                    <td>
+                      <span class="text-muted" style="display: inline-block; white-space: normal;">
+                        ${promo.pro_descripcion}
+                      </span>
+                    </td>
                     <td>
                         <div style="width: 50px; height: 50px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                             <img src="../uploads/${promo.pro_imagen}" style="width: 100%; height: 100%; object-fit: cover;" alt="Promoción">
