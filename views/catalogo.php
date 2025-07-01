@@ -23,7 +23,7 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
 
 <!DOCTYPE html>
 <html lang="es">
-
+<link rel="icon" type="image/png" href="../assets/img/logoM.png">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
