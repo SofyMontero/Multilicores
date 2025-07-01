@@ -137,7 +137,7 @@ $productos = $producto->obtenerCategorias();
 <script>
   const totalGeneral = <?php echo json_encode($_POST['total_general'] ?? 0); ?>;
   const productosPOST = <?php echo json_encode($productosPOST); ?>;
-  console.log("🧾 ProductosPOST:", productosPOST);
+  const observaciones = <?php echo json_encode($_POST['observaciones'] ?? ''); ?>;
 
   function enviarPedido() {
     if (!numcliente) { // Asegúrate de tener el número
@@ -175,7 +175,16 @@ $productos = $producto->obtenerCategorias();
     inputTotal.value = totalGeneral;
     form.appendChild(inputTotal);
 
-    // 5. Envía
+    // 5. Agrega observaciones
+    if (observaciones != null || observaciones != undefined || observaciones != "") {
+      const inputObservaciones = document.createElement("input");
+      inputObservaciones.type = "hidden";
+      inputObservaciones.name = "observaciones";
+      inputObservaciones.value = observaciones;
+      form.appendChild(inputObservaciones);
+    }
+
+    // 6. Envía
     document.body.appendChild(form);
     form.submit();
   }
@@ -371,95 +380,96 @@ $productos = $producto->obtenerCategorias();
   });
 
   /////////////autocompletar///////////
-  document.addEventListener('DOMContentLoaded', function () {
-  const inputBar = document.getElementById('cli_bar');
-  const hiddenBarId = document.getElementById('cli_bar_id');
-  const list = document.getElementById('cli_bar_autocomplete');
+  document.addEventListener('DOMContentLoaded', function() {
+    const inputBar = document.getElementById('cli_bar');
+    const hiddenBarId = document.getElementById('cli_bar_id');
+    const list = document.getElementById('cli_bar_autocomplete');
 
-  let selectedIndex = -1;
+    let selectedIndex = -1;
 
-  function buscarBares(query) {
-    if (query.length < 2) {
-      list.style.display = 'none';
-      return;
-    }
-
-    fetch('../controllers/buscar_bar.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'query=' + encodeURIComponent(query)
-    })
-    .then(res => res.json())
-    .then(data => mostrarSugerencias(data))
-    .catch(() => list.style.display = 'none');
-  }
-
-  function mostrarSugerencias(data) {
-    list.innerHTML = '';
-    if (!Array.isArray(data) || data.length === 0) {
-      list.style.display = 'none';
-      return;
-    }
-
-    data.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'autocomplete-suggestion';
-      div.textContent = item.label || item.value;
-      div.dataset.id = item.id;
-
-      div.addEventListener('click', () => {
-        inputBar.value = item.label;
-        hiddenBarId.value = item.id;
+    function buscarBares(query) {
+      if (query.length < 2) {
         list.style.display = 'none';
+        return;
+      }
+
+      fetch('../controllers/buscar_bar.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'query=' + encodeURIComponent(query)
+        })
+        .then(res => res.json())
+        .then(data => mostrarSugerencias(data))
+        .catch(() => list.style.display = 'none');
+    }
+
+    function mostrarSugerencias(data) {
+      list.innerHTML = '';
+      if (!Array.isArray(data) || data.length === 0) {
+        list.style.display = 'none';
+        return;
+      }
+
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'autocomplete-suggestion';
+        div.textContent = item.label || item.value;
+        div.dataset.id = item.id;
+
+        div.addEventListener('click', () => {
+          inputBar.value = item.label;
+          hiddenBarId.value = item.id;
+          list.style.display = 'none';
+        });
+
+        list.appendChild(div);
       });
 
-      list.appendChild(div);
+      list.style.display = 'block';
+    }
+
+    inputBar.addEventListener('input', () => {
+      const value = inputBar.value.trim();
+      hiddenBarId.value = ''; // Reinicia ID si cambia texto
+      buscarBares(value);
     });
 
-    list.style.display = 'block';
-  }
+    inputBar.addEventListener('keydown', (e) => {
+      const suggestions = list.querySelectorAll('.autocomplete-suggestion');
+      if (suggestions.length === 0) return;
 
-  inputBar.addEventListener('input', () => {
-    const value = inputBar.value.trim();
-    hiddenBarId.value = ''; // Reinicia ID si cambia texto
-    buscarBares(value);
-  });
-
-  inputBar.addEventListener('keydown', (e) => {
-    const suggestions = list.querySelectorAll('.autocomplete-suggestion');
-    if (suggestions.length === 0) return;
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        selectedIndex = (selectedIndex + 1) % suggestions.length;
-        actualizarSeleccion(suggestions);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        selectedIndex = (selectedIndex - 1 + suggestions.length) % suggestions.length;
-        actualizarSeleccion(suggestions);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (selectedIndex >= 0) suggestions[selectedIndex].click();
-        break;
-    }
-  });
-
-  function actualizarSeleccion(suggestions) {
-    suggestions.forEach((el, i) => {
-      el.classList.toggle('selected', i === selectedIndex);
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          selectedIndex = (selectedIndex + 1) % suggestions.length;
+          actualizarSeleccion(suggestions);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          selectedIndex = (selectedIndex - 1 + suggestions.length) % suggestions.length;
+          actualizarSeleccion(suggestions);
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (selectedIndex >= 0) suggestions[selectedIndex].click();
+          break;
+      }
     });
-  }
 
-  document.addEventListener('click', (e) => {
-    if (!list.contains(e.target) && e.target !== inputBar) {
-      list.style.display = 'none';
+    function actualizarSeleccion(suggestions) {
+      suggestions.forEach((el, i) => {
+        el.classList.toggle('selected', i === selectedIndex);
+      });
     }
-  });
-});
 
+    document.addEventListener('click', (e) => {
+      if (!list.contains(e.target) && e.target !== inputBar) {
+        list.style.display = 'none';
+      }
+    });
+  });
 </script>
 
 <style>
@@ -471,18 +481,18 @@ $productos = $producto->obtenerCategorias();
     max-height: 200px;
     overflow-y: auto;
     width: 100%;
-}
+  }
 
-.autocomplete-suggestion {
+  .autocomplete-suggestion {
     padding: 10px;
     cursor: pointer;
     border-bottom: 1px solid #eee;
-}
+  }
 
-.autocomplete-suggestion:hover,
-.autocomplete-suggestion.selected {
+  .autocomplete-suggestion:hover,
+  .autocomplete-suggestion.selected {
     background-color: #f0f0f0;
-}
+  }
 </style>
 
 </body>

@@ -17,7 +17,7 @@ class Pedido
     }
 
 
-    public function crearPedido($datosCliente, $productos, $total,$numCliente)
+    public function crearPedido($datosCliente, $productos, $total,$numCliente,$observaciones)
 
     {
         try {
@@ -54,8 +54,9 @@ class Pedido
                 ped_fecha, 
                 ped_numfac,
                 ped_total,
-                ped_numCliente
-            ) VALUES (?, ?, NOW(), ?, ?,?)";
+                ped_numCliente,
+                ped_observacion
+            ) VALUES (?, ?, NOW(), ?, ?,?,?)";
            
 
             $stmtPedido = $this->pdo->prepare($sqlPedido);
@@ -64,7 +65,8 @@ class Pedido
                 1, 
                 $numeroFactura,
                 $total,
-                $telefono
+                $telefono,
+                $observaciones
 
             ]);
 

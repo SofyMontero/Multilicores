@@ -17,33 +17,40 @@ try {
     // Obtener datos del formulario
     $productos = $_POST['productos'] ?? [];
     $totalGeneral = floatval($_POST['total_general'] ?? 0);
-    
+    $observaciones = $_POST['observaciones'] ?? '';
+
+
+
+
+
     // Validar que hay productos
     if (empty($productos)) {
         throw new Exception('No se recibieron productos');
     }
-    
+
     // Validar estructura de productos
     foreach ($productos as $index => $producto) {
-        if (empty($producto['id']) || empty($producto['nombre']) || 
-            empty($producto['tipo']) || empty($producto['cantidad'])) {
+        if (
+            empty($producto['id']) || empty($producto['nombre']) ||
+            empty($producto['tipo']) || empty($producto['cantidad'])
+        ) {
             throw new Exception("Producto en posición $index tiene datos incompletos");
         }
     }
-    
+
     // Datos del cliente simplificados (sin formulario)
     $numCliente = $_POST['numCliente'] ?? 0;
     $datosCliente = [
         'nombre' => 'Cliente Web',
         'email' => 'pedido@multilicores.com'
     ];
-    
+
     // Instanciar modelo de pedidos
-    $pedidoModel = new Pedido(); 
-    
+    $pedidoModel = new Pedido();
+
     // Crear el pedido
-    $idPedido = $pedidoModel->crearPedido($datosCliente, $productos, $totalGeneral,$numCliente);
-    
+    $idPedido = $pedidoModel->crearPedido($datosCliente, $productos, $totalGeneral, $numCliente, $observaciones);
+
     if ($idPedido) {
         // Pedido creado exitosamente
         $mensaje = "Pedido creado exitosamente";
@@ -52,7 +59,6 @@ try {
     } else {
         throw new Exception('Error al crear el pedido');
     }
-    
 } catch (Exception $e) {
     error_log("Error en procesar_pedido.php: " . $e->getMessage());
     $mensaje = "Error al procesar el pedido: " . $e->getMessage();
@@ -64,6 +70,7 @@ try {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -74,38 +81,50 @@ try {
         .success-animation {
             animation: successPulse 1s ease-in-out;
         }
-        
+
         @keyframes successPulse {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
-        
+
         .card {
             border-radius: 15px;
             overflow: hidden;
         }
-        
+
         .card-header {
             border: none;
         }
-        
+
         .btn {
             border-radius: 25px;
             transition: all 0.3s ease;
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        
+
         .table {
             border-radius: 10px;
             overflow: hidden;
         }
     </style>
 </head>
+
 <body class="bg-light">
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -132,12 +151,12 @@ try {
                                     </h5>
                                 </div>
                             </div>
-                            
+
                             <div class="d-grid gap-2 d-md-block">
                                 <a href="catalogo.php" class="btn btn-success btn-lg px-4 me-md-2">
                                     <i class="fas fa-arrow-left me-1"></i>
                                     Volver al Catálogo
-                                </a>                               
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -157,9 +176,9 @@ try {
                                 <h4 class="text-danger mb-3">No se pudo procesar el pedido</h4>
                                 <p class="lead text-muted"><?php echo $mensaje; ?></p>
                             </div>
-                            
+
                             <div class="d-grid gap-2 d-md-block">
-                                <a href="catalogo.php?idCli=<?php echo$numCliente; ?>" class="btn btn-secondary btn-lg px-4 me-md-2">
+                                <a href="catalogo.php?idCli=<?php echo $numCliente; ?>" class="btn btn-secondary btn-lg px-4 me-md-2">
                                     <i class="fas fa-arrow-left me-1"></i>
                                     Volver al Catálogo
                                 </a>
@@ -173,7 +192,7 @@ try {
                 <?php endif; ?>
             </div>
         </div>
-        
+
         <!-- Resumen de productos -->
         <?php if (!empty($productos) && $tipo === 'success'): ?>
             <div class="row justify-content-center mt-4">
@@ -233,7 +252,7 @@ try {
                                     </table>
                                 </div>
                             </div>
-                            
+
                             <!-- Vista Mobile -->
                             <div class="d-md-none p-3">
                                 <?php foreach ($productos as $producto): ?>
@@ -261,7 +280,7 @@ try {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                
+
                                 <!-- Total para mobile -->
                                 <div class="border-top pt-3 mt-3">
                                     <div class="d-flex justify-content-between align-items-center">
@@ -272,6 +291,26 @@ try {
                                     </div>
                                 </div>
                             </div>
+                            <!-- observacion -->
+                            <div>
+                                <?php if (!empty($observaciones)): ?>
+                                    <div class="border-top p-3 bg-light">
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-3">
+                                                <i class="fas fa-comment-dots text-primary fa-lg"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-2 text-primary">Observaciones</h6>
+                                                <div class="bg-white rounded p-3 shadow-sm">
+                                                    <p class="mb-0 text-dark">
+                                                        <?php echo nl2br(htmlspecialchars($observaciones)); ?>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -280,31 +319,39 @@ try {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <?php if ($limpiarCarrito): ?>
-    <script>
-        // Limpiar carrito después de pedido exitoso
-        try {
-            localStorage.removeItem('carritoMultilicores');
-            localStorage.removeItem('carritoMultilicores_timestamp');
-            console.log('Carrito limpiado después de pedido exitoso');
-            
-            // Mostrar notificación de éxito
-            if (typeof window !== 'undefined') {
-                setTimeout(() => {
-                    const successCard = document.querySelector('.success-animation');
-                    if (successCard) {
-                        successCard.style.transform = 'scale(1.02)';
-                        setTimeout(() => {
-                            successCard.style.transform = 'scale(1)';
-                        }, 200);
-                    }
-                }, 100);
+        <script>
+            // Limpiar carrito después de pedido exitoso
+            try {
+                localStorage.removeItem('carritoMultilicores');
+                localStorage.removeItem('carritoMultilicores_timestamp');
+                sessionStorage.removeItem('observacionesPedido');
+                if (typeof observacionesGlobales !== 'undefined') {
+                    observacionesGlobales = "";
+                }
+                console.log('Carrito limpiado después de pedido exitoso');
+
+
+                // Mostrar notificación de éxito
+                if (typeof window !== 'undefined') {
+                    setTimeout(() => {
+                        const successCard = document.querySelector('.success-animation');
+                        if (successCard) {
+                            successCard.style.transform = 'scale(1.02)';
+                            setTimeout(() => {
+                                successCard.style.transform = 'scale(1)';
+                            }, 200);
+                        }
+                    }, 100);
+                }
+            } catch (e) {
+                console.error('Error al limpiar carrito:', e);
             }
-        } catch (e) {
-            console.error('Error al limpiar carrito:', e);
-        }
-    </script>
+            ///////////////////////// Fin de la sección de limpieza del carrito
+        </script>
+
     <?php endif; ?>
 </body>
+
 </html>
