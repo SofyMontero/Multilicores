@@ -89,6 +89,13 @@ class Pedido
 
             $stmtDetalle = $this->pdo->prepare($sqlDetalle);
 
+            // Agregar cantidad de ventas por producto
+            $sqlVentas = "UPDATE productos SET 
+            cantidad_venta = cantidad_venta + ? 
+            WHERE id_producto = ?";
+
+            $stmtVentas = $this->pdo->prepare($sqlVentas);
+
             foreach ($productos as $producto) {
                 // Validar datos del producto
                 $idProducto = $producto['id'] ?? null;
@@ -111,6 +118,11 @@ class Pedido
                     $cantidad,
                     $precioUnitario,
                     $subtotal
+                ]);
+
+                $stmtVentas->execute([
+                    $cantidad,     // Lo que se va a sumar a cantidad_venta
+                    $idProducto    // El producto al que se le suma
                 ]);
             }
 

@@ -93,7 +93,7 @@ class Producto
             codigo_productos
         FROM productos 
         WHERE id_producto > 0 $condicion $condicion1
-        ORDER BY id_producto DESC
+        ORDER BY cantidad_venta DESC, id_producto DESC
         LIMIT $limit OFFSET $offset
         ";
 
