@@ -78,9 +78,11 @@ class solicitud
                      DT.cantidad,
                      DT.precio_unitario,
                      DT.subtotal,
-                     P.codigo_productos
+                     P.codigo_productos,
+                     PD.ped_observacion
                  FROM detalle_pedidos DT
                  INNER JOIN productos P ON DT.id_producto = P.id_producto
+                 INNER JOIN pedidos PD ON PD.id_pedido = DT.id_pedido
                  WHERE DT.id_pedido = :pedido_id
                  ORDER BY DT.id_detalle
                 ");

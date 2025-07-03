@@ -568,7 +568,18 @@ function cargarProductosPedido(pedidoId) {
                     <td class="text-center">${producto.cantidad}</td>
                     <td class="text-right">$${parseFloat(producto.precio_unitario).toFixed(2)}</td>
                     <td class="text-right">$${parseFloat(producto.subtotal).toFixed(2)}</td>
+                    
                 </tr>`;
+                if (producto.ped_observacion) {
+                        html += `
+                            <tr class="table-active">
+                                <td colspan="6" class="text-muted">
+                                    <i class="fas fa-comment-dots"></i> 
+                                    <em>${producto.ped_observacion}</em>
+                                </td>
+                            </tr>
+                        `;
+                    }
             });
             
             html += '</tbody></table></div>';
