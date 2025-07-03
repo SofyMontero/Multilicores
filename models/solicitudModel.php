@@ -34,6 +34,7 @@ class solicitud
                  OR ped_estado = 1
              ) 
              AND ped_fecha >= CURDATE()
+             AND ped_fecha < CURDATE() + INTERVAL 1 DAY
              ORDER BY ped_fecha DESC
             ");
         $query->execute();
