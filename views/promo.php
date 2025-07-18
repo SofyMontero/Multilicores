@@ -354,13 +354,14 @@ function enviarPromo(id, descripcion, imagen) {
     })
     .then(response => response.json())
     .then(result => {
-            if (result.error) {
-                showAlert('error', 'Error al enviar: ' + result.error);
-                 console.log(result);
-            } else {
-                showAlert('success', '¡Promoción enviada con éxito!');
-                console.log(result);
-            }
+        if (result.error) {
+            showAlert('error', 'Error: ' + result.error);
+            alert('❌ Hubo un error al enviar la promoción.');
+        } else {
+            showAlert('success', 'Promoción enviada correctamente.');
+            alert('✅ Promoción enviada con éxito.');
+            console.log(result);
+        }
     })
     .catch(error => {
         console.error('Error al enviar la promoción:', error);
