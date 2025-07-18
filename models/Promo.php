@@ -118,7 +118,7 @@ class Promo {
     }
     
     public function getClientes() {
-    $stmt = $this->db->prepare("SELECT * FROM clientes where cli_telefono='3125215864'");
+    $stmt = $this->db->prepare("SELECT * FROM clientes ");
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
