@@ -77,7 +77,7 @@ class Promo {
 
         if (preg_match('/^\d{10}$/', $telefono)) {
             $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
-
+            
             $data = [
                 'telefono' => $telefono,
                 'texto' => "$descripcion",
@@ -107,6 +107,7 @@ class Promo {
             $resultados[] = [
                 'cliente' => $cliente['cli_nombre'],
                 'telefono' => $telefono,
+                'imagen'=>$imagen,
                 'resultado' => $error ?: $response
             ];
         }
@@ -117,7 +118,7 @@ class Promo {
     }
     
     public function getClientes() {
-    $stmt = $this->db->prepare("SELECT * FROM clientes");
+    $stmt = $this->db->prepare("SELECT * FROM clientes where cli_telefono='3125215864'");
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
