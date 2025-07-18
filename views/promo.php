@@ -354,17 +354,45 @@ function enviarPromo(id, descripcion, imagen) {
     })
     .then(response => response.json())
     .then(result => {
-        if (result.error) {
-            showAlert('error', 'Error: ' + result.error);
-        } else {
-            showAlert('success', 'Promoción enviada correctamente.');
-            console.log(result);
-        }
+            if (result.error) {
+                showAlert('error', 'Error al enviar: ' + result.error);
+                 console.log(result);
+            } else {
+                showAlert('success', '¡Promoción enviada con éxito!');
+                console.log(result);
+            }
     })
     .catch(error => {
         console.error('Error al enviar la promoción:', error);
         showAlert('error', 'Error de red al enviar la promoción.');
     });
+}
+function showAlert(type, message) {
+    const alertContainer = document.getElementById('alert-container');
+
+    // Elimina alertas anteriores si existen
+    alertContainer.innerHTML = '';
+
+    // Define la clase según el tipo
+    const alertClass = type === 'success'
+        ? 'alert-success-modern'
+        : 'alert-danger-modern';
+
+    const icon = type === 'success'
+        ? '<i class="bi bi-check-circle-fill me-2"></i>'
+        : '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-modern ${alertClass} d-flex align-items-center mb-4`;
+    alert.setAttribute('role', 'alert');
+    alert.innerHTML = `${icon} ${message}`;
+
+    alertContainer.appendChild(alert);
+
+    // Ocultar automáticamente después de 4 segundos
+    setTimeout(() => {
+        alert.remove();
+    }, 4000);
 }
 </script>
 
