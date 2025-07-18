@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
     <?php endif; ?>
-
+     <div id="alert-container"></div>
     <?php if (!empty($errores)): ?>
     <div class="alert alert-modern alert-danger-modern mb-4" role="alert">
         <div class="d-flex align-items-start">
