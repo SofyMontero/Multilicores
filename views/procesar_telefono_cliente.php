@@ -217,39 +217,114 @@ $productos = $producto->obtenerCategorias();
       modalBuscar.show();
     <?php endif; ?>
 
-    inputTelefono.addEventListener('input', function() {
-      const numero = inputTelefono.value.trim();
-      resultadoBusqueda.textContent = '';
+    // Función para limpiar el número (quitar espacios y caracteres no numéricos)
+    function limpiarNumero(numero) {
+      return numero.replace(/\D/g, ''); // Solo números
+    }
 
-      if (numero.length >= 10) {
-        fetch(`../controllers/ajax/buscar_cliente.php?telefono=${numero}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.existe) {
-              resultadoBusqueda.textContent = `Cliente encontrado: ${data.nombre}`;
-              numcliente = numero;
-
-              setTimeout(() => {
-                bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
-                console.log('Cliente asignado:', numcliente);
-
-                // 🚀  Una vez asignado, enviamos el pedido
-                enviarPedido();
-              }, 1000);
-            } else {
-              resultadoBusqueda.textContent = 'Cliente no encontrado. Mostrando formulario...';
-              setTimeout(() => {
-                bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
-                new bootstrap.Modal(document.getElementById('modalCliente')).show();
-              }, 1000);
-            }
-          })
-          .catch(() => {
-            resultadoBusqueda.textContent = 'Error al buscar cliente.';
-          });
+    // Prevenir espacios y caracteres no deseados
+    inputTelefono.addEventListener('keydown', function(e) {
+      // Permitir teclas de control (backspace, delete, tab, escape, enter, etc.)
+      if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+          // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+          (e.keyCode === 65 && e.ctrlKey === true) ||
+          (e.keyCode === 67 && e.ctrlKey === true) ||
+          (e.keyCode === 86 && e.ctrlKey === true) ||
+          (e.keyCode === 88 && e.ctrlKey === true) ||
+          // Permitir flechas
+          (e.keyCode >= 35 && e.keyCode <= 39)) {
+        return;
+      }
+      
+      // Prevenir espacio (código 32) y otros caracteres no numéricos
+      if (e.keyCode === 32 || // Espacio
+          (e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && 
+          (e.keyCode < 96 || e.keyCode > 105)) { // No es número del teclado principal ni numérico
+        e.preventDefault();
       }
     });
+
+    // Variable para controlar el debounce
+    let timeoutId = null;
+    let ultimaBusqueda = '';
+
+    inputTelefono.addEventListener('input', function() {
+      // Limpiar el valor del input (quitar espacios y caracteres no numéricos)
+      const numeroLimpio = limpiarNumero(inputTelefono.value);
+      inputTelefono.value = numeroLimpio;
+      
+      resultadoBusqueda.textContent = '';
+
+      // Si el número está vacío, no hacer nada
+      if (numeroLimpio.length === 0) {
+        return;
+      }
+
+      // Si es el mismo número que la última búsqueda, no hacer nada
+      if (numeroLimpio === ultimaBusqueda) {
+        return;
+      }
+
+      // Limpiar timeout anterior
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Solo buscar si tiene al menos 10 dígitos
+      if (numeroLimpio.length >= 10) {
+        // Mostrar mensaje de búsqueda
+        resultadoBusqueda.textContent = 'Buscando cliente...';
+        
+        // Establecer un delay para evitar múltiples solicitudes
+        timeoutId = setTimeout(() => {
+          ultimaBusqueda = numeroLimpio;
+          
+          fetch(`../controllers/ajax/buscar_cliente.php?telefono=${numeroLimpio}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.existe) {
+                resultadoBusqueda.textContent = `Cliente encontrado: ${data.nombre}`;
+                resultadoBusqueda.className = 'mt-3 text-success small';
+                numcliente = numeroLimpio;
+
+                setTimeout(() => {
+                  bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
+                  console.log('Cliente asignado:', numcliente);
+                  enviarPedido();
+                }, 1000);
+              } else {
+                resultadoBusqueda.textContent = 'Cliente no encontrado. Mostrando formulario de registro...';
+                resultadoBusqueda.className = 'mt-3 text-warning small';
+                
+                setTimeout(() => {
+                  bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
+                  // Pre-llenar el teléfono en el formulario de registro
+                  document.getElementById('cli_telefono').value = numeroLimpio;
+                  new bootstrap.Modal(document.getElementById('modalCliente')).show();
+                }, 1000);
+              }
+            })
+            .catch((error) => {
+              console.error('Error al buscar cliente:', error);
+              resultadoBusqueda.textContent = 'Error al buscar cliente. Intenta nuevamente.';
+              resultadoBusqueda.className = 'mt-3 text-danger small';
+            });
+        }, 500); // Delay de 500ms para evitar múltiples solicitudes
+      } else if (numeroLimpio.length > 0) {
+        resultadoBusqueda.textContent = `Ingresa al menos 10 dígitos (${numeroLimpio.length}/10)`;
+        resultadoBusqueda.className = 'mt-3 text-muted small';
+      }
+    });
+
+    // Limpiar el input al pegar contenido
+    inputTelefono.addEventListener('paste', function(e) {
+      setTimeout(() => {
+        const numeroLimpio = limpiarNumero(inputTelefono.value);
+        inputTelefono.value = numeroLimpio;
+      }, 10);
+    });
   });
+
   document.addEventListener('DOMContentLoaded', function() {
     const formCliente = document.getElementById('formCliente');
 
