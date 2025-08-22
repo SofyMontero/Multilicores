@@ -56,6 +56,21 @@ try {
         $mensaje = "Pedido creado exitosamente";
         $tipo = "success";
         $limpiarCarrito = true;
+        $totalPedido=number_format($totalGeneral, 0, ',', '.');
+        $resumenPedido= "";
+        $dProducto= "";
+        foreach ($productos as $producto): 
+            $dProducto .= $producto['nombre']."\n".$producto['tipo'];
+            $dProducto .= "{$producto['tipo']}";
+            $dProducto .= "{$producto['cantidad']}";
+            $dProducto .= "{$producto['precio_unitario']}";
+            $dProducto .= "{$producto['subtotal']}";
+        endforeach;
+        
+        $resumenPedido .= "Valor total pedido $".$totalPedido;
+                                     
+        $respuesta = $pedidoModel->enviarConfirmacion($idPedido, "$resumenPedido ", "", "$numCliente","pedido_recepcionado");
+        error_log(print_r($respuesta, true));
     } else {
         throw new Exception('Error al crear el pedido');
     }
@@ -317,7 +332,17 @@ try {
             </div>
         <?php endif; ?>
     </div>
-
+  <!-- Toast -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="contadorToast" class="toast show align-items-center text-bg-dark border-0">
+      <div class="d-flex">
+        <div class="toast-body">
+          🔄 La página se redirigirá en <span id="segundos">5</span> segundos...
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+      </div>
+    </div>
+  </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <?php if ($limpiarCarrito): ?>
@@ -348,7 +373,31 @@ try {
             } catch (e) {
                 console.error('Error al limpiar carrito:', e);
             }
-            ///////////////////////// Fin de la sección de limpieza del carrito
+            let segundos = 10;
+            let spanSegundos = document.getElementById("segundos");
+            let redireccionAutomatica = false; // bandera para saber si la salida fue intencional
+
+            let intervalo = setInterval(function() {
+                segundos--;
+                spanSegundos.textContent = segundos;
+
+                if (segundos <= 0) {
+                    let numCliente = <?php echo json_encode($numCliente); ?>;
+                    console.log("Número de cliente:", numCliente);
+                    clearInterval(intervalo);
+
+                    redireccionAutomatica = true; // ✅ marcamos que fue nuestra redirección
+                    window.location.href = "https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=" + numCliente;
+                }
+            }, 1000);
+
+            window.addEventListener("beforeunload", function (e) {
+                if (!redireccionAutomatica) { 
+                    // ❌ Solo mostrar la alerta si NO fue redirección automática
+                    e.preventDefault();
+                    e.returnValue = ""; // alerta estándar
+                }
+            });
         </script>
 
     <?php endif; ?>
