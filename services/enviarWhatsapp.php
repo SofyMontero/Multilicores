@@ -259,6 +259,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]
                 ]);
         break;
+        case 'pedido_recepcionado':
+            $texto=$data['texto'];
+            $texto1=$data['texto1'];
+            
+
+            if (preg_match('/^\+?57/', $telefonoCliente)) {
+                // Ya tiene código
+            } else {
+                $telefonoCliente = "+57" . $telefonoCliente;
+            }
+
+            $mensaje = json_encode([
+                "messaging_product" => "whatsapp",
+                "to" => $telefonoCliente,
+                "type" => "template",
+                "template" => [
+                    "name" => "pedido_recepcionado",  // Asegúrate que esta plantilla tenga dos {{}} en el cuerpo
+                    "language" => [
+                        "code" => "es"
+                    ],
+                    "components" => [
+                        [
+                            "type" => "body",
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => $texto // Este es el {{1}}
+                                ],
+                                [
+                                    "type" => "text",
+                                    "text" => $texto1  // Este sería el {{2}}, por ejemplo
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+
+
+        break;
 
 
 
