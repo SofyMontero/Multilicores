@@ -378,6 +378,59 @@ class Pedido
 
         return $errores;
     }
+    public function enviarConfirmacion($idPromo, $descripcion, $imagen, $telefono, $plantilla): array
+    {
+        $url = "https://multilicoreschapinero.com/sistema/services/enviarWhatsapp.php";
+
+        $data = [
+            'telefono' => $telefono,
+            'plantilla' => "$plantilla",
+            'texto' => "$idPromo",
+            'texto1' => "$descripcion"
+            
+        ];
+
+        $data_json = json_encode($data);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $data_json,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer Multilicoreslicor25'
+            ],
+        ]);
+
+        $response = curl_exec($curl);
+        $error = curl_error($curl);
+        curl_close($curl);
+
+        $resultado = $error ?: $response;
+
+        $resultados[] = [
+            'cliente' => $telefono,
+            'telefono' => $telefono,
+            'resultado' => $resultado
+        ];
+
+        // 📝 Crear log de la solicitud
+        $logData = "=============================\n";
+        $logData .= "Fecha: " . date("Y-m-d H:i:s") . "\n";
+        $logData .= "Telefono: $telefono\n";
+        $logData .= "Plantilla: $plantilla\n";
+        $logData .= "Texto: $descripcion\n";
+        $logData .= "Data JSON Enviado: $data_json\n";
+        $logData .= "Respuesta: $resultado\n";
+        $logData .= "=============================\n\n";
+
+        file_put_contents(__DIR__ . "/log_envios.txt", $logData, FILE_APPEND);
+
+        return $resultados;
+    }
 
 }
 
