@@ -13,7 +13,7 @@ class solicitud
     /**
      * Obtener todos los pedidos pendientes
      */
-    public function obtenerPedidosPendientes()
+    public function obtenerPedidosPendientes($fechaIni,$fechaFin)
     {
         $query = $this->pdo->prepare("
              SELECT 
@@ -32,17 +32,21 @@ class solicitud
                  ped_estado = 'pendiente' 
                  OR ped_estado = '1' 
                  OR ped_estado = 1
-             )            
+             ) AND DATE(ped_fecha) >= :inicio AND DATE(ped_fecha) <= :fin             
              ORDER BY ped_fecha DESC
             ");
-        $query->execute();
+
+        $query->execute([
+            'inicio' => $fechaIni,
+            'fin' => $fechaFin
+        ]);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * Obtener todos los pedidos aceptados
      */
-    public function obtenerPedidosAceptados()
+    public function obtenerPedidosAceptados($fechaIni,$fechaFin)
     {
         $query = $this->pdo->prepare("
             SELECT 
@@ -57,11 +61,14 @@ class solicitud
             FROM pedidos P
             INNER JOIN clientes C ON C.id_cliente = P.ped_cliente
             INNER JOIN bares B ON B.id_bar = C.cli_Bar 
-            WHERE ped_estado = 'aceptado' OR ped_estado = '2' OR ped_estado = 2
+            WHERE (ped_estado = 'aceptado' OR ped_estado = '2' OR ped_estado = 2 OR ped_estado = 'enviado' OR ped_estado in ( 'finalizaCredito','finalizaContado')) AND DATE(ped_fecha) >= :inicio AND DATE(ped_fecha) <= :fin
             ORDER BY ped_fecha DESC
         ");
 
-        $query->execute();
+        $query->execute([
+            'inicio' => $fechaIni,
+            'fin' => $fechaFin
+        ]);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -250,7 +257,7 @@ class solicitud
         $query->execute($params);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function obtenerPedidosRechazados()
+    public function obtenerPedidosRechazados($fechaIni,$fechaFin)
     {
         $query = $this->pdo->prepare("
             SELECT 
@@ -265,11 +272,14 @@ class solicitud
             FROM pedidos P
             INNER JOIN clientes C ON C.id_cliente = P.ped_cliente
             INNER JOIN bares B ON B.id_bar = C.cli_Bar 
-            WHERE ped_estado = 'rechazado' OR ped_estado = '3' OR ped_estado = 3
+            WHERE (ped_estado = 'rechazado' OR ped_estado = '3' OR ped_estado = 3) AND DATE(ped_fecha) >= :inicio AND DATE(ped_fecha) <= :fin
             ORDER BY ped_fecha DESC
         ");
 
-        $query->execute();
+        $query->execute([
+            'inicio' => $fechaIni,
+            'fin' => $fechaFin
+        ]);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
     public function enviarPromo($idPromo, $descripcion, $imagen, $telefono, $plantilla): array
@@ -323,5 +333,19 @@ class solicitud
         file_put_contents(__DIR__ . "/log_envios.txt", $logData, FILE_APPEND);
 
         return $resultados;
+    }
+    public function buscarSugerencias($termino)
+    {
+        $query = $this->pdo->prepare("
+            SELECT id_cliente, cli_nombre 
+            FROM clientes 
+            WHERE cli_nombre LIKE :termino 
+            ORDER BY cli_nombre 
+            LIMIT 10
+        ");
+        $query->bindValue(':termino', '%' . $termino . '%');
+        $query->execute();
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 }

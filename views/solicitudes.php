@@ -1,10 +1,39 @@
-<script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<!-- Emoji Button (si lo necesitas) -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
+
+<script>
+$(function() {
+    $("#cliente").autocomplete({
+        source: "buscar_cliente.php",
+        minLength: 2,
+        select: function(event, ui) {
+            $("#cliente").val(ui.item.label);
+            $("#cliente_id").val(ui.item.value);
+            return false;
+        }
+    });
+});
+</script>
+
 <?php
 include_once "header.php";
 require_once "../models/database.php";
 require_once "../models/solicitudModel.php";
 
+// Calcular fechas por defecto
+echo $hoy = date("Y-m-d");
+echo$ayer = date("Y-m-d", strtotime("-1 day"));
+
+// Si vienen fechas por GET, las usamos; si no, asignamos los valores por defecto
+$fecha_inicio = isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : $ayer;
+$fecha_fin    = isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : $hoy;
 // Instanciar la clase Solicitud
 $solicitudModel = new solicitud();
 
@@ -68,10 +97,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// Procesamiento del formulario de enviar pedido
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'enviar_pedido') {
+    $pedido_id = $_POST['pedido_id'] ?? '';
+    $numCliente = $_POST['numCliente'] ?? '';
+    $observaciones = $_POST['observaciones'] ?? '';
+    // if ($Observaciones!="") {
+    //     $Observaciones="Observaciones: ".$observaciones;
+    // }
+
+    if (!empty($pedido_id)) {
+        $estado = "enviado";
+        try {
+            if ($solicitudModel->cambiarEstadoPedido($pedido_id,$estado)) {
+                $mensaje_exito = "El pedido ha sido aceptado exitosamente";
+                $plantilla="en_camino";
+
+                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$observaciones", "", "$numCliente", $plantilla);
+                error_log(print_r($respuesta, true));
+                echo json_encode($respuesta);
+                exit;
+            } else {
+                $errores[] = "Error al actualizar el pedido";
+            }
+        } catch (Exception $e) {
+            $errores[] = "Error: " . $e->getMessage();
+        }
+    } else {
+        $errores[] = "ID de pedido requerido";
+    }
+}
+
+// Procesamiento del formulario de finalizar pedido
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'finalizar_pedido') {
+    $pedido_id = $_POST['pedido_id'] ?? '';
+    $numCliente = $_POST['numCliente'] ?? '';
+    $observaciones = $_POST['observaciones'] ?? '';
+    $tipo_pago = $_POST['tipo_pago'] ?? '';
+    //     $Observaciones="Observaciones: ".$observaciones;
+    // }
+
+    if (!empty($pedido_id)) {
+        try {
+            if ($tipo_pago=="contado") {
+                $plantilla="pago_contado";
+                $estado = "finalizaContado";
+            }else{
+                $plantilla="pago_credito";
+                $estado = "finalizaCredito";
+            }
+            if ($solicitudModel->cambiarEstadoPedido($pedido_id,$estado)) {
+                $mensaje_exito = "El pedido ha sido Finalizado";
+
+
+               
+                
+
+                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$observaciones", "", "$numCliente", $plantilla);
+                error_log(print_r($respuesta, true));
+                echo json_encode($respuesta);
+                exit;
+            } else {
+                $errores[] = "Error al actualizar el pedido";
+            }
+        } catch (Exception $e) {
+            $errores[] = "Error: " . $e->getMessage();
+        }
+    } else {
+        $errores[] = "ID de pedido requerido";
+    }
+}
+
 // Obtener pedidos usando la clase
-$pedidos_pendientes = $solicitudModel->obtenerPedidosPendientes();
-$pedidos_aceptados = $solicitudModel->obtenerPedidosAceptados();
-$pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
+$pedidos_pendientes = $solicitudModel->obtenerPedidosPendientes($fecha_inicio,$fecha_fin);
+$pedidos_aceptados = $solicitudModel->obtenerPedidosAceptados($fecha_inicio,$fecha_fin);
+$pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$fecha_fin);
 
 ?>
 
@@ -111,11 +211,39 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
 
 <!-- Tabs para todos los pedidos con filtros por estado -->
 <div class="container-fluid">
+
+    <!-- Filtros por fecha -->
+    <div class="row mt-3 mb-3">
+        <div class="col-md-3">
+            <label for="fecha_inicio">Fecha Inicial</label>
+            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                   value="<?php echo $fecha_inicio; ?>">
+        </div>
+        <div class="col-md-3">
+            <label for="fecha_fin">Fecha Final</label>
+            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                   value="<?php echo $fecha_fin; ?>">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary" onclick="filtrarPorFecha()">Filtrar</button>
+            <button type="button" class="btn btn-secondary ml-2" onclick="limpiarFiltros()">Limpiar</button>
+        </div>
+        <!-- Campo de Cliente con autocompletado -->
+        <div class="col-md-3">
+            <label for="cliente">Cliente</label>
+            <input type="text" class="form-control" id="cliente" name="cliente"
+                placeholder="Escriba nombre o identificación"
+                value="<?php echo htmlspecialchars($cliente); ?>">
+        </div>
+    </div>
+
     <ul class="nav nav-tabs" id="pedidosTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <a class="nav-link active" id="todos-tab" data-toggle="tab" href="#todos" role="tab">
                 <i class="fas fa-list"></i> Todos los Pedidos
-                <span class="badge badge-info ml-2"><?php echo count($pedidos_pendientes) + count($pedidos_aceptados) + count($pedidos_rechazados); ?></span>
+                <span class="badge badge-info ml-2">
+                    <?php echo count($pedidos_pendientes) + count($pedidos_aceptados) + count($pedidos_rechazados); ?>
+                </span>
             </a>
         </li>
         <li class="nav-item" role="presentation">
@@ -137,6 +265,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
             </a>
         </li>
     </ul>
+</div>
 
     <div class="tab-content" id="pedidosTabContent">
         <!-- Tab de Todos los Pedidos -->
@@ -262,6 +391,71 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
             </div>
         </div>
 
+                <!-- Tab de Pedidos Pendientes -->
+        <div class="tab-pane fade" id="pendientes" role="tabpanel">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-list"></i> &nbsp; Pedidos Pendientes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-sm" id="tabla-pendientes">
+                            <thead>
+                                <tr class="text-center roboto-medium">
+                                    <th>ID Pedido</th>
+                                    <th>N° Factura</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha y Hora</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                    <th>Ver Productos</th>
+                                    <th>Acciones</th>
+                                    <th>Cliente</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               <?php if (!empty($pedidos_pendientes)): ?>
+                                    <?php foreach ($pedidos_pendientes as $pedido): ?>
+                                        <tr class="table-warning">
+                                            <td class="text-center"><?php echo $pedido['id_pedido']; ?></td>
+                                            <td class="text-center"><?php echo $pedido['ped_numfac']; ?></td>
+                                            <td><?php echo $pedido['ped_cliente']; ?></td>
+                                            <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($pedido['ped_fecha'])); ?></td>
+                                            <td class="text-center">$<?php echo number_format($pedido['ped_total'], 2); ?></td>
+                                            <td class="text-center">
+                                                <span class="badge badge-warning">Pendiente</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-info btn-sm ver-productos" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                    <i class="fas fa-eye"></i> Ver Más
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-success btn-sm aceptar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                    <i class="fas fa-check"></i> Aceptar
+                                                </button>
+                                                <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente=" <?php echo$pedido['ped_numCliente']; ?>" />
+
+                                                <button class="btn btn-danger btn-sm rechazar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                    <i class="fas fa-times"></i> Rechazar
+                                                </button>
+                                            </td>
+                                            <td><?php echo $pedido['nombre_bar']; ?></td>
+                                            
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="7" class="text-center">No hay pedidos aceptados</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Tab de Pedidos Aceptados -->
         <div class="tab-pane fade" id="aceptados" role="tabpanel">
             <div class="card mt-3">
@@ -270,7 +464,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-success table-sm" id="tabla-aceptados">
+                        <table class="table table-dark table-sm" id="tabla-aceptados">
                             <thead>
                                 <tr class="text-center roboto-medium">
                                     <th>ID Pedido</th>
@@ -280,6 +474,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                     <th>Total</th>
                                     <th>Ver Productos</th>
                                     <th>Estado</th>
+                                    <th>Trasabilidad</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -298,6 +493,24 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                                             </td>
                                             <td class="text-center">
                                                 <span class="badge badge-success">Aceptado</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php if ($pedido['ped_estado']=="aceptado"): ?>
+                                                    <button class="btn btn-primary btn-sm enviar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                        🚚 Enviar Pedido
+                                                    </button>
+                                                    <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente="<?php echo $pedido['ped_numCliente']; ?>" />
+                                                
+                                                <?php elseif ($pedido['ped_estado']=="enviado"): ?>
+                                                    <button class="btn btn-warning btn-sm finalizar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                        ✅ Finalizar pedido
+                                                    </button>
+                                                    <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente="<?php echo $pedido['ped_numCliente']; ?>" />
+
+                                                
+                                                <?php elseif ($pedido['ped_estado']=="finalizaContado" or $pedido['ped_estado']=="finalizaCredito"): ?>
+                                                    <span class="badge bg-success">🎉 Culminado</span>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -321,7 +534,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-danger table-sm" id="tabla-rechazados">
+                        <table class="table table-dark table-sm" id="tabla-rechazados">
                             <thead>
                                 <tr class="text-center roboto-medium">
                                     <th>ID Pedido</th>
@@ -460,6 +673,86 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados();
     </div>
 </div>
 
+
+<!-- Modal para enviar pedido -->
+<div class="modal fade" id="enviarModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enviar Pedido</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="form-enviar" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="enviar_pedido">
+                    <input type="hidden" name="pedido_id" id="pedido_id_enviar">
+                    <input type="hidden" name="numCliente" id="numClientePedEnviar">
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Confirmar:</strong> ¿Está seguro que el pedido sera enviado?
+                    </div>
+                    
+                    <!-- <div class="form-group">
+                        <label>Observaciones (opcional):</label>
+                        <textarea name="observaciones" class="form-control" rows="2" 
+                                placeholder="Comentarios adicionales sobre el pedido..."></textarea>
+                    </div> -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Si
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para finalizar pedido -->
+<div class="modal fade" id="finalizarModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Finalizar Pedido</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="form-finalizar" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="finalizar_pedido">
+                    <input type="hidden" name="pedido_id" id="pedido_id_finalizar">
+                    <input type="hidden" name="numCliente" id="numClientePedFinalizar">
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Confirmar:</strong> ¿el pedido sera finalizado con modalidad de pago?
+                    </div>
+                    
+                    <!-- <div class="form-group">
+                        <label>Observaciones (opcional):</label>
+                        <textarea name="observaciones" class="form-control" rows="2" 
+                                placeholder="Comentarios adicionales sobre el pedido..."></textarea>
+                    </div> -->
+                </div>
+                    <!-- Botón Crédito -->
+                    <button type="submit" name="tipo_pago" value="credito" class="btn btn-success">
+                        <i class="fas fa-check"></i> Finalizar como crédito
+                    </button>
+
+                    <!-- Botón Contado -->
+                    <button type="submit" name="tipo_pago" value="contado" class="btn btn-warning">
+                        <i class="fas fa-check"></i> Finalizar como contado
+                    </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Manejar clic en "Ver Más" productos
@@ -479,6 +772,28 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('numClientePedAcepta').value = valorNumCliente;
             
             $('#aceptarModal').modal('show');
+        });
+    });
+        // Manejar clic en "enviar" pedido
+    document.querySelectorAll('.enviar-pedido').forEach(button => {
+        button.addEventListener('click', function() {
+            const pedidoId = this.getAttribute('data-pedido');
+            const valorNumCliente = document.getElementById('numCliente'+pedidoId).dataset.numcliente;
+            document.getElementById('pedido_id_enviar').value = pedidoId;
+            document.getElementById('numClientePedEnviar').value = valorNumCliente;
+            
+            $('#enviarModal').modal('show');
+        });
+    });
+        // Manejar clic en "finalizar" pedido
+    document.querySelectorAll('.finalizar-pedido').forEach(button => {
+        button.addEventListener('click', function() {
+            const pedidoId = this.getAttribute('data-pedido');
+            const valorNumCliente = document.getElementById('numCliente'+pedidoId).dataset.numcliente;
+            document.getElementById('pedido_id_finalizar').value = pedidoId;
+            document.getElementById('numClientePedFinalizar').value = valorNumCliente;
+            
+            $('#finalizarModal').modal('show');
         });
     });
     
@@ -541,6 +856,58 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
+    // Manejar envío del formulario de Enviar
+    document.getElementById('form-enviar').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload(); // Recargar la página para ver los cambios
+            } else {
+                alert('Error al procesar el pedido');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        });
+    });
+
+
+    document.getElementById('form-finalizar').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Saber qué botón disparó el submit
+        const boton = e.submitter; 
+        const tipoPago = boton.value; // "credito" o "contado"
+
+        const formData = new FormData(this);
+        formData.append("tipo_pago", tipoPago); // añadir al POST
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload(); // Recargar la página para ver los cambios
+            } else {
+                alert('Error al procesar el pedido');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        });
+    });
+
 function cargarProductosPedido(pedidoId) {
     const content = document.getElementById('productos-content');
     content.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando productos...</div>';
@@ -596,6 +963,39 @@ function cargarProductosPedido(pedidoId) {
         $('#productosModal').modal('show');
     });
 }
+function filtrarPorFecha() {
+    let inicio = document.getElementById("fecha_inicio").value;
+    let fin = document.getElementById("fecha_fin").value;
+    let url = window.location.pathname + "?fecha_inicio=" + inicio + "&fecha_fin=" + fin;
+    window.location.href = url;
+}
+
+function limpiarFiltros() {
+    window.location.href = window.location.pathname;
+}
+
+$(function() {
+    $("#cliente").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "../controllers/buscar_clientes.php",
+                type: "GET",
+                dataType: "json",
+                data: { term: request.term },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2, // empieza a buscar desde 2 caracteres
+        select: function(event, ui) {
+            // cuando selecciona un cliente del autocompletado
+            $("#cliente").val(ui.item.label);
+            return false;
+        }
+    });
+});
+
 </script>
 
 <?php include_once "footer.php"; ?>
