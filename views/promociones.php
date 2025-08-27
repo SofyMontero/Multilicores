@@ -68,6 +68,7 @@ $tienePromociones = hayPromocionesActivas();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../css/categoria.css" rel="stylesheet" type="text/css" />
+     <link href="../css/catalogo.css" rel="stylesheet" type="text/css" />
     <style>
         .promocion-card {
             border: none;
@@ -166,6 +167,7 @@ $tienePromociones = hayPromocionesActivas();
             margin-bottom: 1rem;
             opacity: 0.5;
         }
+        
     </style>
 </head>
 
@@ -271,25 +273,47 @@ $tienePromociones = hayPromocionesActivas();
                                         <span class="badge bg-success">Activa</span>
                                     </div>
 
+                                     <div class="price-container">
+                                        <div class="price-row">
+                                            <?php if ($promocion['acti_Unidad'] != 0): ?>
+                                                <span class="price-label">Precio Unidad:</span>
+                                                <span class="price-unidad">
+                                                    $<?php echo number_format($promocion['precio_unidad_producto'], 0, ',', '.'); ?> COP
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="price-row">
+                                            <span class="price-label">Precio Paca:</span>
+                                            <span class="price-paca">$<?php echo number_format($promocion['precio_paca_producto'], 0, ',', '.'); ?> COP</span>
+                                        </div>
+                                    </div>
+
+
                                     <!-- Controles mínimos para que tu JS funcione tal cual -->
-                                    <div class="row align-items-end g-2 mt-3">
+                                   <div class="row align-items-end g-2">
                                         <div class="col-6">
                                             <label class="form-label small">Tipo</label>
-                                            <select
-                                                name="productos[<?php echo $pIndex; ?>][tipo]"
+                                            <select name="productos[<?php echo $index; ?>][tipo]"
                                                 class="form-select tipo-select form-select-sm"
-                                                data-index="<?php echo $pIndex; ?>">
+                                                data-index="<?php echo $index; ?>"
+                                                data-precio-unidad="<?php echo $promocion['precio_unidad_producto']; ?>"
+                                                data-precio-paca="<?php echo $promocion['precio_paca_producto']; ?>"
+                                                data-embalaje="<?php if ($promocion['acti_Unidad'] == 1) {
+                                                                    echo '<option value="">Tipo</option>
                                                 <option value="unidad">Unidad</option>
+                                                <option value="paca">Paca</option>';
+                                                                } else echo '<option value="">Tipo</option>                                              
+                                                <option value="paca">Paca</option>' ?>">
                                             </select>
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label small">Cant.</label>
                                             <input type="number"
-                                                name="productos[<?php echo $pIndex; ?>][cantidad]"
+                                                name="productos[<?php echo $index; ?>][cantidad]"
                                                 class="form-control form-control-sm cantidad-input"
                                                 min="1"
                                                 placeholder="1"
-                                                data-index="<?php echo $pIndex; ?>">
+                                                data-index="<?php echo $index; ?>">
                                         </div>
                                     </div>
 
@@ -298,7 +322,9 @@ $tienePromociones = hayPromocionesActivas();
                                         <button type="button"
                                             class="btn btn-outline-success w-100 agregar-btn"
                                             data-id="<?php echo $promocion['codigo']; ?>"
-                                            data-nombre="<?php echo htmlspecialchars($promocion['descripcion']); ?>">
+                                            data-nombre="<?php echo htmlspecialchars($promocion['descripcion']); ?>"
+                                            data-precio-unidad="<?php echo $promocion['precio_unidad_producto']; ?>"
+                                            data-precio-paca="<?php echo $promocion['precio_paca_producto']; ?>">
                                             <i class="fas fa-cart-plus me-1"></i> Agregar
                                         </button>
                                     </div>
@@ -329,6 +355,7 @@ $tienePromociones = hayPromocionesActivas();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Deja tu JS tal cual -->
     <script src="../js/catalogo.js"></script>
+    
 </body>
 
 </html>

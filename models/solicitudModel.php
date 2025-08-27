@@ -70,21 +70,23 @@ class solicitud
      */
     public function obtenerProductosPedido($pedido_id)
     {
-        $query = $this->pdo->prepare("
+        $query = $this->pdo->prepare("         
+
                  SELECT 
-                     DT.id_producto,
-                     DT.nombre_producto,
-                     DT.tipo_producto,
-                     DT.cantidad,
-                     DT.precio_unitario,
-                     DT.subtotal,
-                     P.codigo_productos,
-                     PD.ped_observacion
+                      DT.id_producto,
+                      DT.nombre_producto,
+                      DT.tipo_producto,
+                      DT.cantidad,
+                      DT.precio_unitario,
+                      DT.subtotal,
+                      COALESCE(P.codigo_productos, PR.codigo) AS codigo_productos,
+                      PD.ped_observacion
                  FROM detalle_pedidos DT
-                 INNER JOIN productos P ON DT.id_producto = P.id_producto
-                 INNER JOIN pedidos PD ON PD.id_pedido = DT.id_pedido
-                 WHERE DT.id_pedido = :pedido_id
-                 ORDER BY DT.id_detalle
+                 LEFT JOIN productos P ON DT.id_producto    = P.id_producto
+                LEFT JOIN promociones PR ON DT.id_producto    = PR.codigo
+                INNER JOIN pedidos    PD ON PD.id_pedido     = DT.id_pedido
+                WHERE DT.id_pedido = :pedido_id
+                ORDER BY DT.id_detalle;
                 ");
 
         $query->execute(['pedido_id' => $pedido_id]);
