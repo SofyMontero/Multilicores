@@ -299,6 +299,117 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         break;
+        case 'pago_contado':
+                $texto=$data['texto'];
+                
+                
+
+                if (preg_match('/^\+?57/', $telefonoCliente)) {
+                    // Ya tiene código
+                } else {
+                    $telefonoCliente = "+57" . $telefonoCliente;
+                }
+
+                $mensaje = json_encode([
+                    "messaging_product" => "whatsapp",
+                    "to" => $telefonoCliente,
+                    "type" => "template",
+                    "template" => [
+                        "name" => "pago_contado",  // Asegúrate que esta plantilla tenga dos {{}} en el cuerpo
+                        "language" => [
+                            "code" => "es"
+                        ],
+                        "components" => [
+                            [
+                                "type" => "body",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => $texto // Este es el {{1}}
+                                    ]
+
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+
+
+            break;
+            case 'en_camino':
+                $texto=$data['texto'];
+                
+                
+
+                if (preg_match('/^\+?57/', $telefonoCliente)) {
+                    // Ya tiene código
+                } else {
+                    $telefonoCliente = "+57" . $telefonoCliente;
+                }
+
+                $mensaje = json_encode([
+                    "messaging_product" => "whatsapp",
+                    "to" => $telefonoCliente,
+                    "type" => "template",
+                    "template" => [
+                        "name" => "en_camino",  // Asegúrate que esta plantilla tenga dos {{}} en el cuerpo
+                        "language" => [
+                            "code" => "es"
+                        ],
+                        "components" => [
+                            [
+                                "type" => "body",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => $texto // Este es el {{1}}
+                                    ]
+
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+
+
+            break;
+            case 'pago_credito':
+                $texto=$data['texto'];
+                
+                
+
+                if (preg_match('/^\+?57/', $telefonoCliente)) {
+                    // Ya tiene código
+                } else {
+                    $telefonoCliente = "+57" . $telefonoCliente;
+                }
+
+                $mensaje = json_encode([
+                    "messaging_product" => "whatsapp",
+                    "to" => $telefonoCliente,
+                    "type" => "template",
+                    "template" => [
+                        "name" => "pago_credito",  // Asegúrate que esta plantilla tenga dos {{}} en el cuerpo
+                        "language" => [
+                            "code" => "es"
+                        ],
+                        "components" => [
+                            [
+                                "type" => "body",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => $texto // Este es el {{1}}
+                                    ]
+
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+
+
+            break;
 
 
 
