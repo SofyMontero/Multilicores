@@ -17,6 +17,25 @@ $totalPaginas = ceil($totalProductos / $limit);
 
 // Llamada al nuevo método paginado
 $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset);
+function hayPromocionesActivas() {
+    try {
+        // Tu función getConnection() ya retorna todas las promociones
+        $producto = new Producto();
+        $promociones = $producto->getConnection(); // Esto retorna array con todas las promociones
+        
+        // Filtrar las promociones activas (estado = 1)
+        $promocionesActivas = array_filter($promociones, function($promo) {
+            return isset($promo['estado']) && $promo['estado'] == 1;
+        });
+        
+        return count($promocionesActivas) > 0;
+        
+    } catch (Exception $e) {
+        error_log("Error en hayPromocionesActivas: " . $e->getMessage());
+        return false;
+    }
+}
+$tienePromociones = hayPromocionesActivas();
 
 
 ?>
@@ -54,11 +73,21 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse justify-content-center mt-3 mt-lg-0" id="navbarMenu">
-                        <ul class="navbar-nav gap-3">
-                            <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="categorias.php?idCli=<?php echo urlencode($numCliente); ?>">Categorías</a></li>
-                            <!-- <li class="nav-item"><a class="nav-link fw-semibold text-muted" href="promociones.php">Promociones</a></li> -->
-                            <li class="nav-item"><a class="nav-link fw-semibold text-decoration-underline" href="catalogo.php?idCli=<?php echo urlencode($numCliente); ?>">Productos</a></li>
-                        </ul>
+                         <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold text-muted" href="categorias.php?idCli=<?php echo urlencode($numCliente); ?>">Categorías</a>
+                    </li>
+                    <?php if ($tienePromociones): ?>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" href="promociones.php?idCli=<?php echo urlencode($numCliente); ?>" style="color: #ff6b6b;">
+                            <i class="fas fa-fire me-1"></i>Promociones
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold text-muted" href="catalogo.php?idCli=<?php echo urlencode($numCliente); ?>">Productos</a>
+                    </li>
+                </ul>
                     </div>
                 </nav>
 
@@ -210,7 +239,6 @@ $productos = $producto->obtenerProductos($categoria, $busqueda, $limit, $offset)
         <?php endif; ?>
     </div>
     <input type="text" id="numCliente" data-numcliente="<?php echo $numCliente; ?>" />
-    <script src="mi-script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/catalogo.js"></script>
 </body>

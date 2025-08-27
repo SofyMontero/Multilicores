@@ -17,8 +17,7 @@ class Pedido
     }
 
 
-    public function crearPedido($datosCliente, $productos, $total,$numCliente,$observaciones)
-
+    public function crearPedido($datosCliente, $productos, $total, $numCliente, $observaciones)
     {
         try {
             // Iniciar transacción
@@ -36,7 +35,7 @@ class Pedido
             // Verificar que el número no exista (prevenir duplicados)
             $sqlCheck = "SELECT COUNT(*) FROM pedidos WHERE ped_numfac = ?";
             $stmtCheck = $this->pdo->prepare($sqlCheck);
-            $stmtCheck->execute([$numeroFactura]);             
+            $stmtCheck->execute([$numeroFactura]);
 
             if ($stmtCheck->fetchColumn() > 0) {
                 // Si existe, generar uno nuevo
@@ -47,45 +46,43 @@ class Pedido
             if (substr($telefono, 0, 2) !== '57') {
                 $telefono = '57' . $telefono;
             }
+
             // Insertar pedido principal
             $sqlPedido = "INSERT INTO pedidos (
-                ped_cliente, 
-                ped_estado, 
-                ped_fecha, 
-                ped_numfac,
-                ped_total,
-                ped_numCliente,
-                ped_observacion
-            ) VALUES (?, ?, NOW(), ?, ?,?,?)";
-           
+            ped_cliente, 
+            ped_estado, 
+            ped_fecha, 
+            ped_numfac,
+            ped_total,
+            ped_numCliente,
+            ped_observacion
+        ) VALUES (?, ?, NOW(), ?, ?, ?, ?)";
 
             $stmtPedido = $this->pdo->prepare($sqlPedido);
             $stmtPedido->execute([
-                $clienteInfo,        // ← asegúrate de tener este valor disponible
-                1, 
+                $clienteInfo,
+                1,
                 $numeroFactura,
-                $total,
+                $total,        // puede ser 0 (pedido solo con promos)
                 $telefono,
                 $observaciones
-
             ]);
 
             $idPedido = $this->pdo->lastInsertId();
-
             if (!$idPedido) {
                 throw new Exception('No se pudo obtener el ID del pedido');
             }
 
             // Insertar detalles del pedido
             $sqlDetalle = "INSERT INTO detalle_pedidos (
-                id_pedido, 
-                id_producto, 
-                nombre_producto,
-                tipo_producto, 
-                cantidad, 
-                precio_unitario, 
-                subtotal
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            id_pedido, 
+            id_producto, 
+            nombre_producto,
+            tipo_producto, 
+            cantidad, 
+            precio_unitario, 
+            subtotal
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             $stmtDetalle = $this->pdo->prepare($sqlDetalle);
 
@@ -97,32 +94,40 @@ class Pedido
             $stmtVentas = $this->pdo->prepare($sqlVentas);
 
             foreach ($productos as $producto) {
-                // Validar datos del producto
-                $idProducto = $producto['id'] ?? null;
-                $nombre = $producto['nombre'] ?? '';
-                $tipo = $producto['tipo'] ?? '';
-                $cantidad = intval($producto['cantidad'] ?? 0);
-                $precioUnitario = floatval($producto['precio_unitario'] ?? 0);
-                $subtotal = floatval($producto['subtotal'] ?? 0);
+                // Datos del producto (permitimos 0 en precios)
+                $idProducto      = $producto['id'] ?? null;
+                $nombre          = $producto['nombre'] ?? '';
+                $tipo            = $producto['tipo'] ?? '';
+                $cantidad        = (int)($producto['cantidad'] ?? 0);
+                $precioUnitario  = isset($producto['precio_unitario']) && is_numeric($producto['precio_unitario'])
+                    ? (float)$producto['precio_unitario'] : 0.0;
 
-                // Verificar que los datos son válidos
-                if (empty($nombre) || $cantidad <= 0 || $precioUnitario <= 0) {
+                // Recalcular subtotal en servidor (0 si promo)
+                $subtotal = $precioUnitario * $cantidad;
+
+                // Validaciones: 0 es válido, negativo NO
+                if ($nombre === '' || $cantidad <= 0) {
                     throw new Exception("Datos inválidos en producto: $nombre");
                 }
+                if ($precioUnitario < 0 || $subtotal < 0) {
+                    throw new Exception("Importes negativos en producto: $nombre");
+                }
 
+                // Insert detalle
                 $stmtDetalle->execute([
                     $idPedido,
                     $idProducto,
                     $nombre,
                     $tipo,
                     $cantidad,
-                    $precioUnitario,
-                    $subtotal
+                    $precioUnitario,   // puede ser 0 (promo)
+                    $subtotal          // puede ser 0 (promo)
                 ]);
 
+                // Actualizar contador de ventas (si no quieres sumar promos, pon un if($precioUnitario>0){...})
                 $stmtVentas->execute([
-                    $cantidad,     // Lo que se va a sumar a cantidad_venta
-                    $idProducto    // El producto al que se le suma
+                    $cantidad,
+                    $idProducto
                 ]);
             }
 
@@ -140,6 +145,7 @@ class Pedido
             throw $e; // Re-lanzar la excepción para manejo en el controlador
         }
     }
+
 
     public function obtenerPedidosCliente($nombreCliente, $limite = 50)
     {
@@ -387,7 +393,7 @@ class Pedido
             'plantilla' => "$plantilla",
             'texto' => "$idPromo",
             'texto1' => "$descripcion"
-            
+
         ];
 
         $data_json = json_encode($data);
@@ -431,6 +437,4 @@ class Pedido
 
         return $resultados;
     }
-
 }
-

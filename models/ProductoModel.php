@@ -160,6 +160,16 @@ class Producto
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
+       public function getConnection()
+    {
+        $query = $this->pdo->prepare("
+            SELECT * FROM promociones
+        ");
+
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function buscarSugerencias($termino)
     {
         $query = $this->pdo->prepare("

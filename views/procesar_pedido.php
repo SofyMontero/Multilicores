@@ -8,47 +8,69 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Verificar que se recibieron datos
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['productos'])) {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['productos']) || !is_array($_POST['productos']) || count($_POST['productos']) === 0) {
     header('Location: catalogo.php?error=sin_productos');
     exit;
 }
 
 try {
-    // Obtener datos del formulario
-    $productos = $_POST['productos'] ?? [];
-    $totalGeneral = floatval($_POST['total_general'] ?? 0);
-    $observaciones = $_POST['observaciones'] ?? '';
+    // Obtener datos del formulario (entrada cruda)
+    $productosEntrada = $_POST['productos'];
+    $observaciones    = $_POST['observaciones'] ?? '';
+    $numCliente       = $_POST['numCliente'] ?? 0;
 
+    // ---- Normalización segura (acepta promos con monto 0) ----
+    $productos = [];
+    $totalGeneral = 0.0;
 
-
-
-
-    // Validar que hay productos
-    if (empty($productos)) {
-        throw new Exception('No se recibieron productos');
-    }
-
-    // Validar estructura de productos
-    foreach ($productos as $index => $producto) {
-        if (
-            empty($producto['id']) || empty($producto['nombre']) ||
-            empty($producto['tipo']) || empty($producto['cantidad'])
-        ) {
+    foreach ($productosEntrada as $index => $p) {
+        // Validar campos mínimos sin usar empty() (porque "0" sería false)
+        if (!isset($p['id']) || $p['id'] === '' ||
+            !isset($p['nombre']) || $p['nombre'] === '' ||
+            !isset($p['tipo']) || $p['tipo'] === '' ||
+            !isset($p['cantidad'])) {
             throw new Exception("Producto en posición $index tiene datos incompletos");
         }
+
+        // Normalizar cantidad (mínimo 1)
+        $cantidad = (int)$p['cantidad'];
+        if ($cantidad < 1) {
+            throw new Exception("La cantidad del producto en posición $index debe ser al menos 1");
+        }
+
+        // Precios: permitir 0 para promociones
+        $precioUnitario = isset($p['precio_unitario']) ? (float)$p['precio_unitario'] : 0.0;
+        // Recalcular subtotal en servidor (no confiar en el cliente)
+        $subtotal = $precioUnitario > 0 ? $precioUnitario * $cantidad : 0.0;
+
+        // Bandera de promo (precio 0 => promo)
+        $esPromo = ($precioUnitario <= 0);
+
+        // Armar producto normalizado
+        $productoNormalizado = [
+            'id'              => $p['id'],
+            'nombre'          => $p['nombre'],
+            'tipo'            => $p['tipo'],     // "unidad", "paca" o lo que envíe el front
+            'cantidad'        => $cantidad,
+            'precio_unitario' => $precioUnitario, // puede ser 0 en promo
+            'subtotal'        => $subtotal,       // 0 en promo
+            'es_promo'        => $esPromo,        // útil por si lo usas en el modelo/reportes
+        ];
+
+        $productos[]  = $productoNormalizado;
+        $totalGeneral += $subtotal; // suma puede quedar en 0 si todo es promo (válido)
     }
 
     // Datos del cliente simplificados (sin formulario)
-    $numCliente = $_POST['numCliente'] ?? 0;
     $datosCliente = [
         'nombre' => 'Cliente Web',
-        'email' => 'pedido@multilicores.com'
+        'email'  => 'pedido@multilicores.com'
     ];
 
     // Instanciar modelo de pedidos
     $pedidoModel = new Pedido();
 
-    // Crear el pedido
+    // Crear el pedido (totalGeneral puede ser 0 y debe ser aceptado)
     $idPedido = $pedidoModel->crearPedido($datosCliente, $productos, $totalGeneral, $numCliente, $observaciones);
 
     if ($idPedido) {
@@ -56,20 +78,13 @@ try {
         $mensaje = "Pedido creado exitosamente";
         $tipo = "success";
         $limpiarCarrito = true;
-        $totalPedido=number_format($totalGeneral, 0, ',', '.');
-        $resumenPedido= "";
-        $dProducto= "";
-        foreach ($productos as $producto): 
-            $dProducto .= $producto['nombre']."\n".$producto['tipo'];
-            $dProducto .= "{$producto['tipo']}";
-            $dProducto .= "{$producto['cantidad']}";
-            $dProducto .= "{$producto['precio_unitario']}";
-            $dProducto .= "{$producto['subtotal']}";
-        endforeach;
-        
-        $resumenPedido .= "Valor total pedido $".$totalPedido;
-                                     
-        $respuesta = $pedidoModel->enviarConfirmacion($idPedido, "$resumenPedido ", "", "$numCliente","pedido_recepcionado");
+
+        // Resumen simple para confirmación
+        $totalPedido = number_format($totalGeneral, 0, ',', '.');
+        $resumenPedido = "Valor total pedido $" . $totalPedido;
+
+        // Enviar confirmación (mantengo tu llamada)
+        $respuesta = $pedidoModel->enviarConfirmacion($idPedido, "$resumenPedido ", "", "$numCliente", "pedido_recepcionado");
         error_log(print_r($respuesta, true));
     } else {
         throw new Exception('Error al crear el pedido');
@@ -80,8 +95,13 @@ try {
     $tipo = "error";
     $limpiarCarrito = false;
     $idPedido = null;
-}
 
+    // En caso de error, intenta conservar variables mínimas
+    $productos = $productos ?? [];
+    $totalGeneral = $totalGeneral ?? 0;
+    $observaciones = $observaciones ?? '';
+    $numCliente = $numCliente ?? 0;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -93,50 +113,17 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .success-animation {
-            animation: successPulse 1s ease-in-out;
-        }
-
+        .success-animation { animation: successPulse 1s ease-in-out; }
         @keyframes successPulse {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-
-            50% {
-                transform: scale(1.05);
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
-
-        .card {
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            border: none;
-        }
-
-        .btn {
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .table {
-            border-radius: 10px;
-            overflow: hidden;
-        }
+        .card { border-radius: 15px; overflow: hidden; }
+        .card-header { border: none; }
+        .btn { border-radius: 25px; transition: all 0.3s ease; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .table { border-radius: 10px; overflow: hidden; }
     </style>
 </head>
 
@@ -193,7 +180,7 @@ try {
                             </div>
 
                             <div class="d-grid gap-2 d-md-block">
-                                <a href="catalogo.php?idCli=<?php echo $numCliente; ?>" class="btn btn-secondary btn-lg px-4 me-md-2">
+                                <a href="catalogo.php?idCli=<?php echo htmlspecialchars($numCliente); ?>" class="btn btn-secondary btn-lg px-4 me-md-2">
                                     <i class="fas fa-arrow-left me-1"></i>
                                     Volver al Catálogo
                                 </a>
@@ -245,13 +232,13 @@ try {
                                                         </span>
                                                     </td>
                                                     <td class="align-middle fw-bold">
-                                                        <?php echo intval($producto['cantidad'] ?? 0); ?>
+                                                        <?php echo (int)($producto['cantidad'] ?? 0); ?>
                                                     </td>
                                                     <td class="align-middle">
-                                                        $<?php echo number_format(floatval($producto['precio_unitario'] ?? 0), 0, ',', '.'); ?>
+                                                        $<?php echo number_format((float)($producto['precio_unitario'] ?? 0), 0, ',', '.'); ?>
                                                     </td>
                                                     <td class="align-middle fw-bold text-success">
-                                                        $<?php echo number_format(floatval($producto['subtotal'] ?? 0), 0, ',', '.'); ?>
+                                                        $<?php echo number_format((float)($producto['subtotal'] ?? 0), 0, ',', '.'); ?>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -283,13 +270,13 @@ try {
                                                     </span>
                                                 </div>
                                                 <div class="col-6 text-end fw-bold">
-                                                    Cant: <?php echo intval($producto['cantidad'] ?? 0); ?>
+                                                    Cant: <?php echo (int)($producto['cantidad'] ?? 0); ?>
                                                 </div>
                                                 <div class="col-6 text-muted">
-                                                    $<?php echo number_format(floatval($producto['precio_unitario'] ?? 0), 0, ',', '.'); ?>
+                                                    $<?php echo number_format((float)($producto['precio_unitario'] ?? 0), 0, ',', '.'); ?>
                                                 </div>
                                                 <div class="col-6 text-end fw-bold text-success">
-                                                    $<?php echo number_format(floatval($producto['subtotal'] ?? 0), 0, ',', '.'); ?>
+                                                    $<?php echo number_format((float)($producto['subtotal'] ?? 0), 0, ',', '.'); ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -332,20 +319,22 @@ try {
             </div>
         <?php endif; ?>
     </div>
-  <!-- Toast -->
-  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="contadorToast" class="toast show align-items-center text-bg-dark border-0">
-      <div class="d-flex">
-        <div class="toast-body">
-          🔄 La página se redirigirá en <span id="segundos">5</span> segundos...
+
+    <!-- Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="contadorToast" class="toast show align-items-center text-bg-dark border-0">
+            <div class="d-flex">
+                <div class="toast-body">
+                    🔄 La página se redirigirá en <span id="segundos">5</span> segundos...
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
-      </div>
     </div>
-  </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <?php if ($limpiarCarrito): ?>
+    <?php if (!empty($limpiarCarrito) && $limpiarCarrito): ?>
         <script>
             // Limpiar carrito después de pedido exitoso
             try {
@@ -357,50 +346,42 @@ try {
                 }
                 console.log('Carrito limpiado después de pedido exitoso');
 
-
-                // Mostrar notificación de éxito
-                if (typeof window !== 'undefined') {
-                    setTimeout(() => {
-                        const successCard = document.querySelector('.success-animation');
-                        if (successCard) {
-                            successCard.style.transform = 'scale(1.02)';
-                            setTimeout(() => {
-                                successCard.style.transform = 'scale(1)';
-                            }, 200);
-                        }
-                    }, 100);
-                }
+                // Animación suave
+                setTimeout(() => {
+                    const successCard = document.querySelector('.success-animation');
+                    if (successCard) {
+                        successCard.style.transform = 'scale(1.02)';
+                        setTimeout(() => { successCard.style.transform = 'scale(1)'; }, 200);
+                    }
+                }, 100);
             } catch (e) {
                 console.error('Error al limpiar carrito:', e);
             }
+
+            // Redirección con cuenta regresiva
             let segundos = 10;
             let spanSegundos = document.getElementById("segundos");
-            let redireccionAutomatica = false; // bandera para saber si la salida fue intencional
+            let redireccionAutomatica = false;
 
             let intervalo = setInterval(function() {
                 segundos--;
-                spanSegundos.textContent = segundos;
+                if (spanSegundos) spanSegundos.textContent = segundos;
 
                 if (segundos <= 0) {
                     let numCliente = <?php echo json_encode($numCliente); ?>;
-                    console.log("Número de cliente:", numCliente);
                     clearInterval(intervalo);
-
-                    redireccionAutomatica = true; // ✅ marcamos que fue nuestra redirección
+                    redireccionAutomatica = true;
                     window.location.href = "https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=" + numCliente;
                 }
             }, 1000);
 
             window.addEventListener("beforeunload", function (e) {
-                if (!redireccionAutomatica) { 
-                    // ❌ Solo mostrar la alerta si NO fue redirección automática
+                if (!redireccionAutomatica) {
                     e.preventDefault();
-                    e.returnValue = ""; // alerta estándar
+                    e.returnValue = "";
                 }
             });
         </script>
-
     <?php endif; ?>
 </body>
-
 </html>

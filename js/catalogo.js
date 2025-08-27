@@ -192,8 +192,11 @@ function agregarAlCarrito(event) {
   // Obtener datos del producto
   const id = btn.dataset.id;
   const nombre = btn.dataset.nombre;
-  const precioUnidad = parseFloat(btn.dataset.precioUnidad);
-  const precioPaca = parseFloat(btn.dataset.precioPaca);
+  const precioUnidadRaw = parseFloat(btn.dataset.precioUnidad);
+  const precioPacaRaw = parseFloat(btn.dataset.precioPaca);
+
+  // Helper para validar numéricos
+  const esNumero = (v) => typeof v === "number" && !Number.isNaN(v);
 
   // Obtener valores del formulario
   const tipoSelect = productCard.querySelector(".tipo-select");
@@ -215,42 +218,55 @@ function agregarAlCarrito(event) {
     return;
   }
 
-  // Calcular precio según el tipo
-  const precioUnitario = tipo === "paca" ? precioPaca : precioUnidad;
-  const precioTotal = precioUnitario * cantidad;
+  // Calcular precio según el tipo (o detectar PROMO sin precio)
+  const precioSeleccionadoRaw = tipo === "paca" ? precioPacaRaw : precioUnidadRaw;
+  const esPromo = !esNumero(precioSeleccionadoRaw); // si no hay precio => promo
+  const precioUnitario = esPromo ? 0 : precioSeleccionadoRaw;
+  const precioTotal = esPromo ? 0 : precioUnitario * cantidad;
 
-  // Verificar si ya existe el mismo producto con el mismo tipo
+  // Verificar si ya existe el mismo producto con el mismo tipo y la misma condición de promo
   const existingIndex = carrito.findIndex(
-    (item) => item.id === id && item.tipo === tipo
+    (item) => item.id === id && item.tipo === tipo && !!item.esPromo === esPromo
   );
 
   if (existingIndex !== -1) {
-    // Si existe, sumar la cantidad
+    // Sumar cantidades
     carrito[existingIndex].cantidad += cantidad;
-    carrito[existingIndex].precioTotal =
-      carrito[existingIndex].precioUnitario * carrito[existingIndex].cantidad;
+
+    // Recalcular total si NO es promo (las promos no suman precio)
+    if (!carrito[existingIndex].esPromo) {
+      carrito[existingIndex].precioTotal =
+        carrito[existingIndex].precioUnitario * carrito[existingIndex].cantidad;
+    }
+
     mostrarAlerta(
-      `Cantidad actualizada: ${carrito[existingIndex].cantidad} ${tipo}s de ${nombre}`,
+      carrito[existingIndex].esPromo
+        ? `Cantidad actualizada: ${carrito[existingIndex].cantidad} ${tipo}s (PROMO) de ${nombre}`
+        : `Cantidad actualizada: ${carrito[existingIndex].cantidad} ${tipo}s de ${nombre}`,
       "success"
     );
   } else {
-    // Si no existe, crear nuevo producto
+    // Crear nuevo producto
     const producto = {
-      id: id,
-      nombre: nombre,
-      tipo: tipo,
-      cantidad: cantidad,
-      precioUnitario: precioUnitario,
-      precioTotal: precioTotal,
+      id,
+      nombre,
+      tipo,
+      cantidad,
+      esPromo,                 // <— bandera para ignorar en totales
+      precioUnitario,          // 0 si promo
+      precioTotal,             // 0 si promo
       timestamp: Date.now(),
     };
 
     carrito.push(producto);
-    mostrarAlerta(`${nombre} agregado al carrito`, "success");
+    mostrarAlerta(
+      esPromo ? `${nombre} agregado al carrito como PROMO` : `${nombre} agregado al carrito`,
+      "success"
+    );
   }
 
   // Actualizar interfaz
-  actualizarContadores();
+  actualizarContadores?.();
 
   // Limpiar formulario
   tipoSelect.value = "";
@@ -278,13 +294,20 @@ function agregarAlCarrito(event) {
   }, 1500);
 
   // Guardar en localStorage
-  guardarCarrito();
+  guardarCarrito?.();
+}
+
+function calcularTotalCarrito() {
+  return carrito
+    .filter((i) => !i.esPromo)
+    .reduce((acc, i) => acc + (i.precioTotal || 0), 0);
 }
 
 // Función para actualizar contadores y resumen
 function actualizarContadores() {
   const totalItems = carrito.length;
-  totalGeneral = carrito.reduce((sum, item) => sum + item.precioTotal, 0);
+  // ✅ Solo usamos la función que excluye promos
+  totalGeneral = calcularTotalCarrito();
 
   // Actualizar contador del carrito
   if (cartCountElement) {
@@ -342,7 +365,9 @@ function cambiarCantidad(index, nuevaCantidad) {
 
   // Actualizar cantidad y recalcular precio total
   carrito[index].cantidad = nuevaCantidad;
-  carrito[index].precioTotal = carrito[index].precioUnitario * nuevaCantidad;
+  carrito[index].precioTotal = carrito[index].esPromo
+    ? 0
+    : carrito[index].precioUnitario * nuevaCantidad;
 
   // Actualizar interfaz
   actualizarContadores();
