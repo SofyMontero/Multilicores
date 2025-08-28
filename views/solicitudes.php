@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $mensaje_exito = "El pedido ha sido aceptado exitosamente";
                 $plantilla="en_camino";
 
-                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$observaciones", "", "$numCliente", $plantilla);
+                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$pedido_id", "", "$numCliente", $plantilla);
                 error_log(print_r($respuesta, true));
                 echo json_encode($respuesta);
                 exit;
@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                
                 
 
-                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$observaciones", "", "$numCliente", $plantilla);
+                $respuesta = $solicitudModel->enviarPromo($pedido_id, "$pedido_id", "", "$numCliente", $plantilla);
                 error_log(print_r($respuesta, true));
                 echo json_encode($respuesta);
                 exit;
@@ -342,10 +342,26 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                                     <i class="fas fa-eye"></i> Ver Más
                                                 </button>
                                             </td>
-                                            <td class="text-center">
-                                                <span class="text-success">
-                                                    <i class="fas fa-check-circle"></i> Procesado
-                                                </span>
+
+                                             <td class="text-center">
+                                                <?php if ($pedido['ped_estado']=="aceptado"): ?>
+                                                    <button class="btn btn-primary btn-sm enviar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                        🚚 Enviar Pedido
+                                                    </button>
+                                                    <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente="<?php echo $pedido['ped_numCliente']; ?>" />
+                                                
+                                                <?php elseif ($pedido['ped_estado']=="enviado"): ?>
+                                                    <button class="btn btn-warning btn-sm finalizar-pedido" data-pedido="<?php echo $pedido['id_pedido']; ?>">
+                                                        ✅ Finalizar pedido
+                                                    </button>
+                                                    <input type="hidden" id="numCliente<?php echo $pedido['id_pedido']; ?>" data-numcliente="<?php echo $pedido['ped_numCliente']; ?>" />
+
+                                                
+                                                <?php elseif ($pedido['ped_estado']=="finalizaContado" or $pedido['ped_estado']=="finalizaCredito"): ?>
+                                                    <span class="text-success">
+                                                        <i class="fas fa-check-circle"></i> Procesado
+                                                    </span>
+                                                <?php endif; ?>
                                             </td>
                                             <td><?php echo $pedido['nombre_bar']; ?></td>
                                         </tr>
@@ -511,7 +527,9 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
 
                                                 
                                                 <?php elseif ($pedido['ped_estado']=="finalizaContado" or $pedido['ped_estado']=="finalizaCredito"): ?>
-                                                    <span class="badge badge-success">🎉 Culminado</span>
+                                                    <span class="text-success">
+                                                        <i class="fas fa-check-circle"></i> Procesado
+                                                    </span>
                                                 <?php endif; ?>
                                             </td>
                                             <td><?php echo $pedido['nombre_bar']; ?></td>
