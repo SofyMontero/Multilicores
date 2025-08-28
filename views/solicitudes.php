@@ -28,8 +28,9 @@ require_once "../models/database.php";
 require_once "../models/solicitudModel.php";
 
 // Calcular fechas por defecto
-echo $hoy = date("Y-m-d");
-echo$ayer = date("Y-m-d", strtotime("-1 day"));
+$hoy = date("Y-m-d");
+$ayer = date("Y-m-d", strtotime("-1 day"));
+
 
 // Si vienen fechas por GET, las usamos; si no, asignamos los valores por defecto
 $fecha_inicio = isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : $ayer;
@@ -272,7 +273,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
         <div class="tab-pane fade show active" id="todos" role="tabpanel">
             <div class="card mt-3">
                 <div class="card-header">
-                    <h5 class="card-title"><i class="fas fa-list"></i> &nbsp; Todas las Solicitudes</h5>
+                    <h5 class="card-title"><i class="fas fa-list"></i> &nbsp; Solicitudes de los ultimos 2 dias</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -446,7 +447,7 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="7" class="text-center">No hay pedidos aceptados</td>
+                                        <td colspan="9" class="text-center">No hay pedidos pendientes</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -470,11 +471,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                     <th>ID Pedido</th>
                                     <th>N° Factura</th>
                                     <th>Cliente</th>
-                                    <th>Fecha Pedido</th>
+                                    <th>Fecha y Hora</th>
                                     <th>Total</th>
-                                    <th>Ver Productos</th>
                                     <th>Estado</th>
-                                    <th>Trasabilidad</th>
+                                    <th>Ver Productos</th>
+                                    <th>Acciones</th>
+                                    <th>Cliente</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -487,12 +489,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                             <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($pedido['ped_fecha'])); ?></td>
                                             <td class="text-center">$<?php echo number_format($pedido['ped_total'], 2); ?></td>
                                             <td class="text-center">
+                                                <span class="badge badge-success">Aceptado</span>
+                                            </td>
+                                            <td class="text-center">
                                                 <button class="btn btn-info btn-sm ver-productos" data-pedido="<?php echo $pedido['id_pedido']; ?>">
                                                     <i class="fas fa-eye"></i> Ver Más
                                                 </button>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge badge-success">Aceptado</span>
                                             </td>
                                             <td class="text-center">
                                                 <?php if ($pedido['ped_estado']=="aceptado"): ?>
@@ -509,14 +511,15 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
 
                                                 
                                                 <?php elseif ($pedido['ped_estado']=="finalizaContado" or $pedido['ped_estado']=="finalizaCredito"): ?>
-                                                    <span class="badge bg-success">🎉 Culminado</span>
+                                                    <span class="badge badge-success">🎉 Culminado</span>
                                                 <?php endif; ?>
                                             </td>
+                                            <td><?php echo $pedido['nombre_bar']; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="7" class="text-center">No hay pedidos aceptados</td>
+                                        <td colspan="9" class="text-center">No hay pedidos aceptados</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -540,10 +543,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                     <th>ID Pedido</th>
                                     <th>N° Factura</th>
                                     <th>Cliente</th>
-                                    <th>Fecha Pedido</th>
+                                    <th>Fecha y Hora</th>
                                     <th>Total</th>
-                                    <th>Ver Productos</th>
                                     <th>Estado</th>
+                                    <th>Ver Productos</th>
+                                    <th>Acciones</th>
+                                    <th>Cliente</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -556,18 +561,24 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                             <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($pedido['ped_fecha'])); ?></td>
                                             <td class="text-center">$<?php echo number_format($pedido['ped_total'], 2); ?></td>
                                             <td class="text-center">
+                                                <span class="badge badge-danger">Rechazado</span>
+                                            </td>
+                                            <td class="text-center">
                                                 <button class="btn btn-info btn-sm ver-productos" data-pedido="<?php echo $pedido['id_pedido']; ?>">
                                                     <i class="fas fa-eye"></i> Ver Más
                                                 </button>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge badge-danger">Rechazado</span>
+                                                <span class="text-danger">
+                                                    <i class="fas fa-times-circle"></i> Rechazado
+                                                </span>
                                             </td>
+                                            <td><?php echo $pedido['nombre_bar']; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="7" class="text-center">No hay pedidos rechazados</td>
+                                        <td colspan="9" class="text-center">No hay pedidos rechazados</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
