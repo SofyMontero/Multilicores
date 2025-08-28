@@ -389,7 +389,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "to" => $telefonoCliente,
                     "type" => "template",
                     "template" => [
-                        "name" => "pago_credito",  // Asegúrate que esta plantilla tenga dos {{}} en el cuerpo
+                        "name" => "pago_a_credito",  // Asegúrate que esta plantilla tenga dos {{}} en el cuerpo
                         "language" => [
                             "code" => "es"
                         ],
