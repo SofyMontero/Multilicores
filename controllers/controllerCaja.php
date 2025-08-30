@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = new Database();
     $conexion = $db->connect(); 
 
-    $fecha       = $data['fecha'];
+    $fecha       = date("Y-m-d H:i:s");
     $cliente_id  = $data['cliente_id'];
     $num_factura = $data['num_factura'];
     $ingreso     = $data['ingreso'] ?? 0;

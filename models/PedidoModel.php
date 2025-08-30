@@ -56,12 +56,13 @@ class Pedido
             ped_total,
             ped_numCliente,
             ped_observacion
-        ) VALUES (?, ?, NOW(), ?, ?, ?, ?)";
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             $stmtPedido = $this->pdo->prepare($sqlPedido);
             $stmtPedido->execute([
                 $clienteInfo,
                 1,
+                date("Y-m-d H:i:s"),
                 $numeroFactura,
                 $total,        // puede ser 0 (pedido solo con promos)
                 $telefono,
