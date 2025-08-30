@@ -62,7 +62,7 @@ class Pedido
             $stmtPedido->execute([
                 $clienteInfo,
                 1,
-                date("Y-m-d H:i:s"),
+                date("Y-m-d H:i:s", strtotime("-5 hours")),
                 $numeroFactura,
                 $total,        // puede ser 0 (pedido solo con promos)
                 $telefono,
