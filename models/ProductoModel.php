@@ -176,7 +176,7 @@ class Producto
         $query = $this->pdo->prepare("
             SELECT id_producto, descripcion_producto 
             FROM productos 
-            WHERE descripcion_producto LIKE :termino 
+            WHERE  estado_producto = '1' and descripcion_producto LIKE :termino 
             ORDER BY descripcion_producto 
             LIMIT 10
         ");
