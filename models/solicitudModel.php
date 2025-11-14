@@ -24,6 +24,7 @@ class solicitud
                  P.ped_total, 
                  P.ped_estado,
                  P.ped_numCliente,
+                 P.ped_sede,
                  B.nombre_bar
              FROM pedidos P
              INNER JOIN clientes C ON C.id_cliente = P.ped_cliente
@@ -57,6 +58,7 @@ class solicitud
                 P.ped_total, 
                 P.ped_estado,
                 P.ped_numCliente,
+                P.ped_sede,
                 B.nombre_bar
             FROM pedidos P
             INNER JOIN clientes C ON C.id_cliente = P.ped_cliente
@@ -268,6 +270,7 @@ class solicitud
                 P.ped_total, 
                 P.ped_estado,
                 P.ped_numCliente,
+                P.ped_sede,
                 B.nombre_bar
             FROM pedidos P
             INNER JOIN clientes C ON C.id_cliente = P.ped_cliente

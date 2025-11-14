@@ -40,6 +40,7 @@ try {
 
     // Datos del cliente simplificados (sin formulario)
     $numCliente = $_POST['numCliente'] ?? 0;
+    $ped_sede = $_POST['ped_sede'] ?? null; // Dirección del cliente seleccionado
     $datosCliente = [
         'nombre' => 'Cliente Web',
         'email' => 'pedido@multilicores.com'
@@ -49,7 +50,7 @@ try {
     $pedidoModel = new Pedido();
 
     // Crear el pedido
-    $idPedido = $pedidoModel->crearPedido($datosCliente, $productos, $totalGeneral, $numCliente, $observaciones);
+    $idPedido = $pedidoModel->crearPedido($datosCliente, $productos, $totalGeneral, $numCliente, $observaciones, $ped_sede);
 
     if ($idPedido) {
         // Pedido creado exitosamente

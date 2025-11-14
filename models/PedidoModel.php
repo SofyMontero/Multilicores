@@ -17,7 +17,7 @@ class Pedido
     }
 
 
-    public function crearPedido($datosCliente, $productos, $total, $numCliente, $observaciones)
+    public function crearPedido($datosCliente, $productos, $total, $numCliente, $observaciones, $ped_sede = null)
     {
         try {
             // Iniciar transacción
@@ -55,8 +55,9 @@ class Pedido
             ped_numfac,
             ped_total,
             ped_numCliente,
-            ped_observacion
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            ped_observacion,
+            ped_sede
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
             $stmtPedido = $this->pdo->prepare($sqlPedido);
             $stmtPedido->execute([
@@ -66,7 +67,8 @@ class Pedido
                 $numeroFactura,
                 $total,        // puede ser 0 (pedido solo con promos)
                 $telefono,
-                $observaciones
+                $observaciones,
+                $ped_sede      // dirección del cliente seleccionado
             ]);
 
             $idPedido = $this->pdo->lastInsertId();

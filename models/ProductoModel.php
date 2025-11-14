@@ -340,4 +340,20 @@ class Producto
             return false;
         }
     }
+
+    /**
+     * Obtener todos los clientes por teléfono
+     */
+    public function obtenerClientesPorTelefono($telefono)
+    {
+        try {
+            $sql = "SELECT id_cliente, cli_nombre, cli_direccion, cli_telefono FROM clientes WHERE cli_telefono = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$telefono]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error en obtenerClientesPorTelefono: " . $e->getMessage());
+            return [];
+        }
+    }
 }

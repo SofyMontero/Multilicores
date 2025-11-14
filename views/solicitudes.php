@@ -319,7 +319,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                                     <i class="fas fa-times"></i> Rechazar
                                                 </button>
                                             </td>
-                                            <td><?php echo $pedido['nombre_bar']; ?></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($pedido['nombre_bar'] ?? ''); ?></strong>
+                                                <?php if (!empty($pedido['ped_sede'])): ?>
+                                                    <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($pedido['ped_sede']); ?></small>
+                                                <?php endif; ?>
+                                            </td>
                                             
                                         </tr>
                                     <?php endforeach; ?>
@@ -363,7 +368,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                                     </span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?php echo $pedido['nombre_bar']; ?></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($pedido['nombre_bar'] ?? ''); ?></strong>
+                                                <?php if (!empty($pedido['ped_sede'])): ?>
+                                                    <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($pedido['ped_sede']); ?></small>
+                                                <?php endif; ?>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -390,7 +400,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                                     <i class="fas fa-times-circle"></i> Rechazado
                                                 </span>
                                             </td>
-                                            <td><?php echo $pedido['nombre_bar']; ?></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($pedido['nombre_bar'] ?? ''); ?></strong>
+                                                <?php if (!empty($pedido['ped_sede'])): ?>
+                                                    <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($pedido['ped_sede']); ?></small>
+                                                <?php endif; ?>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -457,7 +472,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                                     <i class="fas fa-times"></i> Rechazar
                                                 </button>
                                             </td>
-                                            <td><?php echo $pedido['nombre_bar']; ?></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($pedido['nombre_bar'] ?? ''); ?></strong>
+                                                <?php if (!empty($pedido['ped_sede'])): ?>
+                                                    <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($pedido['ped_sede']); ?></small>
+                                                <?php endif; ?>
+                                            </td>
                                             
                                         </tr>
                                     <?php endforeach; ?>
@@ -532,7 +552,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                                     </span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?php echo $pedido['nombre_bar']; ?></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($pedido['nombre_bar'] ?? ''); ?></strong>
+                                                <?php if (!empty($pedido['ped_sede'])): ?>
+                                                    <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($pedido['ped_sede']); ?></small>
+                                                <?php endif; ?>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
@@ -591,7 +616,12 @@ $pedidos_rechazados = $solicitudModel->obtenerPedidosRechazados($fecha_inicio,$f
                                                     <i class="fas fa-times-circle"></i> Rechazado
                                                 </span>
                                             </td>
-                                            <td><?php echo $pedido['nombre_bar']; ?></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($pedido['nombre_bar'] ?? ''); ?></strong>
+                                                <?php if (!empty($pedido['ped_sede'])): ?>
+                                                    <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($pedido['ped_sede']); ?></small>
+                                                <?php endif; ?>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>

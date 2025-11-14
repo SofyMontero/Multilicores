@@ -22,12 +22,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['productos'])) {
 $numCliente = $_POST['numCliente'] ?? '';
 
 $mostrarModalCliente = "existe";
+$clientesMultiples = [];
+$direccionClienteUnico = null;
 
 if (!empty($numCliente)) {
   $pedido = new Producto(); // Asegúrate de que tu clase tiene $this->pdo inicializado
-  if (!$pedido->clienteExistePorTelefono($numCliente)) {
+  $clientes = $pedido->obtenerClientesPorTelefono($numCliente);
+  
+  if (count($clientes) == 0) {
     $mostrarModalCliente = "no_existe"; // cliente no existe
+  } elseif (count($clientes) > 1) {
+    $mostrarModalCliente = "multiple"; // hay múltiples clientes
+    $clientesMultiples = $clientes;
+  } else {
+    // Un solo cliente - guardar su dirección
+    $direccionClienteUnico = $clientes[0]['cli_direccion'] ?? null;
   }
+  // Si count($clientes) == 1, $mostrarModalCliente queda como "existe"
 } else {
   $mostrarModalCliente = "no_llego"; // no vino el número
 }
@@ -133,11 +144,41 @@ $productos = $producto->obtenerCategorias();
   </div>
 </div>
 
+<!-- Modal de selección de cliente múltiple -->
+<div class="modal fade" id="modalSeleccionarCliente" tabindex="-1" aria-labelledby="modalSeleccionarClienteLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow rounded-4 border-0">
+      <div class="modal-header bg-warning text-dark rounded-top-4 text-center d-flex flex-column justify-content-center w-100">
+        <i class="bi bi-people-fill fs-1 mb-2"></i>
+        <h5 class="fw-bold mb-1">Múltiples clientes encontrados</h5>
+        <p class="mb-0">Selecciona el cliente al que deseas enviar el pedido</p>
+      </div>
+      <div class="modal-body p-4">
+        <label for="selectCliente" class="form-label fw-bold">Selecciona un cliente:</label>
+        <select class="form-select form-select-lg" id="selectCliente" name="selectCliente" required>
+          <option value="" disabled selected>-- Selecciona un cliente --</option>
+        </select>
+        <div id="infoClienteSeleccionado" class="mt-3 p-3 bg-light rounded border" style="display: none;">
+          <p class="mb-1"><strong>Nombre:</strong> <span id="infoNombre"></span></p>
+          <p class="mb-0"><strong>Dirección:</strong> <span id="infoDireccion"></span></p>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center pb-4">
+        <button type="button" class="btn btn-success px-4 rounded-pill" id="btnConfirmarCliente">
+          Confirmar y Enviar Pedido
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
   const totalGeneral = <?php echo json_encode($_POST['total_general'] ?? 0); ?>;
   const productosPOST = <?php echo json_encode($productosPOST); ?>;
   const observaciones = <?php echo json_encode($_POST['observaciones'] ?? ''); ?>;
+
+  let direccionCliente = null; // Variable global para almacenar la dirección del cliente seleccionado
 
   function enviarPedido() {
     if (!numcliente) { // Asegúrate de tener el número
@@ -184,7 +225,16 @@ $productos = $producto->obtenerCategorias();
       form.appendChild(inputObservaciones);
     }
 
-    // 6. Envía
+    // 6. Agrega ped_sede (dirección del cliente seleccionado) si existe
+    if (direccionCliente) {
+      const inputSede = document.createElement('input');
+      inputSede.type = 'hidden';
+      inputSede.name = 'ped_sede';
+      inputSede.value = direccionCliente;
+      form.appendChild(inputSede);
+    }
+
+    // 7. Envía
     document.body.appendChild(form);
     form.submit();
   }
@@ -194,12 +244,59 @@ $productos = $producto->obtenerCategorias();
       const modalCliente = new bootstrap.Modal(document.getElementById('modalCliente'));
       modalCliente.show();
     <?php endif; ?>
+    
+    <?php if ($mostrarModalCliente == "multiple"): ?>
+      const modalSeleccionar = new bootstrap.Modal(document.getElementById('modalSeleccionarCliente'));
+      const selectCliente = document.getElementById('selectCliente');
+      const clientes = <?php echo json_encode($clientesMultiples); ?>;
+      const telefono = <?php echo json_encode($numCliente); ?>;
+      
+      // Llenar el select con los clientes
+      clientes.forEach((cliente, index) => {
+        const option = document.createElement('option');
+        option.value = cliente.id_cliente;
+        option.dataset.nombre = cliente.cli_nombre;
+        option.dataset.direccion = cliente.cli_direccion || 'Sin dirección';
+        option.textContent = `${cliente.cli_nombre} - ${cliente.cli_direccion || 'Sin dirección'}`;
+        selectCliente.appendChild(option);
+      });
+      
+      // Mostrar información del cliente seleccionado
+      selectCliente.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+          document.getElementById('infoNombre').textContent = selectedOption.dataset.nombre;
+          document.getElementById('infoDireccion').textContent = selectedOption.dataset.direccion;
+          document.getElementById('infoClienteSeleccionado').style.display = 'block';
+        } else {
+          document.getElementById('infoClienteSeleccionado').style.display = 'none';
+        }
+      });
+      
+      // Confirmar y enviar pedido
+      document.getElementById('btnConfirmarCliente').addEventListener('click', function() {
+        if (selectCliente.value) {
+          const selectedOption = selectCliente.options[selectCliente.selectedIndex];
+          numcliente = telefono;
+          direccionCliente = selectedOption.dataset.direccion || null; // Guardar la dirección
+          bootstrap.Modal.getInstance(document.getElementById('modalSeleccionarCliente')).hide();
+          console.log('Cliente seleccionado:', numcliente, 'Dirección:', direccionCliente);
+          enviarPedido();
+        } else {
+          alert('Por favor selecciona un cliente');
+        }
+      });
+      
+      modalSeleccionar.show();
+    <?php endif; ?>
   });
+  
   let numcliente = null;
   document.addEventListener("DOMContentLoaded", function() {
     <?php if ($mostrarModalCliente == "existe"): ?>
       numcliente = <?php echo json_encode($numCliente); ?>;
-      console.log("Cliente ya existe. Enviando pedido directamente...");
+      direccionCliente = <?php echo json_encode($direccionClienteUnico); ?>;
+      console.log("Cliente ya existe. Enviando pedido directamente... Dirección:", direccionCliente);
       enviarPedido();
       return;
     <?php endif; ?>
@@ -283,15 +380,81 @@ $productos = $producto->obtenerCategorias();
             .then(res => res.json())
             .then(data => {
               if (data.existe) {
-                resultadoBusqueda.textContent = `Cliente encontrado: ${data.nombre}`;
-                resultadoBusqueda.className = 'mt-3 text-success small';
-                numcliente = numeroLimpio;
+                if (data.multiple) {
+                  // Hay múltiples clientes
+                  resultadoBusqueda.textContent = `Se encontraron ${data.clientes.length} clientes con este teléfono`;
+                  resultadoBusqueda.className = 'mt-3 text-warning small';
+                  
+                  setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
+                    
+                    // Llenar el select con los clientes
+                    const selectCliente = document.getElementById('selectCliente');
+                    selectCliente.innerHTML = '<option value="" disabled selected>-- Selecciona un cliente --</option>';
+                    
+                    data.clientes.forEach((cliente) => {
+                      const option = document.createElement('option');
+                      option.value = cliente.id_cliente;
+                      option.dataset.nombre = cliente.cli_nombre;
+                      option.dataset.direccion = cliente.cli_direccion || 'Sin dirección';
+                      option.textContent = `${cliente.cli_nombre} - ${cliente.cli_direccion || 'Sin dirección'}`;
+                      selectCliente.appendChild(option);
+                    });
+                    
+                    // Ocultar info inicialmente
+                    document.getElementById('infoClienteSeleccionado').style.display = 'none';
+                    
+                    // Función para manejar el cambio de selección
+                    function manejarCambioCliente() {
+                      const selectedOption = selectCliente.options[selectCliente.selectedIndex];
+                      if (selectedOption && selectedOption.value) {
+                        document.getElementById('infoNombre').textContent = selectedOption.dataset.nombre;
+                        document.getElementById('infoDireccion').textContent = selectedOption.dataset.direccion;
+                        document.getElementById('infoClienteSeleccionado').style.display = 'block';
+                      } else {
+                        document.getElementById('infoClienteSeleccionado').style.display = 'none';
+                      }
+                    }
+                    
+                    // Remover listener anterior si existe y agregar uno nuevo
+                    selectCliente.removeEventListener('change', manejarCambioCliente);
+                    selectCliente.addEventListener('change', manejarCambioCliente);
+                    
+                    // Función para confirmar y enviar
+                    function confirmarYEnviar() {
+                      if (selectCliente.value) {
+                        const selectedOption = selectCliente.options[selectCliente.selectedIndex];
+                        numcliente = numeroLimpio;
+                        direccionCliente = selectedOption.dataset.direccion || null; // Guardar la dirección
+                        bootstrap.Modal.getInstance(document.getElementById('modalSeleccionarCliente')).hide();
+                        console.log('Cliente seleccionado:', numcliente, 'Dirección:', direccionCliente);
+                        enviarPedido();
+                      } else {
+                        alert('Por favor selecciona un cliente');
+                      }
+                    }
+                    
+                    // Remover listener anterior del botón y agregar uno nuevo
+                    const btnConfirmar = document.getElementById('btnConfirmarCliente');
+                    const newBtnConfirmar = btnConfirmar.cloneNode(true);
+                    btnConfirmar.parentNode.replaceChild(newBtnConfirmar, btnConfirmar);
+                    newBtnConfirmar.addEventListener('click', confirmarYEnviar);
+                    
+                    new bootstrap.Modal(document.getElementById('modalSeleccionarCliente')).show();
+                  }, 1000);
+                } else {
+                  // Solo hay un cliente
+                  resultadoBusqueda.textContent = `Cliente encontrado: ${data.nombre}`;
+                  resultadoBusqueda.className = 'mt-3 text-success small';
+                  numcliente = numeroLimpio;
+                  direccionCliente = data.direccion || null; // Guardar la dirección del cliente único
 
-                setTimeout(() => {
-                  bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
-                  console.log('Cliente asignado:', numcliente);
-                  enviarPedido();
-                }, 1000);
+                  setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('modalBuscarTelefono')).hide();
+                    console.log('Cliente asignado:', numcliente, 'Dirección:', direccionCliente);
+                    enviarPedido();
+                  }, 1000);
+                }
               } else {
                 resultadoBusqueda.textContent = 'Cliente no encontrado. Mostrando formulario de registro...';
                 resultadoBusqueda.className = 'mt-3 text-warning small';
