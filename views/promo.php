@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <tr>
                             <th>ID</th>
                             <th>Promoción</th>
-                            <th>Patrocinador</th>
+                            <th>Fecha</th>
                             <th>Estado</th>
                             <th>Descripción</th>
                             <th>Imagen</th>
@@ -286,18 +286,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const fila = `
                 <tr>
-                    <td><span class="fw-medium">${promo.pro_id}</span></td>
-                    <td><span class="fw-medium">${promo.pro_nombre}</span></td>
-                    <td>${promo.pro_patrocinador || '-'}</td>
-                    <td><span class="status-badge ${statusClass}">${promo.pro_estado}</span></td>
+                    <td><span class="fw-medium">${promo.id_promocion }</span></td>
+                    <td><span class="fw-medium">${promo.titulo}</span></td>
+                    <td>${promo.creado_en || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${promo.estado }</span></td>
                     <td>
                       <span class="text-muted" style="max-width: 200px; display: inline-block; word-wrap: break-word; white-space: normal;">
-                        ${promo.pro_descripcion}
+                        ${promo.descripcion}
                       </span>
                     </td>
                     <td>
                         <div style="width: 50px; height: 50px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                            <img src="../uploads/${promo.pro_imagen}" style="width: 100%; height: 100%; object-fit: cover;" alt="Promoción">
+                            <img src="../assets/img/licores/promos/${promo.imagen}" style="width: 100%; height: 100%; object-fit: cover;" alt="Promoción">
                         </div>
                     </td>
                     <td>
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <button class="btn btn-outline-primary btn-sm" title="Editar" style="border-radius: 6px;">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-primary btn-sm" onclick='enviarPromo(${promo.pro_id}, ${JSON.stringify(promo.pro_descripcion)}, ${JSON.stringify(promo.pro_imagen)})' title="Enviar" style="border-radius: 6px;">
+                            <button class="btn btn-primary btn-sm" onclick='enviarPromo(${promo.id_promocion}, ${JSON.stringify(promo.descripcion)}, ${JSON.stringify(promo.imagen)})' title="Enviar" style="border-radius: 6px;">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>

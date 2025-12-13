@@ -62,7 +62,7 @@ class Promo {
     }
 
     public function getAllPromos() {
-        $stmt = $this->db->prepare("SELECT * FROM promos");
+        $stmt = $this->db->prepare("SELECT * FROM promociones");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
