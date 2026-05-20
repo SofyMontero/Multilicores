@@ -122,6 +122,14 @@ $promocionesActivas = $tienePromociones ? obtenerPromocionesActivas() : [];
             overflow: hidden;
         }
 
+        .categoria-promociones .card-imagen {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.85) 100%);
+        }
+
+        .categoria-promociones img {
+            border-color: rgba(255, 107, 107, 0.35);
+        }
+
         .categoria-promociones::before {
             content: '🎉';
             position: absolute;
