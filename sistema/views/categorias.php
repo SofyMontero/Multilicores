@@ -123,7 +123,8 @@ $promocionesActivas = $tienePromociones ? obtenerPromocionesActivas() : [];
         }
 
         .categoria-promociones .card-imagen {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.85) 100%);
+            background: rgba(255, 255, 255, 0.55);
+            border-color: rgba(255, 107, 107, 0.3);
         }
 
         .categoria-promociones img {
