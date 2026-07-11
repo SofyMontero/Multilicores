@@ -646,6 +646,14 @@ function mostrarModalCarrito() {
 // Nueva función para procesar pedido desde el modal
 function procesarPedidoDesdeModal() {
   console.log("🚀 Iniciando procesamiento de pedido desde modal");
+
+  // Evitar doble toque en móvil
+  const btnEnviar = document.querySelector(".modal.show .btn-success");
+  if (btnEnviar) {
+    if (btnEnviar.disabled) return;
+    btnEnviar.disabled = true;
+    btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+  }
   
   // Capturar observaciones del modal antes de cerrar
   const obsTextarea = document.querySelector("#observacionesPedidoModal");
@@ -713,18 +721,50 @@ function vaciarCarrito() {
 }
 
 // Función mejorada para procesar pedido
+let pedidoEnProceso = false;
+
+function generarPedidoToken() {
+  if (window.crypto && window.crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    window.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  return (
+    Date.now().toString(16) +
+    Math.random().toString(16).slice(2) +
+    Math.random().toString(16).slice(2)
+  );
+}
+
 function procesarPedido() {
   console.log("🔄 Procesando pedido...");
+
+  if (pedidoEnProceso) {
+    console.warn("Pedido ya en proceso, se ignora envío duplicado");
+    return;
+  }
   
   if (carrito.length === 0) {
     mostrarAlerta("El carrito está vacío", "warning");
     return;
   }
 
+  pedidoEnProceso = true;
+
   // Crear formulario dinámico con los productos del carrito
   const form = document.createElement("form");
   form.method = "POST";
   form.action = "procesar_telefono_cliente.php";
+
+  // Token único por intento (viaja hasta procesar_pedido.php)
+  const tokenInput = document.createElement("input");
+  tokenInput.type = "hidden";
+  tokenInput.name = "pedido_token";
+  tokenInput.value = generarPedidoToken();
+  form.appendChild(tokenInput);
+  try {
+    sessionStorage.setItem("pedidoTokenActivo", tokenInput.value);
+  } catch (e) {}
 
   // Agregar productos al formulario
   carrito.forEach((item, index) => {

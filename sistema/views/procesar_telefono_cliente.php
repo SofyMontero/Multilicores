@@ -1,7 +1,15 @@
 <?php
+session_start();
+
 $productosPOST = [];
 foreach ($_POST['productos'] as $index => $producto) {
   $productosPOST[] = $producto; // Normaliza el array
+}
+
+// Token único del intento de pedido (evita duplicados en móvil)
+$pedidoToken = preg_replace('/[^a-zA-Z0-9]/', '', (string)($_POST['pedido_token'] ?? ''));
+if ($pedidoToken === '') {
+  $pedidoToken = bin2hex(random_bytes(16));
 }
 ?>
 
@@ -177,13 +185,29 @@ $productos = $producto->obtenerCategorias();
   const totalGeneral = <?php echo json_encode($_POST['total_general'] ?? 0); ?>;
   const productosPOST = <?php echo json_encode($productosPOST); ?>;
   const observaciones = <?php echo json_encode($_POST['observaciones'] ?? ''); ?>;
+  const pedidoToken = <?php echo json_encode($pedidoToken); ?>;
 
   let direccionCliente = null; // Variable global para almacenar la dirección del cliente seleccionado
+  let pedidoYaEnviado = false; // Evita doble envío por toques repetidos / reintentos
 
   function enviarPedido() {
+    if (pedidoYaEnviado) {
+      console.warn('Pedido ya en proceso, se ignora envío duplicado');
+      return;
+    }
+
     if (!numcliente) { // Asegúrate de tener el número
       alert('No se encontró numCliente; no se envía el pedido.');
       return;
+    }
+
+    pedidoYaEnviado = true;
+
+    // Deshabilitar botones de confirmación para evitar doble toque en móvil
+    const btnConfirmar = document.getElementById('btnConfirmarCliente');
+    if (btnConfirmar) {
+      btnConfirmar.disabled = true;
+      btnConfirmar.textContent = 'Enviando...';
     }
 
     // 1. Crea el formulario
@@ -217,7 +241,7 @@ $productos = $producto->obtenerCategorias();
     form.appendChild(inputTotal);
 
     // 5. Agrega observaciones
-    if (observaciones != null || observaciones != undefined || observaciones != "") {
+    if (observaciones != null && observaciones !== undefined && observaciones !== "") {
       const inputObservaciones = document.createElement("input");
       inputObservaciones.type = "hidden";
       inputObservaciones.name = "observaciones";
@@ -234,7 +258,14 @@ $productos = $producto->obtenerCategorias();
       form.appendChild(inputSede);
     }
 
-    // 7. Envía
+    // 7. Token de idempotencia (mismo intento = un solo pedido)
+    const inputToken = document.createElement('input');
+    inputToken.type = 'hidden';
+    inputToken.name = 'pedido_token';
+    inputToken.value = pedidoToken;
+    form.appendChild(inputToken);
+
+    // 8. Envía
     document.body.appendChild(form);
     form.submit();
   }
@@ -494,13 +525,23 @@ $productos = $producto->obtenerCategorias();
     formCliente.addEventListener('submit', function(e) {
       e.preventDefault();
 
+      if (pedidoYaEnviado) {
+        return;
+      }
+
       const formData = new FormData(formCliente);
       const telefonoInput = document.getElementById('cli_telefono');
       const telefono = telefonoInput.value.trim();
+      const btnGuardar = formCliente.querySelector('button[type="submit"]');
 
       if (telefono.length < 10) {
         alert("Número de teléfono inválido");
         return;
+      }
+
+      if (btnGuardar) {
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = 'Guardando...';
       }
 
       fetch('../controllers/ajax/guardar_cliente.php', {
@@ -514,11 +555,19 @@ $productos = $producto->obtenerCategorias();
             numcliente = telefono;
             enviarPedido();
           } else {
+            if (btnGuardar) {
+              btnGuardar.disabled = false;
+              btnGuardar.textContent = 'Guardar Cliente';
+            }
             alert('Error al guardar el cliente: ' + (data.mensaje || ''));
           }
         })
         .catch(error => {
           console.error('Error:', error);
+          if (btnGuardar) {
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = 'Guardar Cliente';
+          }
           alert('Error al guardar el cliente');
         });
     });
