@@ -163,3 +163,21 @@
     font-size: 12px;
     opacity: 0.8;
 }
+
+.template-download {
+    background: #f0fdfa;
+    border: 1px solid #99f6e4;
+    border-radius: 12px;
+    padding: 20px 16px;
+}
+
+.template-download .btn-outline-primary {
+    color: #009688;
+    border-color: #009688;
+}
+
+.template-download .btn-outline-primary:hover {
+    background: #009688;
+    border-color: #009688;
+    color: #fff;
+}

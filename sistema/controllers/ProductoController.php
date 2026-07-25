@@ -126,6 +126,61 @@ function leerCSVConUTF8($archivo, $delimitador = ',')
     return $datos;
 }
 
+// Descargar plantilla CSV con productos actualizados
+if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["accion"]) && $_GET["accion"] === "descargar_plantilla") {
+    try {
+        $producto = new Producto();
+        $productos = $producto->obtenerProductosLista(0);
+
+        $nombreArchivo = "plantilla_productos_" . date("Y-m-d_His") . ".csv";
+
+        header("Content-Type: text/csv; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=\"$nombreArchivo\"");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+
+        $output = fopen("php://output", "w");
+
+        // BOM UTF-8 para que Excel abra correctamente caracteres especiales
+        fwrite($output, "\xEF\xBB\xBF");
+
+        // Encabezados en el mismo orden que espera la importación
+        fputcsv($output, [
+            "id_producto",
+            "codigo_productos",
+            "descripcion_producto",
+            "cantidad_paca_producto",
+            "precio_unidad_producto",
+            "precio_paca_producto",
+            "id_cate_producto",
+            "acti_Unidad",
+            "imagen_producto",
+            "estado_producto"
+        ], ";");
+
+        foreach ($productos as $prod) {
+            fputcsv($output, [
+                $prod["id_producto"] ?? "",
+                $prod["codigo_productos"] ?? "",
+                $prod["descripcion_producto"] ?? "",
+                $prod["cantidad_paca_producto"] ?? "",
+                $prod["precio_unidad_producto"] ?? "",
+                $prod["precio_paca_producto"] ?? "",
+                $prod["id_cate_producto"] ?? "",
+                $prod["acti_Unidad"] ?? "",
+                $prod["imagen_producto"] ?? "",
+                $prod["estado_producto"] ?? ""
+            ], ";");
+        }
+
+        fclose($output);
+        exit;
+    } catch (Exception $e) {
+        header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Error al generar plantilla: " . $e->getMessage()));
+        exit;
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
 
     // Verificaciones básicas

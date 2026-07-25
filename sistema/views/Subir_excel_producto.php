@@ -32,7 +32,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
         <i class="fas fa-box-open fa-fw"></i> &nbsp; PRODUCTOS
     </h3>
     <p class="text-justify">
-        A continuación se presenta la lista de productos disponibles. Puede cargar productos en lote desde un archivo CSV.
+        Descarga la plantilla con los productos actuales, edita los precios y vuelve a subir el CSV para actualizarlos en lote.
     </p>
 </div>
 
@@ -76,6 +76,22 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                     </div>
 
                     <div class="card-body p-4">
+                        <div class="template-download mb-4 text-center">
+                            <p class="text-muted mb-2">
+                                Descarga la plantilla con los productos actuales, edita precios y vuelve a subirla.
+                            </p>
+                            <a href="../controllers/ProductoController.php?accion=descargar_plantilla"
+                               class="btn btn-outline-primary btn-lg"
+                               id="btnDescargarPlantilla">
+                                <i class="fas fa-download"></i> Descargar plantilla actualizada
+                            </a>
+                            <small class="d-block text-muted mt-2">
+                                Incluye <?php echo count($productos); ?> productos · Formato CSV
+                            </small>
+                        </div>
+
+                        <hr class="my-4">
+
                         <form id="uploadForm" action="../controllers/ProductoController.php" method="POST" enctype="multipart/form-data">
                             <div class="upload-zone" onclick="document.getElementById('archivo_excel').click()">
                                 <div class="upload-icon">💰</div>
