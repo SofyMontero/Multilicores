@@ -502,30 +502,6 @@ function cargarScript(src, callback) {
     document.body.appendChild(script);
 }
 
-function showAlert(type, message) {
-    const alertClass = type === 'success' ? 'alert-success-modern' : 'alert-danger-modern';
-    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
-    
-    const alertHtml = `
-        <div class="alert alert-modern ${alertClass} d-flex align-items-center mb-4" role="alert">
-            <i class="fas ${icon} me-2"></i>
-            <div>${message}</div>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-        </div>`;
-    
-    const container = document.querySelector('.container-fluid');
-    const firstCard = container.querySelector('.modern-card');
-    firstCard.insertAdjacentHTML('beforebegin', alertHtml);
-    
-    // Auto-hide después de 5 segundos
-    setTimeout(() => {
-        const alert = container.querySelector('.alert');
-        if (alert) {
-            alert.remove();
-        }
-    }, 5000);
-}
-
 function editarPromo(idPromo) {
     const promo = promosPorId[idPromo];
     if (!promo) {
