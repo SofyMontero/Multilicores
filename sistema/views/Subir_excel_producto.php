@@ -5,6 +5,7 @@ require_once "../models/ProductoModel.php";
 // Obtener productos desde la base de datos
 $producto = new Producto();
 $productos = $producto->obtenerProductosLista(0);
+$categorias = $producto->obtenerCategorias();
 
 // Capturar parámetros de resultado
 $importados = $_GET['importados'] ?? 0;
@@ -12,6 +13,7 @@ $actualizados = $_GET['actualizados'] ?? 0;
 $errores = $_GET['errores'] ?? 0;
 $success = $_GET['success'] ?? null;
 $error = $_GET['error'] ?? null;
+$creado = $_GET['creado'] ?? null;
 $erroresDetalle = isset($_GET['errores_detalle']) ? explode('|', $_GET['errores_detalle']) : [];
 $filasVacias = $_GET['filas_vacias'] ?? 0;
 $delimitador = $_GET['delimitador'] ?? null;
@@ -33,6 +35,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
     </h3>
     <p class="text-justify">
         Descarga la plantilla con los productos actuales, edita los precios y vuelve a subir el CSV para actualizarlos en lote.
+        También puedes crear productos nuevos uno a uno.
     </p>
 </div>
 
@@ -76,6 +79,16 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                     </div>
 
                     <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <button type="button"
+                                    class="btn btn-primary btn-lg"
+                                    data-toggle="modal"
+                                    data-target="#crearProductoModal"
+                                    id="btnCrearProducto">
+                                <i class="fas fa-plus-circle"></i> Crear producto
+                            </button>
+                        </div>
+
                         <div class="template-download mb-4 text-center">
                             <p class="text-muted mb-2">
                                 Descarga la plantilla con los productos actuales, edita precios y vuelve a subirla.
@@ -122,8 +135,14 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
 <!-- Lista de productos -->
 <div class="container-fluid mt-4">
     <div class="card">
-        <div class="card-header">
-            <h5 class="card-title"><i class="fas fa-list"></i> &nbsp; Lista de Productos</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0"><i class="fas fa-list"></i> &nbsp; Lista de Productos</h5>
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    data-toggle="modal"
+                    data-target="#crearProductoModal">
+                <i class="fas fa-plus"></i> Nuevo
+            </button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -166,6 +185,111 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                 </table>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal crear producto -->
+<div class="modal fade" id="crearProductoModal" tabindex="-1" role="dialog" aria-labelledby="crearProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form method="POST"
+              action="../controllers/ProductoController.php"
+              enctype="multipart/form-data"
+              class="modal-content"
+              id="formCrearProducto">
+            <input type="hidden" name="accion" value="crear_producto">
+
+            <div class="modal-header" style="background: #009688; color: #fff;">
+                <h5 class="modal-title" id="crearProductoModalLabel">
+                    <i class="fas fa-plus-circle"></i> Crear producto
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="codigo_productos">Código <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="codigo_productos" name="codigo_productos" required maxlength="50" placeholder="Ej: 1001">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_cate_producto">Categoría <span class="text-danger">*</span></label>
+                            <select class="form-control" id="id_cate_producto" name="id_cate_producto" required>
+                                <?php if (!empty($categorias)): ?>
+                                    <?php foreach ($categorias as $cat): ?>
+                                        <option value="<?php echo (int)$cat['id_categoria']; ?>">
+                                            <?php echo htmlspecialchars($cat['nombre_categoria']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <option value="1">Sin categorías</option>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="descripcion_producto">Descripción / Nombre <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="descripcion_producto" name="descripcion_producto" required maxlength="255" placeholder="Ej: Aguardiente Antioqueño 750ml">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="cantidad_paca_producto">Embalaje (unid. por paca)</label>
+                            <input type="number" class="form-control" id="cantidad_paca_producto" name="cantidad_paca_producto" min="1" step="1" value="1">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="precio_unidad_producto">Precio unidad <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="precio_unidad_producto" name="precio_unidad_producto" min="1" step="1" required placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="precio_paca_producto">Precio paca</label>
+                            <input type="number" class="form-control" id="precio_paca_producto" name="precio_paca_producto" min="0" step="1" value="0">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="acti_Unidad">Venta por unidad</label>
+                            <select class="form-control" id="acti_Unidad" name="acti_Unidad">
+                                <option value="1" selected>Sí</option>
+                                <option value="0">No (solo paca)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="estado_producto">Estado</label>
+                            <select class="form-control" id="estado_producto" name="estado_producto">
+                                <option value="1" selected>Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="imagen">Imagen</label>
+                            <input type="file" class="form-control-file" id="imagen" name="imagen" accept="image/*">
+                            <small class="form-text text-muted">Opcional. JPG, PNG, GIF o WEBP (máx. 3MB)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" id="btnGuardarProducto">
+                    <i class="fas fa-save"></i> Guardar producto
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -217,7 +341,9 @@ function closeToast(toastId) {
 }
 
 // Mostrar notificaciones según los parámetros URL
-<?php if ($success): ?>
+<?php if ($creado): ?>
+    showToast('success', 'Producto creado', 'El producto se registró correctamente.');
+<?php elseif ($success): ?>
     <?php if ($importados > 0 || $actualizados > 0): ?>
         let message = '';
         if (<?php echo $importados; ?> > 0) message += '<?php echo $importados; ?> productos importados. ';
@@ -238,7 +364,7 @@ function closeToast(toastId) {
 // Drag and drop functionality
 const uploadZone = document.querySelector('.upload-zone');
 const fileInput = document.getElementById('archivo_excel');
-const uploadForm = document.getElementById('uploadForm');
+const uploadForm = document.querySelector('#uploadForm');
 const submitBtn = document.getElementById('submitBtn');
 const progressBar = document.querySelector('.progress-bar');
 const progressFill = document.querySelector('.progress-fill');
@@ -323,6 +449,16 @@ uploadForm.addEventListener('submit', (e) => {
         progressFill.style.width = '100%';
     }, 1000);
 });
+
+// Feedback al guardar producto desde el modal
+const formCrearProducto = document.getElementById('formCrearProducto');
+const btnGuardarProducto = document.getElementById('btnGuardarProducto');
+if (formCrearProducto) {
+    formCrearProducto.addEventListener('submit', () => {
+        btnGuardarProducto.disabled = true;
+        btnGuardarProducto.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    });
+}
 
 // Limpiar parámetros URL después de mostrar notificaciones
 if (window.location.search) {

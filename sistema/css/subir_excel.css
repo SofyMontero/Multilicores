@@ -181,3 +181,23 @@
     border-color: #009688;
     color: #fff;
 }
+
+#btnCrearProducto {
+    background: #009688;
+    border-color: #009688;
+}
+
+#btnCrearProducto:hover {
+    background: #00796b;
+    border-color: #00796b;
+}
+
+#crearProductoModal .modal-header .close {
+    opacity: 1;
+    text-shadow: none;
+}
+
+#crearProductoModal .form-group label {
+    font-weight: 500;
+    color: #374151;
+}
