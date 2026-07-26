@@ -203,26 +203,37 @@
 }
 
 .price-edit-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    max-width: 130px;
+    position: relative;
+    display: inline-block;
+    width: 110px;
+    vertical-align: middle;
 }
 
 .price-prefix {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
     color: #9ca3af;
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1;
+    pointer-events: none;
 }
 
+.price-input.form-control,
 .price-input {
-    width: 100px;
+    width: 110px !important;
+    max-width: 110px !important;
+    display: inline-block !important;
     text-align: right;
     background: #1f2937;
     color: #f9fafb;
     border: 1px solid #4b5563;
     border-radius: 6px;
-    padding: 4px 8px;
+    padding: 4px 8px 4px 20px !important;
+    margin: 0 !important;
+    float: none !important;
 }
 
 .price-input:focus {
