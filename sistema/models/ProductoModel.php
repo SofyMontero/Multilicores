@@ -304,6 +304,27 @@ class Producto
         }
     }
 
+    public function actualizarPreciosPorId($id_producto, $precio_unidad_producto, $precio_paca_producto)
+    {
+        try {
+            $query = $this->db->connect()->prepare("
+            UPDATE productos SET
+                precio_unidad_producto = :precio_unidad_producto,
+                precio_paca_producto = :precio_paca_producto
+            WHERE id_producto = :id_producto
+        ");
+
+            $query->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
+            $query->bindParam(':precio_unidad_producto', $precio_unidad_producto);
+            $query->bindParam(':precio_paca_producto', $precio_paca_producto);
+
+            return $query->execute();
+        } catch (Exception $e) {
+            error_log("Error en actualizarPreciosPorId: " . $e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * Verificar si existe un producto por código

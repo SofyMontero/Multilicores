@@ -201,3 +201,48 @@
     font-weight: 500;
     color: #374151;
 }
+
+.price-edit-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    max-width: 130px;
+}
+
+.price-prefix {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.price-input {
+    width: 100px;
+    text-align: right;
+    background: #1f2937;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+.price-input:focus {
+    background: #111827;
+    border-color: #009688;
+    box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.25);
+    color: #fff;
+    outline: none;
+}
+
+.producto-row.precio-modificado {
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.producto-row.precio-guardado {
+    background: rgba(16, 185, 129, 0.18);
+    transition: background 0.4s ease;
+}
+
+.btn-guardar-precio:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}

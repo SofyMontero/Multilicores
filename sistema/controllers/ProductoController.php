@@ -181,6 +181,55 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["accion"]) && $_GET["acc
     }
 }
 
+// Actualizar precios desde la lista (AJAX)
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accion"]) && $_POST["accion"] === "actualizar_precios") {
+    header("Content-Type: application/json; charset=UTF-8");
+
+    try {
+        $id_producto = limpiarValor($_POST["id_producto"] ?? "", "int");
+        $precio_unidad_producto = limpiarValor($_POST["precio_unidad_producto"] ?? "0", "float");
+        $precio_paca_producto = limpiarValor($_POST["precio_paca_producto"] ?? "0", "float");
+
+        if (!$id_producto) {
+            echo json_encode(["success" => false, "message" => "ID de producto inválido"]);
+            exit;
+        }
+
+        if ($precio_unidad_producto <= 0) {
+            echo json_encode(["success" => false, "message" => "El precio unidad debe ser mayor a 0"]);
+            exit;
+        }
+
+        if ($precio_paca_producto < 0) {
+            echo json_encode(["success" => false, "message" => "El precio paca no puede ser negativo"]);
+            exit;
+        }
+
+        $producto = new Producto();
+
+        if (!$producto->existeProducto($id_producto)) {
+            echo json_encode(["success" => false, "message" => "El producto no existe"]);
+            exit;
+        }
+
+        if ($producto->actualizarPreciosPorId($id_producto, $precio_unidad_producto, $precio_paca_producto)) {
+            echo json_encode([
+                "success" => true,
+                "message" => "Precios actualizados",
+                "precio_unidad_producto" => $precio_unidad_producto,
+                "precio_paca_producto" => $precio_paca_producto
+            ]);
+            exit;
+        }
+
+        echo json_encode(["success" => false, "message" => "No se pudieron actualizar los precios"]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
+        exit;
+    }
+}
+
 // Crear producto individual desde el formulario modal
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accion"]) && $_POST["accion"] === "crear_producto") {
     try {

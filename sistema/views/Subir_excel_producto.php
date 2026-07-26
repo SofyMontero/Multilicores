@@ -155,6 +155,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                             <th>EMBALAGE</th>
                             <th>PRECIO UNIDAD</th>
                             <th>PRECIO PACA</th>
+                            <th></th>
                             <th>CATEGORIA</th>
                             <th>U o P</th>
                             <th>IMAGEN</th>
@@ -164,22 +165,53 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                     <tbody>
 
                         <?php if (!empty($productos)): ?>
-                            <?php $contador = 1; foreach ($productos as $prod): ?>
-                            <tr class="text-center">
+                            <?php foreach ($productos as $prod): ?>
+                            <tr class="text-center producto-row"
+                                data-id="<?php echo (int)$prod['id_producto']; ?>">
                                 <td><?php echo $prod['id_producto']; ?></td>
-                                <td><?php echo $prod['codigo_productos']; ?></td>
-                                <td><?php echo $prod['descripcion_producto']; ?></td>
+                                <td><?php echo htmlspecialchars($prod['codigo_productos']); ?></td>
+                                <td class="text-left"><?php echo htmlspecialchars($prod['descripcion_producto']); ?></td>
                                 <td><?php echo $prod['cantidad_paca_producto']; ?></td>
-                                <td>$<?php echo number_format($prod['precio_unidad_producto'],2); ?></td>
-                                <td>$<?php echo number_format($prod['precio_paca_producto'], 2); ?></td>
+                                <td>
+                                    <div class="price-edit-wrap">
+                                        <span class="price-prefix">$</span>
+                                        <input type="number"
+                                               class="form-control form-control-sm price-input precio-unidad"
+                                               min="1"
+                                               step="1"
+                                               value="<?php echo (float)$prod['precio_unidad_producto']; ?>"
+                                               data-original="<?php echo (float)$prod['precio_unidad_producto']; ?>"
+                                               title="Editar precio unidad">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="price-edit-wrap">
+                                        <span class="price-prefix">$</span>
+                                        <input type="number"
+                                               class="form-control form-control-sm price-input precio-paca"
+                                               min="0"
+                                               step="1"
+                                               value="<?php echo (float)$prod['precio_paca_producto']; ?>"
+                                               data-original="<?php echo (float)$prod['precio_paca_producto']; ?>"
+                                               title="Editar precio paca">
+                                    </div>
+                                </td>
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-sm btn-success btn-guardar-precio"
+                                            title="Guardar precios"
+                                            disabled>
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </td>
                                 <td><?php echo $prod['id_cate_producto']; ?></td>
                                 <td><?php echo $prod['acti_Unidad']; ?></td>
-                                <td><?php echo $prod['imagen_producto']; ?></td>
+                                <td><?php echo htmlspecialchars($prod['imagen_producto']); ?></td>
                                 <td><?php echo $prod['estado_producto']; ?></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="10" class="text-center">No hay productos registrados</td></tr>
+                            <tr><td colspan="11" class="text-center">No hay productos registrados</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -459,6 +491,94 @@ if (formCrearProducto) {
         btnGuardarProducto.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
     });
 }
+
+// Edición inline de precios en la lista
+function marcarFilaCambiada(row) {
+    const unidadInput = row.querySelector('.precio-unidad');
+    const pacaInput = row.querySelector('.precio-paca');
+    const btnGuardar = row.querySelector('.btn-guardar-precio');
+    const cambio =
+        Number(unidadInput.value) !== Number(unidadInput.dataset.original) ||
+        Number(pacaInput.value) !== Number(pacaInput.dataset.original);
+
+    btnGuardar.disabled = !cambio;
+    row.classList.toggle('precio-modificado', cambio);
+}
+
+async function guardarPreciosFila(row) {
+    const id = row.dataset.id;
+    const unidadInput = row.querySelector('.precio-unidad');
+    const pacaInput = row.querySelector('.precio-paca');
+    const btnGuardar = row.querySelector('.btn-guardar-precio');
+    const precioUnidad = Number(unidadInput.value);
+    const precioPaca = Number(pacaInput.value);
+
+    if (!precioUnidad || precioUnidad <= 0) {
+        showToast('error', 'Precio inválido', 'El precio unidad debe ser mayor a 0');
+        unidadInput.focus();
+        return;
+    }
+
+    if (precioPaca < 0) {
+        showToast('error', 'Precio inválido', 'El precio paca no puede ser negativo');
+        pacaInput.focus();
+        return;
+    }
+
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    const formData = new FormData();
+    formData.append('accion', 'actualizar_precios');
+    formData.append('id_producto', id);
+    formData.append('precio_unidad_producto', precioUnidad);
+    formData.append('precio_paca_producto', precioPaca);
+
+    try {
+        const response = await fetch('../controllers/ProductoController.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            unidadInput.dataset.original = String(precioUnidad);
+            pacaInput.dataset.original = String(precioPaca);
+            row.classList.remove('precio-modificado');
+            row.classList.add('precio-guardado');
+            setTimeout(() => row.classList.remove('precio-guardado'), 1200);
+            showToast('success', 'Precios guardados', data.message || 'Actualización correcta');
+        } else {
+            showToast('error', 'Error', data.message || 'No se pudieron guardar los precios');
+            marcarFilaCambiada(row);
+        }
+    } catch (err) {
+        showToast('error', 'Error de red', 'No se pudo conectar con el servidor');
+        marcarFilaCambiada(row);
+    } finally {
+        btnGuardar.innerHTML = '<i class="fas fa-save"></i>';
+        marcarFilaCambiada(row);
+    }
+}
+
+document.querySelectorAll('.producto-row').forEach((row) => {
+    const inputs = row.querySelectorAll('.price-input');
+    const btnGuardar = row.querySelector('.btn-guardar-precio');
+
+    inputs.forEach((input) => {
+        input.addEventListener('input', () => marcarFilaCambiada(row));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!btnGuardar.disabled) {
+                    guardarPreciosFila(row);
+                }
+            }
+        });
+    });
+
+    btnGuardar.addEventListener('click', () => guardarPreciosFila(row));
+});
 
 // Limpiar parámetros URL después de mostrar notificaciones
 if (window.location.search) {
