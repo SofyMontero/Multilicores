@@ -66,24 +66,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     <!-- Formulario Moderno -->
     <div class="d-flex justify-content-end mb-4">
-        <button type="button" class="btn btn-modern btn-primary-modern" id="btn-agregar-promo" data-bs-toggle="modal" data-bs-target="#promoModal">
+        <button type="button" class="btn btn-modern btn-primary-modern" id="btn-agregar-promo" data-toggle="modal" data-target="#promoModal">
             <i class="fas fa-plus-circle me-2"></i>Agregar promo
         </button>
     </div>
 
-    <div class="modal fade" id="promoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal fade" id="promoModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content promo-modal-content">
                 <div class="modal-header">
-            <div class="d-flex align-items-center mb-0">
-                <i class="fas fa-plus-circle text-primary me-2"></i>
-                <h5 class="mb-0 fw-semibold" id="form-title">Nueva Promoción</h5>
-            </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <div class="d-flex align-items-center mb-0">
+                        <i class="fas fa-plus-circle text-primary me-2"></i>
+                        <h5 class="mb-0 fw-semibold" id="form-title">Nueva Promoción</h5>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body p-4">
             
-            <form method="POST" action="" id="form-promocion">
+            <form method="POST" action="" id="form-promocion" enctype="multipart/form-data">
                 <input type="hidden" name="action" id="action" value="insert">
                 <input type="hidden" name="id" id="id">
                 
@@ -106,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     
                     <div class="col-md-6">
                         <label for="estado" class="form-label fw-medium">Estado</label>
-                        <select class="form-select" id="estado" name="estado">
+                        <select class="form-control" id="estado" name="estado">
                             <option value="1" selected>Activa</option>
                             <option value="0">Inactiva</option>
                         </select>
@@ -129,15 +131,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                     <div class="col-md-4">
                         <label for="acti_Unidad" class="form-label fw-medium">Venta por Unidad</label>
-                        <select class="form-select" id="acti_Unidad" name="acti_Unidad">
+                        <select class="form-control" id="acti_Unidad" name="acti_Unidad">
                             <option value="1" selected>Sí</option>
                             <option value="0">No</option>
                         </select>
                     </div>
                     
                     <div class="col-md-6">
-                        <label for="imagen" class="form-label fw-medium">Imagen</label>
-                        <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*" required>
+                        <label for="imagen" class="form-label fw-medium">Imagen <span class="text-danger" id="imagen-requerida-label">*</span></label>
+                        <input type="file" class="form-control-file" id="imagen" name="imagen" accept="image/*">
+                        <small class="form-text text-muted" id="imagen-ayuda">Obligatoria al crear. Opcional al editar.</small>
                     </div>
                     
                     <div class="col-12">
@@ -182,8 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -227,13 +230,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="modal-content" style="border-radius: 12px; border: none;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-semibold">Confirmar Acción</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body pt-0">
                 <p id="modal-mensaje" class="text-muted">¿Está seguro de que desea realizar esta acción?</p>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-modern btn-outline-modern" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-modern btn-outline-modern" data-dismiss="modal">Cancelar</button>
                 <form id="estado-form" method="POST" action="" class="d-inline">
                     <input type="hidden" name="action" value="cambiar_estado">
                     <input type="hidden" name="promocion_id" id="promocion_id">
@@ -245,11 +250,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </div>
 </div>
 
-<link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 <script>
 // Mantener todo el JavaScript original pero con mejoras visuales
 let dataTablesCargando = false;
+const promosPorId = {};
+
+function escaparHtml(texto) {
+    return String(texto ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function abrirModalPromo() {
+    if (window.jQuery) {
+        $('#promoModal').modal('show');
+    }
+}
+
+function cerrarModalPromo() {
+    if (window.jQuery) {
+        $('#promoModal').modal('hide');
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Emoji picker mejorado
@@ -293,6 +319,13 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
+        const esInsert = formData.get('action') === 'insert';
+        const imagenInput = document.getElementById('imagen');
+
+        if (esInsert && (!imagenInput.files || imagenInput.files.length === 0)) {
+            showAlert('error', 'Debe seleccionar una imagen para la promoción.');
+            return;
+        }
 
         // Mostrar loading
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -312,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 form.reset();
                 resetPromoForm();
                 cargarPromociones();
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('promoModal')).hide();
+                cerrarModalPromo();
             } else {
                 showAlert('error', '⚠️ Error al guardar: ' + data.message);
             }
@@ -348,47 +381,53 @@ function cargarPromociones() {
         tbody.innerHTML = '';
         const promociones = data.promociones || data;
 
+        Object.keys(promosPorId).forEach((key) => delete promosPorId[key]);
+
         promociones.forEach(promo => {
+            const idPromo = promo.id_promocion;
+            promosPorId[idPromo] = promo;
+
             const statusClass = String(promo.estado) === '1' ? 'status-active' : 'status-inactive';
             const estadoTexto = String(promo.estado) === '1' ? 'Activa' : 'Inactiva';
             const estadoChecked = String(promo.estado) === '1' ? 'checked' : '';
-            const imagen = promo.imagen ? `../assets/img/licores/promos/${promo.imagen}` : '../assets/img/licores/placeholder.jpg';
-            
-            const promoJson = encodeURIComponent(JSON.stringify(promo));
+            const imagen = promo.imagen
+                ? `../assets/img/licores/promos/${promo.imagen}`
+                : '../assets/img/licores/placeholder.jpg';
+
             const fila = `
                 <tr>
-                    <td><span class="fw-medium">${promo.id_promocion }</span></td>
-                    <td><span class="fw-medium">${promo.titulo}</span></td>
-                    <td>${promo.codigo || '-'}</td>
+                    <td><span class="fw-medium">${escaparHtml(idPromo)}</span></td>
+                    <td><span class="fw-medium">${escaparHtml(promo.titulo)}</span></td>
+                    <td>${escaparHtml(promo.codigo || '-')}</td>
                     <td>$${Number(promo.precio_paca_producto || 0).toLocaleString('es-CO')}</td>
-                    <td>${promo.creado_en || '-'}</td>
+                    <td>${escaparHtml(promo.creado_en || '-')}</td>
                     <td>
-                        <div class="form-check form-switch promo-status-switch">
-                            <input class="form-check-input" type="checkbox" role="switch"
-                                   id="estadoPromo${promo.id_promocion}"
+                        <div class="custom-control custom-switch promo-status-switch">
+                            <input type="checkbox" class="custom-control-input"
+                                   id="estadoPromo${idPromo}"
                                    ${estadoChecked}
-                                   onchange="cambiarEstadoPromo(this, ${promo.id_promocion})">
-                            <label class="form-check-label status-badge ${statusClass}" for="estadoPromo${promo.id_promocion}">
+                                   onchange="cambiarEstadoPromo(this, ${idPromo})">
+                            <label class="custom-control-label status-badge ${statusClass}" for="estadoPromo${idPromo}">
                                 ${estadoTexto}
                             </label>
                         </div>
                     </td>
                     <td>
                       <span class="text-muted" style="max-width: 200px; display: inline-block; word-wrap: break-word; white-space: normal;">
-                        ${promo.descripcion}
+                        ${escaparHtml(promo.descripcion)}
                       </span>
                     </td>
                     <td>
                         <div style="width: 50px; height: 50px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                            <img src="${imagen}" style="width: 100%; height: 100%; object-fit: cover;" alt="Promocion">
+                            <img src="${escaparHtml(imagen)}" style="width: 100%; height: 100%; object-fit: cover;" alt="Promocion">
                         </div>
                     </td>
                     <td>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-primary btn-sm" onclick="editarPromo('${promoJson}')" title="Editar" style="border-radius: 6px;">
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-outline-primary btn-sm mr-2" onclick="editarPromo(${idPromo})" title="Editar" style="border-radius: 6px;">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-primary btn-sm" onclick="enviarPromoDesdeJson('${promoJson}')" title="Enviar" style="border-radius: 6px;">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="enviarPromoPorId(${idPromo})" title="Enviar" style="border-radius: 6px;">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
@@ -446,7 +485,7 @@ function cargarDataTables(callback) {
 
     dataTablesCargando = true;
     cargarScript('https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js', function() {
-        cargarScript('https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js', function() {
+        cargarScript('https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js', function() {
             dataTablesCargando = false;
             callback();
         });
@@ -487,8 +526,12 @@ function showAlert(type, message) {
     }, 5000);
 }
 
-function editarPromo(promoJson) {
-    const promo = JSON.parse(decodeURIComponent(promoJson));
+function editarPromo(idPromo) {
+    const promo = promosPorId[idPromo];
+    if (!promo) {
+        showAlert('error', 'No se encontró la promoción para editar.');
+        return;
+    }
 
     document.getElementById('form-title').textContent = 'Editar Promoción';
     document.getElementById('action').value = 'update';
@@ -501,20 +544,32 @@ function editarPromo(promoJson) {
     document.getElementById('precio_paca_producto').value = promo.precio_paca_producto || 0;
     document.getElementById('acti_Unidad').value = String(promo.acti_Unidad ?? '1');
     document.getElementById('descripcion').value = promo.descripcion || '';
-    document.getElementById('imagen').required = false;
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('promoModal')).show();
+
+    const imagenInput = document.getElementById('imagen');
+    imagenInput.value = '';
+    imagenInput.required = false;
+    const labelReq = document.getElementById('imagen-requerida-label');
+    const ayuda = document.getElementById('imagen-ayuda');
+    if (labelReq) labelReq.style.display = 'none';
+    if (ayuda) ayuda.textContent = 'Opcional: deja vacío para conservar la imagen actual.';
+
+    abrirModalPromo();
 }
 
 function resetPromoForm() {
     document.getElementById('form-title').textContent = 'Nueva Promoción';
     document.getElementById('action').value = 'insert';
     document.getElementById('id').value = '';
-    document.getElementById('imagen').required = true;
+    document.getElementById('imagen').required = false;
+    const labelReq = document.getElementById('imagen-requerida-label');
+    const ayuda = document.getElementById('imagen-ayuda');
+    if (labelReq) labelReq.style.display = '';
+    if (ayuda) ayuda.textContent = 'Obligatoria al crear. Opcional al editar.';
 }
 
 function cambiarEstadoPromo(input, idPromo) {
     const nuevoEstado = input.checked ? 1 : 0;
-    const label = input.closest('.promo-status-switch').querySelector('.form-check-label');
+    const label = input.closest('.promo-status-switch').querySelector('label');
 
     input.disabled = true;
     actualizarTextoEstado(label, nuevoEstado);
@@ -556,8 +611,12 @@ function actualizarTextoEstado(label, estado) {
     label.classList.toggle('status-inactive', estado !== 1);
 }
 
-function enviarPromoDesdeJson(promoJson) {
-    const promo = JSON.parse(decodeURIComponent(promoJson));
+function enviarPromoPorId(idPromo) {
+    const promo = promosPorId[idPromo];
+    if (!promo) {
+        showAlert('error', 'No se encontró la promoción para enviar.');
+        return;
+    }
     enviarPromo(promo.id_promocion, promo.descripcion, promo.imagen);
 }
 
@@ -617,8 +676,6 @@ function showAlert(type, message) {
 }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 <style>
