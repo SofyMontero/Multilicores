@@ -30,8 +30,13 @@ try {
     $data = array_map(static function ($promo) {
         $imagen = $promo['imagen'] ?? '';
         $actiUnidad = $promo['acti_Unidad'] ?? '0';
+        $codigo = (int)($promo['codigo'] ?? 0);
+        $promoId = (int)($promo['id_promocion'] ?? $promo['id'] ?? 0);
+
         return [
-            'id' => (int)($promo['id_promocion'] ?? $promo['id'] ?? 0),
+            'id' => $codigo > 0 ? $codigo : $promoId,
+            'promoId' => $promoId,
+            'productoId' => $codigo,
             'titulo' => $promo['titulo'] ?? $promo['nombre'] ?? '',
             'descripcion' => $promo['descripcion'] ?? '',
             'prioridad' => (int)($promo['prioridad'] ?? 0),
@@ -39,9 +44,7 @@ try {
             'precioPaca' => (float)($promo['precio_paca_producto'] ?? 0),
             'vendeUnidad' => (int)$actiUnidad !== 0,
             'actiUnidad' => $actiUnidad,
-            'imagen' => $imagen !== ''
-                ? api_asset_url('promos/' . $imagen)
-                : api_asset_url('placeholder.jpg'),
+            'imagen' => api_promo_image_url($imagen, $codigo),
             'estado' => (int)($promo['estado'] ?? 0),
             'creadoEn' => $promo['creado_en'] ?? null,
         ];

@@ -36,6 +36,43 @@ function api_asset_url(string $relativePath): string
     return api_base_url() . '/assets/img/licores/' . $relativePath;
 }
 
+function api_logo_url(): string
+{
+    return api_base_url() . '/assets/img/logoM.png';
+}
+
+/**
+ * Resuelve URL de imagen de promo: archivo local si existe, si no imagen del producto (codigo).
+ */
+function api_promo_image_url(?string $filename, $codigoProducto = null): string
+{
+    $filename = basename(trim((string)$filename));
+    if ($filename !== '') {
+        $localPath = __DIR__ . '/../assets/img/licores/promos/' . $filename;
+        if (is_file($localPath)) {
+            return api_asset_url('promos/' . $filename);
+        }
+        // Archivo referenciado en BD pero ausente en disco: aún devolvemos la URL
+        // solo si existe; si no, caemos al producto.
+    }
+
+    $codigo = (int)$codigoProducto;
+    if ($codigo > 0) {
+        try {
+            $producto = new Producto();
+            $prod = $producto->obtenerProductoPorId($codigo);
+            $img = $prod['imagen_producto'] ?? '';
+            if ($img !== '') {
+                return api_asset_url($img);
+            }
+        } catch (Exception $e) {
+            error_log('api_promo_image_url: ' . $e->getMessage());
+        }
+    }
+
+    return api_logo_url();
+}
+
 function api_json($data, int $status = 200): void
 {
     http_response_code($status);

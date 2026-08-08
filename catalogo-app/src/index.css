@@ -222,9 +222,12 @@ textarea {
 
 .category-card img {
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  object-position: center;
   display: block;
+  background: #fff;
+  padding: 0.75rem;
 }
 
 .category-card span {
@@ -245,14 +248,29 @@ textarea {
 
 .product-card__media {
   position: relative;
-  background: #eef2f5;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 0.75rem;
 }
 
 .product-card__media img {
   width: 100%;
-  height: 210px;
-  object-fit: cover;
+  max-width: 100%;
+  height: 220px;
+  object-fit: contain;
+  object-position: center;
   display: block;
+}
+
+.product-card--promo .product-card__media {
+  min-height: 240px;
+}
+
+.product-card--promo .product-card__media img {
+  height: 240px;
 }
 
 .badge-promo {

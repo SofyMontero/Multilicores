@@ -72,8 +72,10 @@ export default function CategoriasPage() {
               alt={cat.nombre}
               loading="lazy"
               onError={(e) => {
+                if (e.currentTarget.dataset.fallback === '1') return
+                e.currentTarget.dataset.fallback = '1'
                 e.currentTarget.src =
-                  'https://multilicoreschapinero.com/sistema/assets/img/licores/placeholder.jpg'
+                  'https://multilicoreschapinero.com/sistema/assets/img/logoM.png'
               }}
             />
             <span>{cat.nombre}</span>

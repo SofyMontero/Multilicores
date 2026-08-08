@@ -30,16 +30,20 @@ export default function ProductCard({ product, esPromo = false }) {
     })
   }
 
+  const fallbackImg =
+    'https://multilicoreschapinero.com/sistema/assets/img/logoM.png'
+
   return (
-    <article className="product-card">
+    <article className={`product-card${esPromo ? ' product-card--promo' : ''}`}>
       <div className="product-card__media">
         <img
-          src={product.imagen}
+          src={product.imagen || fallbackImg}
           alt={nombre}
           loading="lazy"
           onError={(e) => {
-            e.currentTarget.src =
-              'https://multilicoreschapinero.com/sistema/assets/img/licores/placeholder.jpg'
+            if (e.currentTarget.dataset.fallback === '1') return
+            e.currentTarget.dataset.fallback = '1'
+            e.currentTarget.src = fallbackImg
           }}
         />
         {esPromo && <span className="badge-promo">Promo</span>}
