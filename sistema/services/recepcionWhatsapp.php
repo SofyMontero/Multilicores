@@ -50,6 +50,8 @@ $sender = new WhatsappSender($conn);
 write_log("Mensaje recibido de $telefonoCliente: $mensaje");
 
 if ($mensaje != null) {
+    // Cuando despliegues la app React, cambia a:
+    // https://multilicoreschapinero.com/sistema/app/?idCli=$telefonoCliente
     $link="https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=$telefonoCliente";
     $respuestaTexto = "    
         🍷 ¡Bienvenido a Multilicores!
