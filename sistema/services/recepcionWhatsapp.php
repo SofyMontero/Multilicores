@@ -43,6 +43,7 @@ $timestamp = $mensajeData['timestamp'];
 
 require_once 'conexion.php';
 require_once 'WhatsappSender.php';
+require_once __DIR__ . '/../config/catalogo_router.php';
 
 $sender = new WhatsappSender($conn);
 
@@ -50,9 +51,8 @@ $sender = new WhatsappSender($conn);
 write_log("Mensaje recibido de $telefonoCliente: $mensaje");
 
 if ($mensaje != null) {
-    // Cuando despliegues la app React, cambia a:
-    // https://multilicoreschapinero.com/sistema/app/?idCli=$telefonoCliente
-    $link="https://multilicoreschapinero.com/sistema/views/categorias.php?idCli=$telefonoCliente";
+    // Link estable: siempre categorias.php (la versión activa se elige en config/catalogo.php)
+    $link = catalogo_whatsapp_link($telefonoCliente);
     $respuestaTexto = "    
         🍷 ¡Bienvenido a Multilicores!
 Tu experiencia en licores comienza aquí.

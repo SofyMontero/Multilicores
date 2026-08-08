@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../config/catalogo_router.php';
+catalogo_redirigir_si_react('promociones');
+
 require_once "../models/database.php";
 require_once "../models/ProductoModel.php";
 ini_set('display_errors', 1);
