@@ -95,6 +95,7 @@ export default function CheckoutPage() {
       const payload = {
         pedidoToken,
         telefono: telefono || phoneInput,
+        clienteId: clienteSeleccionado?.id || null,
         total,
         observaciones,
         direccion,

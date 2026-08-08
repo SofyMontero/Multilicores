@@ -99,6 +99,7 @@ try {
     $totalGeneral = (float)($body['total'] ?? $body['total_general'] ?? 0);
     $observaciones = (string)($body['observaciones'] ?? '');
     $numCliente = api_normalize_phone((string)($body['telefono'] ?? $body['numCliente'] ?? ''));
+    $clienteId = (int)($body['clienteId'] ?? $body['id_cliente'] ?? 0);
     $ped_sede = $body['direccion'] ?? $body['ped_sede'] ?? null;
     $pedidoToken = preg_replace('/[^a-zA-Z0-9]/', '', (string)($body['pedidoToken'] ?? $body['pedido_token'] ?? ''));
 
@@ -148,6 +149,7 @@ try {
     $datosCliente = [
         'nombre' => 'Cliente App',
         'email' => 'pedido@multilicores.com',
+        'id_cliente' => $clienteId > 0 ? $clienteId : null,
     ];
 
     $pedidoModel = new Pedido();

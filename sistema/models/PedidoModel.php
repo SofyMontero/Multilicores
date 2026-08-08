@@ -23,11 +23,31 @@ class Pedido
             // Iniciar transacción
             $this->pdo->beginTransaction();
 
-            // obtener id cliente
-            $sqlidClinte = "SELECT id_cliente FROM clientes WHERE cli_telefono = ?";
-            $stmtCheck = $this->pdo->prepare($sqlidClinte);
-            $stmtCheck->execute([$numCliente]);
-            $clienteInfo = $stmtCheck->fetchColumn();
+            $telefono = preg_replace('/\D+/', '', trim((string)$numCliente));
+            $telefonoSin57 = (strpos($telefono, '57') === 0 && strlen($telefono) > 10)
+                ? substr($telefono, 2)
+                : $telefono;
+            $telefonoCon57 = (strpos($telefono, '57') === 0) ? $telefono : ('57' . $telefono);
+
+            // Resolver cliente por ID explícito o por teléfono (con/sin 57)
+            $clienteInfo = null;
+            if (!empty($datosCliente['id_cliente'])) {
+                $clienteInfo = (int)$datosCliente['id_cliente'];
+            }
+
+            if (!$clienteInfo) {
+                $sqlidClinte = "SELECT id_cliente FROM clientes
+                    WHERE cli_telefono = ? OR cli_telefono = ? OR cli_telefono = ?
+                    ORDER BY id_cliente ASC
+                    LIMIT 1";
+                $stmtCheck = $this->pdo->prepare($sqlidClinte);
+                $stmtCheck->execute([$telefono, $telefonoSin57, $telefonoCon57]);
+                $clienteInfo = $stmtCheck->fetchColumn();
+            }
+
+            if (!$clienteInfo) {
+                throw new Exception('No se encontró el cliente con el teléfono indicado. Verifica o regístrate de nuevo.');
+            }
 
             // Generar número de factura único
             $numeroFactura = 'PED-' . date('Ymd') . '-' . sprintf('%04d', rand(1000, 9999));
@@ -40,11 +60,6 @@ class Pedido
             if ($stmtCheck->fetchColumn() > 0) {
                 // Si existe, generar uno nuevo
                 $numeroFactura = 'PED-' . date('Ymd') . '-' . sprintf('%04d', rand(1000, 9999));
-            }
-
-            $telefono = trim($numCliente);
-            if (substr($telefono, 0, 2) !== '57') {
-                $telefono = '57' . $telefono;
             }
 
             // Insertar pedido principal
@@ -66,7 +81,7 @@ class Pedido
                 date("Y-m-d H:i:s", strtotime("-5 hours")),
                 $numeroFactura,
                 $total,        // puede ser 0 (pedido solo con promos)
-                $telefono,
+                $telefonoCon57,
                 $observaciones,
                 $ped_sede      // dirección del cliente seleccionado
             ]);

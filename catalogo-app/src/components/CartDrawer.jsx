@@ -40,34 +40,56 @@ export default function CartDrawer() {
           <ul className="cart-list">
             {items.map((item, index) => (
               <li key={`${item.id}-${item.tipo}-${index}`} className="cart-item">
-                <div>
-                  <strong>{item.nombre}</strong>
-                  <div className="muted small">
-                    {item.tipo} · {formatMoney(item.precioUnitario)}
+                <div className="cart-item__top">
+                  <div className="cart-item__info">
+                    <strong className="cart-item__name">{item.nombre}</strong>
+                    <span className="cart-item__meta">
+                      {item.tipo} · {formatMoney(item.precioUnitario)} c/u
+                    </span>
                   </div>
-                </div>
-                <div className="cart-item__actions">
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.cantidad}
-                    onChange={(e) => updateQty(index, e.target.value)}
-                    aria-label="Cantidad"
-                  />
-                  <span>{formatMoney(item.precioTotal)}</span>
-                  <button type="button" className="linkish" onClick={() => removeItem(index)}>
-                    Quitar
+                  <button
+                    type="button"
+                    className="cart-item__remove"
+                    onClick={() => removeItem(index)}
+                    aria-label="Quitar"
+                  >
+                    ✕
                   </button>
+                </div>
+
+                <div className="cart-item__bottom">
+                  <div className="qty-stepper" role="group" aria-label="Cantidad">
+                    <button
+                      type="button"
+                      className="qty-stepper__btn"
+                      onClick={() => updateQty(index, Math.max(1, item.cantidad - 1))}
+                      aria-label="Menos"
+                    >
+                      −
+                    </button>
+                    <span className="qty-stepper__value">{item.cantidad}</span>
+                    <button
+                      type="button"
+                      className="qty-stepper__btn"
+                      onClick={() => updateQty(index, item.cantidad + 1)}
+                      aria-label="Más"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <strong className="cart-item__subtotal">
+                    {formatMoney(item.precioTotal)}
+                  </strong>
                 </div>
               </li>
             ))}
           </ul>
         )}
 
-        <label className="field">
+        <label className="field drawer__notes">
           <span>Observaciones</span>
           <textarea
-            rows={3}
+            rows={2}
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
             placeholder="Ej: dejar en portería"
@@ -81,7 +103,7 @@ export default function CartDrawer() {
           </div>
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn btn-primary btn-block"
             disabled={items.length === 0}
             onClick={() => {
               setCartOpen(false)
