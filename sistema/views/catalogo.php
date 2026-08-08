@@ -157,13 +157,12 @@ $tienePromociones = hayPromocionesActivas();
                                                 class="form-select tipo-select form-select-sm"
                                                 data-index="<?php echo $index; ?>"
                                                 data-precio-unidad="<?php echo $prod['precio_unidad_producto']; ?>"
-                                                data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>"
-                                                data-embalaje="<?php if ($prod['acti_Unidad'] == 1) {
-                                                                    echo '<option value="">Tipo</option>
-                                                <option value="unidad">Unidad</option>
-                                                <option value="paca">Paca</option>';
-                                                                } else echo '<option value="">Tipo</option>                                              
-                                                <option value="paca">Paca</option>' ?>">
+                                                data-precio-paca="<?php echo $prod['precio_paca_producto']; ?>">
+                                                <option value="">Tipo</option>
+                                                <?php if ((int)$prod['acti_Unidad'] !== 0): ?>
+                                                    <option value="unidad">Unidad</option>
+                                                <?php endif; ?>
+                                                <option value="paca">Paca</option>
                                             </select>
                                         </div>
                                         <div class="col-6">
@@ -172,6 +171,7 @@ $tienePromociones = hayPromocionesActivas();
                                                 name="productos[<?php echo $index; ?>][cantidad]"
                                                 class="form-control form-control-sm cantidad-input"
                                                 min="1"
+                                                value="1"
                                                 placeholder="1"
                                                 data-index="<?php echo $index; ?>">
                                         </div>

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/catalogo_router.php';
 catalogo_redirigir_si_react('promociones');
 
+require_once __DIR__ . '/../helpers/promo_images.php';
 require_once "../models/database.php";
 require_once "../models/ProductoModel.php";
 ini_set('display_errors', 1);
@@ -256,12 +257,17 @@ $tienePromociones = hayPromocionesActivas();
                                     <h3 class="promocion-titulo"><?php echo htmlspecialchars($promocion['titulo']); ?></h3>
                                 </div>
 
-                                <?php if (!empty($promocion['imagen'])): ?>
-                                    <img src="../assets/img/licores/promos/<?php echo htmlspecialchars($promocion['imagen']); ?>"
+                                <?php
+                                $promoImg = promo_image_web_path(
+                                    $promocion['imagen'] ?? '',
+                                    $promocion['codigo'] ?? null,
+                                    (string)($promocion['descripcion'] ?? '')
+                                );
+                                ?>
+                                    <img src="<?php echo htmlspecialchars($promoImg); ?>"
                                         class="w-100 promocion-imagen"
                                         alt="<?php echo htmlspecialchars($promocion['titulo']); ?>"
-                                        onerror="this.style.display='none'">
-                                <?php endif; ?>
+                                        onerror="this.onerror=null;this.src='../assets/img/logoM.png';">
 
                                 <div class="card-body p-4">
                                     <p class="card-text text-muted mb-4" style="line-height: 1.6;">
@@ -296,36 +302,46 @@ $tienePromociones = hayPromocionesActivas();
                                    <div class="row align-items-end g-2">
                                         <div class="col-6">
                                             <label class="form-label small">Tipo</label>
-                                            <select name="productos[<?php echo $index; ?>][tipo]"
+                                            <select name="productos[<?php echo $pIndex; ?>][tipo]"
                                                 class="form-select tipo-select form-select-sm"
-                                                data-index="<?php echo $index; ?>"
+                                                data-index="<?php echo $pIndex; ?>"
                                                 data-precio-unidad="<?php echo $promocion['precio_unidad_producto']; ?>"
-                                                data-precio-paca="<?php echo $promocion['precio_paca_producto']; ?>"
-                                                data-embalaje="<?php if ($promocion['acti_Unidad'] == 1) {
-                                                                    echo '<option value="">Tipo</option>
-                                                <option value="unidad">Unidad</option>
-                                                <option value="paca">Paca</option>';
-                                                                } else echo '<option value="">Tipo</option>                                              
-                                                <option value="paca">Paca</option>' ?>">
+                                                data-precio-paca="<?php echo $promocion['precio_paca_producto']; ?>">
+                                                <option value="">Tipo</option>
+                                                <?php if ((int)$promocion['acti_Unidad'] !== 0): ?>
+                                                    <option value="unidad">Unidad</option>
+                                                <?php endif; ?>
+                                                <option value="paca">Paca</option>
                                             </select>
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label small">Cant.</label>
                                             <input type="number"
-                                                name="productos[<?php echo $index; ?>][cantidad]"
+                                                name="productos[<?php echo $pIndex; ?>][cantidad]"
                                                 class="form-control form-control-sm cantidad-input"
                                                 min="1"
+                                                value="1"
                                                 placeholder="1"
-                                                data-index="<?php echo $index; ?>">
+                                                data-index="<?php echo $pIndex; ?>">
                                         </div>
                                     </div>
 
                                     <!-- Botón Agregar -->
                                     <div class="text-end mt-3">
+                <?php
+                // Preferir id_producto real si el codigo de promo no es un producto válido
+                $prodRelacionado = promo_find_product(
+                    $promocion['codigo'] ?? null,
+                    (string)($promocion['descripcion'] ?? '')
+                );
+                $idParaCarrito = $prodRelacionado['id_producto']
+                    ?? ($promocion['codigo'] ?? $promocion['id_promocion'] ?? 0);
+                $nombreParaCarrito = $promocion['descripcion'] ?? ($promocion['titulo'] ?? 'Promo');
+                ?>
                                         <button type="button"
                                             class="btn btn-outline-success w-100 agregar-btn"
-                                            data-id="<?php echo $promocion['codigo']; ?>"
-                                            data-nombre="<?php echo htmlspecialchars($promocion['descripcion']); ?>"
+                                            data-id="<?php echo htmlspecialchars((string)$idParaCarrito); ?>"
+                                            data-nombre="<?php echo htmlspecialchars($nombreParaCarrito); ?>"
                                             data-precio-unidad="<?php echo $promocion['precio_unidad_producto']; ?>"
                                             data-precio-paca="<?php echo $promocion['precio_paca_producto']; ?>">
                                             <i class="fas fa-cart-plus me-1"></i> Agregar

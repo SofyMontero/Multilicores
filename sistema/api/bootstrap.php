@@ -17,17 +17,11 @@ require_once __DIR__ . '/../models/database.php';
 require_once __DIR__ . '/../models/ProductoModel.php';
 require_once __DIR__ . '/../models/PedidoModel.php';
 require_once __DIR__ . '/../models/BarModel.php';
+require_once __DIR__ . '/../helpers/promo_images.php';
 
 function api_base_url(): string
 {
-    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
-        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
-
-    $scheme = $https ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'multilicoreschapinero.com';
-
-    return $scheme . '://' . $host . '/sistema';
+    return promo_https_base();
 }
 
 function api_asset_url(string $relativePath): string
@@ -41,36 +35,9 @@ function api_logo_url(): string
     return api_base_url() . '/assets/img/logoM.png';
 }
 
-/**
- * Resuelve URL de imagen de promo: archivo local si existe, si no imagen del producto (codigo).
- */
-function api_promo_image_url(?string $filename, $codigoProducto = null): string
+function api_promo_image_url(?string $filename, $codigoProducto = null, string $descripcion = ''): string
 {
-    $filename = basename(trim((string)$filename));
-    if ($filename !== '') {
-        $localPath = __DIR__ . '/../assets/img/licores/promos/' . $filename;
-        if (is_file($localPath)) {
-            return api_asset_url('promos/' . $filename);
-        }
-        // Archivo referenciado en BD pero ausente en disco: aún devolvemos la URL
-        // solo si existe; si no, caemos al producto.
-    }
-
-    $codigo = (int)$codigoProducto;
-    if ($codigo > 0) {
-        try {
-            $producto = new Producto();
-            $prod = $producto->obtenerProductoPorId($codigo);
-            $img = $prod['imagen_producto'] ?? '';
-            if ($img !== '') {
-                return api_asset_url($img);
-            }
-        } catch (Exception $e) {
-            error_log('api_promo_image_url: ' . $e->getMessage());
-        }
-    }
-
-    return api_logo_url();
+    return promo_image_absolute_url($filename, $codigoProducto, $descripcion);
 }
 
 function api_json($data, int $status = 200): void

@@ -30,21 +30,28 @@ try {
     $data = array_map(static function ($promo) {
         $imagen = $promo['imagen'] ?? '';
         $actiUnidad = $promo['acti_Unidad'] ?? '0';
-        $codigo = (int)($promo['codigo'] ?? 0);
+        $codigo = $promo['codigo'] ?? '';
+        $descripcion = (string)($promo['descripcion'] ?? '');
         $promoId = (int)($promo['id_promocion'] ?? $promo['id'] ?? 0);
 
+        $prodRelacionado = promo_find_product($codigo, $descripcion);
+        $productoId = (int)($prodRelacionado['id_producto'] ?? 0);
+        if ($productoId <= 0 && ctype_digit((string)$codigo)) {
+            $productoId = (int)$codigo;
+        }
+
         return [
-            'id' => $codigo > 0 ? $codigo : $promoId,
+            'id' => $productoId > 0 ? $productoId : $promoId,
             'promoId' => $promoId,
-            'productoId' => $codigo,
+            'productoId' => $productoId,
             'titulo' => $promo['titulo'] ?? $promo['nombre'] ?? '',
-            'descripcion' => $promo['descripcion'] ?? '',
+            'descripcion' => $descripcion,
             'prioridad' => (int)($promo['prioridad'] ?? 0),
             'precioUnidad' => (float)($promo['precio_unidad_producto'] ?? 0),
             'precioPaca' => (float)($promo['precio_paca_producto'] ?? 0),
             'vendeUnidad' => (int)$actiUnidad !== 0,
             'actiUnidad' => $actiUnidad,
-            'imagen' => api_promo_image_url($imagen, $codigo),
+            'imagen' => api_promo_image_url($imagen, $codigo, $descripcion),
             'estado' => (int)($promo['estado'] ?? 0),
             'creadoEn' => $promo['creado_en'] ?? null,
         ];
