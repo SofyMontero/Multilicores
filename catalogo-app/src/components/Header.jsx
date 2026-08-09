@@ -1,9 +1,8 @@
 import { NavLink, useSearchParams } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
 import { useCliente } from '../context/ClienteContext.jsx'
-
-const LOGO =
-  'https://multilicoreschapinero.com/sistema/assets/img/logoM.png'
+import { CLIENT } from '../brand.js'
+import MonteblancoMark from './MonteblancoMark.jsx'
 
 function withCli(path, telefono) {
   if (!telefono) return path
@@ -21,8 +20,14 @@ export default function Header() {
     <header className="site-header">
       <div className="site-header__inner">
         <NavLink to={withCli('/', idCli)} className="brand">
-          <img src={LOGO} alt="Multilicores" className="brand__logo" />
-          <span className="brand__name">Multilicores</span>
+          <img src={CLIENT.logo} alt={CLIENT.name} className="brand__logo" />
+          <div className="brand__copy">
+            <span className="brand__name">{CLIENT.name}</span>
+            <span className="brand__product">
+              <MonteblancoMark size={14} />
+              <span>by Monteblanco</span>
+            </span>
+          </div>
         </NavLink>
 
         <nav className="site-nav" aria-label="Principal">

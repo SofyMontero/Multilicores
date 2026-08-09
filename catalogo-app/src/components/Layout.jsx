@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { Outlet, useSearchParams } from 'react-router-dom'
 import Header from './Header.jsx'
+import Footer from './Footer.jsx'
 import CartDrawer from './CartDrawer.jsx'
+import InstallPrompt from './InstallPrompt.jsx'
 import { useCliente } from '../context/ClienteContext.jsx'
 
 export default function Layout() {
@@ -19,7 +21,9 @@ export default function Layout() {
       <main className="app-main">
         <Outlet />
       </main>
+      <Footer />
       <CartDrawer />
+      <InstallPrompt />
     </div>
   )
 }

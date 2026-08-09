@@ -37,7 +37,7 @@ export default function CategoriasPage() {
   return (
     <section className="page">
       <div className="page-hero">
-        <p className="eyebrow">Catálogo cliente</p>
+        <p className="eyebrow">Catálogo Multilicores</p>
         <h1>Elige tu categoría</h1>
         <p className="lede">
           Explora licores y arma tu pedido. Te confirmamos por WhatsApp.
