@@ -81,13 +81,13 @@ $promocionesActivas = $tienePromociones ? obtenerPromocionesActivas() : [];
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../css/categoria.css" rel="stylesheet" type="text/css" />
     <style>
-        /* Estilos para el banner de promociones */
+        /* Estilos para el banner de promociones — azul del logo Multilicores */
         .promociones-banner {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: #e11d48;
             margin-bottom: 2rem;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(238, 90, 36, 0.3);
+            box-shadow: 0 10px 30px rgba(225, 29, 72, 0.28);
             position: relative;
         }
 
@@ -119,51 +119,34 @@ $promocionesActivas = $tienePromociones ? obtenerPromocionesActivas() : [];
         }
 
         .categoria-promociones {
-            background: linear-gradient(135deg, #ff9a9e, #fecfef);
-            border: 2px solid #ff6b6b;
+            background: #8db3cf;
+            border: 2px solid #1d4e89;
             position: relative;
             overflow: hidden;
         }
 
         .categoria-promociones .card-imagen {
             background: rgba(255, 255, 255, 0.55);
-            border-color: rgba(255, 107, 107, 0.3);
+            border-color: rgba(29, 78, 137, 0.3);
         }
 
         .categoria-promociones img {
-            border-color: rgba(255, 107, 107, 0.35);
+            border-color: rgba(29, 78, 137, 0.35);
         }
 
         .categoria-promociones::before {
-            content: '🎉';
+            content: '';
             position: absolute;
             top: 10px;
             right: 10px;
-            font-size: 1.5rem;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            20%,
-            50%,
-            80%,
-            100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-10px);
-            }
-
-            60% {
-                transform: translateY(-5px);
-            }
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #1d4e89;
         }
 
         .btn-promociones {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: #1d4e89;
             border: none;
             color: white;
             font-weight: 600;
@@ -172,8 +155,9 @@ $promocionesActivas = $tienePromociones ? obtenerPromocionesActivas() : [];
 
         .btn-promociones:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(238, 90, 36, 0.4);
+            box-shadow: 0 5px 15px rgba(29, 78, 137, 0.4);
             color: white;
+            background: #163d6c;
         }
 
         .carousel-item img {
@@ -219,7 +203,7 @@ $promocionesActivas = $tienePromociones ? obtenerPromocionesActivas() : [];
                         </li>
                         <?php if ($tienePromociones): ?>
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold" href="promociones.php?idCli=<?php echo urlencode($numCliente); ?>" style="color: #ff6b6b;">
+                                <a class="nav-link fw-semibold" href="promociones.php?idCli=<?php echo urlencode($numCliente); ?>" style="color: #1d4e89;">
                                     <i class="fas fa-fire me-1"></i>Promociones
                                 </a>
                             </li>
@@ -309,7 +293,7 @@ $promocionesActivas = $tienePromociones ? obtenerPromocionesActivas() : [];
                         </div>
                         <div class="card-body-custom">
                             <h5 class="card-titulo categoria-nombre">
-                                <i class="fas fa-fire me-2" style="color: #ff6b6b;"></i>Promociones
+                                <i class="fas fa-fire me-2" style="color: #1d4e89;"></i>Promociones
                             </h5>
                             <p class="card-descripcion">
                                 Ofertas especiales y descuentos únicos
