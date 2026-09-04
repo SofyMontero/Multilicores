@@ -11,55 +11,24 @@ error_reporting(E_ALL);
 
 $numCliente = $_GET['idCli'] ?? '';
 
-// Obtener promociones usando la función existente en Producto
-function obtenerPromociones()
-{
-    try {
-        $producto = new Producto();
-        $todasLasPromociones = $producto->getConnection(); // Retorna array con todas las promociones
-
-        // Filtrar solo las promociones activas (estado = 1)
-        $promocionesActivas = array_filter($todasLasPromociones, function ($promo) {
-            return isset($promo['estado']) && $promo['estado'] == 1;
-        });
-
-        // Ordenar por prioridad y fecha
-        usort($promocionesActivas, function ($a, $b) {
-            // Primero por prioridad (desc)
-            if ($a['prioridad'] != $b['prioridad']) {
-                return $b['prioridad'] - $a['prioridad'];
-            }
-            // Luego por fecha de creación (desc)
-            return strtotime($b['creado_en']) - strtotime($a['creado_en']);
-        });
-
-        return $promocionesActivas;
-    } catch (Exception $e) {
-        error_log("Error obteniendo promociones: " . $e->getMessage());
-        return [];
-    }
+try {
+    $producto = new Producto();
+    $todasLasPromociones = $producto->getConnection() ?: [];
+    $promociones = array_values(array_filter($todasLasPromociones, static function ($promo) {
+        return isset($promo['estado']) && (int)$promo['estado'] === 1;
+    }));
+    usort($promociones, static function ($a, $b) {
+        if ((int)$a['prioridad'] !== (int)$b['prioridad']) {
+            return (int)$b['prioridad'] - (int)$a['prioridad'];
+        }
+        return strtotime($b['creado_en'] ?? 'now') <=> strtotime($a['creado_en'] ?? 'now');
+    });
+} catch (Exception $e) {
+    error_log("Error obteniendo promociones: " . $e->getMessage());
+    $promociones = [];
 }
 
-$promociones = obtenerPromociones();
-
-function hayPromocionesActivas()
-{
-    try {
-        $producto = new Producto();
-        $promociones = $producto->getConnection();
-
-        $promocionesActivas = array_filter($promociones, function ($promo) {
-            return isset($promo['estado']) && $promo['estado'] == 1;
-        });
-
-        return count($promocionesActivas) > 0;
-    } catch (Exception $e) {
-        error_log("Error en hayPromocionesActivas: " . $e->getMessage());
-        return false;
-    }
-}
-
-$tienePromociones = hayPromocionesActivas();
+$tienePromociones = !empty($promociones);
 ?>
 
 <!DOCTYPE html>
@@ -258,6 +227,10 @@ $tienePromociones = hayPromocionesActivas();
                                 </div>
 
                                 <?php
+                                $prodRelacionado = promo_find_product(
+                                    $promocion['codigo'] ?? null,
+                                    (string)($promocion['descripcion'] ?? '')
+                                );
                                 $promoImg = promo_image_web_path(
                                     $promocion['imagen'] ?? '',
                                     $promocion['codigo'] ?? null,
@@ -329,11 +302,6 @@ $tienePromociones = hayPromocionesActivas();
                                     <!-- Botón Agregar -->
                                     <div class="text-end mt-3">
                 <?php
-                // Preferir id_producto real si el codigo de promo no es un producto válido
-                $prodRelacionado = promo_find_product(
-                    $promocion['codigo'] ?? null,
-                    (string)($promocion['descripcion'] ?? '')
-                );
                 $idParaCarrito = $prodRelacionado['id_producto']
                     ?? ($promocion['codigo'] ?? $promocion['id_promocion'] ?? 0);
                 $nombreParaCarrito = $promocion['descripcion'] ?? ($promocion['titulo'] ?? 'Promo');

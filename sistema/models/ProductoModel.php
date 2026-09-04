@@ -1,5 +1,5 @@
 <?php
-require_once "database.php";
+require_once __DIR__ . "/database.php";
 
 class Producto
 {
@@ -112,7 +112,7 @@ class Producto
             $conde = "and id_cate_producto='$categoria'";
         }
 
-        $query = $this->db->connect()->prepare("
+        $query = $this->pdo->prepare("
         SELECT 
         `id_producto`, 
         `precio_unidad_producto`, 
@@ -191,7 +191,7 @@ class Producto
      */
     public function existeProducto($id_producto)
     {
-        $query = $this->db->connect()->prepare("
+        $query = $this->pdo->prepare("
         SELECT COUNT(*) as total 
         FROM productos 
         WHERE id_producto = :id_producto
@@ -209,7 +209,7 @@ class Producto
      */
     public function actualizarProducto($id_producto, $codigo_producto, $descripcion_producto, $cantidad_paca_producto, $precio_unidad, $precio_paca, $id_cate_producto, $acti_Unidad, $imagen_producto, $estado_producto)
     {
-        $query = $this->db->connect()->prepare("
+        $query = $this->pdo->prepare("
         UPDATE productos SET 
             codigo_productos = :codigo_producto,
             descripcion_producto = :descripcion_producto,
@@ -239,7 +239,7 @@ class Producto
     public function obtenerProductoPorCodigo($codigo_productos)
     {
         try {
-            $query = $this->db->connect()->prepare("
+            $query = $this->pdo->prepare("
             SELECT * FROM productos 
             WHERE codigo_productos = :codigo_productos 
             LIMIT 1
@@ -262,7 +262,7 @@ class Producto
     public function obtenerProductoPorId($id_producto)
     {
         try {
-            $query = $this->db->connect()->prepare("
+            $query = $this->pdo->prepare("
             SELECT * FROM productos 
             WHERE id_producto = :id_producto 
             LIMIT 1
@@ -286,7 +286,7 @@ class Producto
     public function actualizarProductoPorCodigo($codigo_productos, $precio_unidad_producto, $precio_paca_producto)
     {
         try {
-            $query = $this->db->connect()->prepare("
+            $query = $this->pdo->prepare("
             UPDATE productos SET 
                 precio_unidad_producto = :precio_unidad_producto,
                 precio_paca_producto = :precio_paca_producto
@@ -307,7 +307,7 @@ class Producto
     public function actualizarPreciosPorId($id_producto, $precio_unidad_producto, $precio_paca_producto)
     {
         try {
-            $query = $this->db->connect()->prepare("
+            $query = $this->pdo->prepare("
             UPDATE productos SET
                 precio_unidad_producto = :precio_unidad_producto,
                 precio_paca_producto = :precio_paca_producto
@@ -332,7 +332,7 @@ class Producto
     public function existeProductoPorCodigo($codigo_productos)
     {
         try {
-            $query = $this->db->connect()->prepare("
+            $query = $this->pdo->prepare("
             SELECT COUNT(*) as total 
             FROM productos 
             WHERE codigo_productos = :codigo_productos

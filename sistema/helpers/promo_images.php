@@ -20,21 +20,31 @@ function promo_https_base(): string
 
 function promo_find_product($codigoProducto = null, string $descripcion = ''): ?array
 {
+    static $producto = null;
+    static $cache = [];
+
+    $codigo = trim((string)$codigoProducto);
+    $cacheKey = $codigo . "\0" . $descripcion;
+    if (array_key_exists($cacheKey, $cache)) {
+        return $cache[$cacheKey];
+    }
+
     try {
-        $producto = new Producto();
-        $codigo = trim((string)$codigoProducto);
+        if ($producto === null) {
+            $producto = new Producto();
+        }
 
         if ($codigo !== '' && ctype_digit($codigo)) {
             $prod = $producto->obtenerProductoPorId((int)$codigo);
             if ($prod) {
-                return $prod;
+                return $cache[$cacheKey] = $prod;
             }
         }
 
         if ($codigo !== '') {
             $prod = $producto->obtenerProductoPorCodigo($codigo);
             if ($prod) {
-                return $prod;
+                return $cache[$cacheKey] = $prod;
             }
         }
 
@@ -45,7 +55,7 @@ function promo_find_product($codigoProducto = null, string $descripcion = ''): ?
             if (!empty($sugerencias[0]['id_producto'])) {
                 $prod = $producto->obtenerProductoPorId((int)$sugerencias[0]['id_producto']);
                 if ($prod) {
-                    return $prod;
+                    return $cache[$cacheKey] = $prod;
                 }
             }
         }
@@ -53,7 +63,7 @@ function promo_find_product($codigoProducto = null, string $descripcion = ''): ?
         error_log('promo_find_product: ' . $e->getMessage());
     }
 
-    return null;
+    return $cache[$cacheKey] = null;
 }
 
 function promo_local_file_exists(string $filename): bool
