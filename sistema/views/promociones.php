@@ -234,7 +234,8 @@ $tienePromociones = !empty($promociones);
                                 $promoImg = promo_image_web_path(
                                     $promocion['imagen'] ?? '',
                                     $promocion['codigo'] ?? null,
-                                    (string)($promocion['descripcion'] ?? '')
+                                    (string)($promocion['descripcion'] ?? ''),
+                                    (int)($promocion['id_promocion'] ?? 0)
                                 );
                                 ?>
                                     <img src="<?php echo htmlspecialchars($promoImg, ENT_QUOTES, 'UTF-8'); ?>"

@@ -51,7 +51,7 @@ try {
             'precioPaca' => (float)($promo['precio_paca_producto'] ?? 0),
             'vendeUnidad' => (int)$actiUnidad !== 0,
             'actiUnidad' => $actiUnidad,
-            'imagen' => api_promo_image_url($imagen, $codigo, $descripcion),
+            'imagen' => api_promo_image_url($imagen, $codigo, $descripcion, $promoId),
             'estado' => (int)($promo['estado'] ?? 0),
             'creadoEn' => $promo['creado_en'] ?? null,
         ];

@@ -76,24 +76,20 @@ function promo_image_filename(?string $filename): string
     return basename($filename);
 }
 
-function promo_image_url_segment(string $filename): string
-{
-    if (preg_match('/^[A-Za-z0-9._-]+$/', $filename)) {
-        return $filename;
-    }
-
-    return rawurlencode($filename);
-}
-
 /**
  * Ruta relativa desde /sistema/views/ (catálogo PHP).
- * Misma carpeta que el admin en promo.php: assets/img/licores/promos/
+ * Se sirve por ID para no chocar con el bloqueo de Hostinger a nombres con dos puntos.
  */
-function promo_image_web_path(?string $filename, $codigoProducto = null, string $descripcion = ''): string
+function promo_image_web_path(?string $filename, $codigoProducto = null, string $descripcion = '', $promoId = 0): string
 {
+    $promoId = (int)$promoId;
+    if ($promoId > 0) {
+        return '../helpers/promo_imagen.php?id=' . $promoId;
+    }
+
     $filename = promo_image_filename($filename);
     if ($filename !== '') {
-        return '../assets/img/licores/promos/' . promo_image_url_segment($filename);
+        return '../helpers/promo_imagen.php?f=' . rawurlencode($filename);
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);
@@ -108,13 +104,17 @@ function promo_image_web_path(?string $filename, $codigoProducto = null, string 
 /**
  * URL absoluta (API / React).
  */
-function promo_image_absolute_url(?string $filename, $codigoProducto = null, string $descripcion = ''): string
+function promo_image_absolute_url(?string $filename, $codigoProducto = null, string $descripcion = '', $promoId = 0): string
 {
-    $filename = promo_image_filename($filename);
     $base = promo_https_base();
+    $promoId = (int)$promoId;
+    if ($promoId > 0) {
+        return $base . '/helpers/promo_imagen.php?id=' . $promoId;
+    }
 
+    $filename = promo_image_filename($filename);
     if ($filename !== '') {
-        return $base . '/assets/img/licores/promos/' . promo_image_url_segment($filename);
+        return $base . '/helpers/promo_imagen.php?f=' . rawurlencode($filename);
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);

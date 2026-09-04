@@ -390,9 +390,11 @@ function cargarPromociones() {
             const statusClass = String(promo.estado) === '1' ? 'status-active' : 'status-inactive';
             const estadoTexto = String(promo.estado) === '1' ? 'Activa' : 'Inactiva';
             const estadoChecked = String(promo.estado) === '1' ? 'checked' : '';
-            const imagen = promo.imagen
-                ? `../assets/img/licores/promos/${promo.imagen}`
-                : '../assets/img/licores/placeholder.jpg';
+            const imagen = promo.id_promocion
+                ? `../helpers/promo_imagen.php?id=${encodeURIComponent(promo.id_promocion)}`
+                : (promo.imagen
+                    ? `../helpers/promo_imagen.php?f=${encodeURIComponent(promo.imagen)}`
+                    : '../assets/img/licores/placeholder.jpg');
 
             const fila = `
                 <tr>

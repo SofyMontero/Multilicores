@@ -35,9 +35,9 @@ function api_logo_url(): string
     return api_base_url() . '/assets/img/logoM.png';
 }
 
-function api_promo_image_url(?string $filename, $codigoProducto = null, string $descripcion = ''): string
+function api_promo_image_url(?string $filename, $codigoProducto = null, string $descripcion = '', $promoId = 0): string
 {
-    return promo_image_absolute_url($filename, $codigoProducto, $descripcion);
+    return promo_image_absolute_url($filename, $codigoProducto, $descripcion, $promoId);
 }
 
 function api_json($data, int $status = 200): void
