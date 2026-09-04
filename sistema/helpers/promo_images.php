@@ -66,23 +66,25 @@ function promo_find_product($codigoProducto = null, string $descripcion = ''): ?
     return $cache[$cacheKey] = null;
 }
 
-function promo_local_file_exists(string $filename): bool
+function promo_image_filename(?string $filename): string
 {
-    $filename = basename(trim($filename));
+    $filename = str_replace('\\', '/', trim((string)$filename));
     if ($filename === '') {
-        return false;
+        return '';
     }
-    return is_file(__DIR__ . '/../assets/img/licores/promos/' . $filename);
+
+    return basename($filename);
 }
 
 /**
  * Ruta relativa desde /sistema/views/ (catálogo PHP).
+ * Misma carpeta que el admin en promo.php: assets/img/licores/promos/
  */
 function promo_image_web_path(?string $filename, $codigoProducto = null, string $descripcion = ''): string
 {
-    $filename = basename(trim((string)$filename));
-    if ($filename !== '' && promo_local_file_exists($filename)) {
-        return '../assets/img/licores/promos/' . rawurlencode($filename);
+    $filename = promo_image_filename($filename);
+    if ($filename !== '') {
+        return '../assets/img/licores/promos/' . $filename;
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);
@@ -99,10 +101,10 @@ function promo_image_web_path(?string $filename, $codigoProducto = null, string 
  */
 function promo_image_absolute_url(?string $filename, $codigoProducto = null, string $descripcion = ''): string
 {
-    $filename = basename(trim((string)$filename));
+    $filename = promo_image_filename($filename);
     $base = promo_https_base();
 
-    if ($filename !== '' && promo_local_file_exists($filename)) {
+    if ($filename !== '') {
         return $base . '/assets/img/licores/promos/' . rawurlencode($filename);
     }
 

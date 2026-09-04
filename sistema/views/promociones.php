@@ -237,7 +237,7 @@ $tienePromociones = !empty($promociones);
                                     (string)($promocion['descripcion'] ?? '')
                                 );
                                 ?>
-                                    <img src="<?php echo htmlspecialchars($promoImg); ?>"
+                                    <img src="<?php echo htmlspecialchars($promoImg, ENT_QUOTES, 'UTF-8'); ?>"
                                         class="w-100 promocion-imagen"
                                         alt="<?php echo htmlspecialchars($promocion['titulo']); ?>"
                                         onerror="this.onerror=null;this.src='../assets/img/logoM.png';">
