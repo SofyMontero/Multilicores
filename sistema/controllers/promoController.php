@@ -18,6 +18,27 @@ function normalizarEstado($estado) {
     return 0;
 }
 
+function nombreArchivoPromo(string $nombreOriginal, string $extension): string
+{
+    $base = pathinfo($nombreOriginal, PATHINFO_FILENAME);
+    if (function_exists('iconv')) {
+        $transliterado = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $base);
+        if (is_string($transliterado) && $transliterado !== '') {
+            $base = $transliterado;
+        }
+    }
+
+    $base = strtolower($base);
+    $base = preg_replace('/[^a-z0-9]+/', '-', $base);
+    $base = trim($base, '-');
+    if ($base === '') {
+        $base = 'promo';
+    }
+
+    // Un solo punto (la extensión). uniqid(..., true) metía otro y rompía la URL.
+    return $base . '-' . date('YmdHis') . '.' . $extension;
+}
+
 function subirImagen($requerida = false) {
     if (!isset($_FILES["imagen"]) || $_FILES["imagen"]["error"] === UPLOAD_ERR_NO_FILE) {
         if ($requerida) {
@@ -40,12 +61,18 @@ function subirImagen($requerida = false) {
         responderJson(false, "Formato de imagen no permitido.");
     }
 
-    $nombreImagen = uniqid("promo_", true) . "." . $extension;
-    $directorio = "../assets/img/licores/promos/";
-    $destino = $directorio . $nombreImagen;
-
-    if (!is_dir($directorio)) {
+    $directorio = __DIR__ . "/../assets/img/licores/promos/";
+    if (!is_dir($directorio) && !mkdir($directorio, 0755, true) && !is_dir($directorio)) {
         responderJson(false, "No existe la carpeta de imagenes de promociones.");
+    }
+
+    $nombreImagen = nombreArchivoPromo($nombreOriginal, $extension);
+    $destino = $directorio . $nombreImagen;
+    $intento = 1;
+    while (is_file($destino)) {
+        $nombreImagen = pathinfo($nombreImagen, PATHINFO_FILENAME) . '-' . $intento . '.' . $extension;
+        $destino = $directorio . $nombreImagen;
+        $intento++;
     }
 
     if (!move_uploaded_file($tmpPath, $destino)) {

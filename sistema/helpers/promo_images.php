@@ -76,6 +76,15 @@ function promo_image_filename(?string $filename): string
     return basename($filename);
 }
 
+function promo_image_url_segment(string $filename): string
+{
+    if (preg_match('/^[A-Za-z0-9._-]+$/', $filename)) {
+        return $filename;
+    }
+
+    return rawurlencode($filename);
+}
+
 /**
  * Ruta relativa desde /sistema/views/ (catálogo PHP).
  * Misma carpeta que el admin en promo.php: assets/img/licores/promos/
@@ -84,7 +93,7 @@ function promo_image_web_path(?string $filename, $codigoProducto = null, string 
 {
     $filename = promo_image_filename($filename);
     if ($filename !== '') {
-        return '../assets/img/licores/promos/' . $filename;
+        return '../assets/img/licores/promos/' . promo_image_url_segment($filename);
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);
@@ -105,7 +114,7 @@ function promo_image_absolute_url(?string $filename, $codigoProducto = null, str
     $base = promo_https_base();
 
     if ($filename !== '') {
-        return $base . '/assets/img/licores/promos/' . rawurlencode($filename);
+        return $base . '/assets/img/licores/promos/' . promo_image_url_segment($filename);
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);
