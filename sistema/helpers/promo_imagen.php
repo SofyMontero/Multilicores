@@ -48,22 +48,6 @@ if ($filename !== '') {
     }
 }
 
-if ($path !== null && $id > 0 && preg_match('/\.\d+\.(jpe?g|png|gif|webp)$/i', $filename)) {
-    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    $seguro = 'promo-' . $id . '.' . $ext;
-    $destino = __DIR__ . '/../assets/img/licores/promos/' . $seguro;
-    if (@copy($path, $destino) && is_file($destino)) {
-        try {
-            $db = $pdo instanceof PDO ? $pdo : (new Database())->connect();
-            $upd = $db->prepare('UPDATE promociones SET imagen = :img WHERE id_promocion = :id');
-            $upd->execute(['img' => $seguro, 'id' => $id]);
-            $path = $destino;
-        } catch (Exception $e) {
-            // Si no se pudo actualizar el nombre, igual se sirve el archivo original.
-        }
-    }
-}
-
 if ($path === null) {
     $path = __DIR__ . '/../assets/img/logoM.png';
     if (!is_file($path)) {

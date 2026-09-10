@@ -35,8 +35,7 @@ function nombreArchivoPromo(string $nombreOriginal, string $extension): string
         $base = 'promo';
     }
 
-    // Un solo punto (la extensión). uniqid(..., true) metía otro y rompía la URL.
-    return $base . '-' . date('YmdHis') . '.' . $extension;
+    return $base . '.' . $extension;
 }
 
 function subirImagen($requerida = false) {
@@ -68,12 +67,6 @@ function subirImagen($requerida = false) {
 
     $nombreImagen = nombreArchivoPromo($nombreOriginal, $extension);
     $destino = $directorio . $nombreImagen;
-    $intento = 1;
-    while (is_file($destino)) {
-        $nombreImagen = pathinfo($nombreImagen, PATHINFO_FILENAME) . '-' . $intento . '.' . $extension;
-        $destino = $directorio . $nombreImagen;
-        $intento++;
-    }
 
     if (!move_uploaded_file($tmpPath, $destino)) {
         responderJson(false, "Error al mover la imagen al servidor.");

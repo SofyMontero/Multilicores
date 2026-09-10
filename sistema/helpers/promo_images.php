@@ -77,19 +77,13 @@ function promo_image_filename(?string $filename): string
 }
 
 /**
- * Ruta relativa desde /sistema/views/ (catálogo PHP).
- * Se sirve por ID para no chocar con el bloqueo de Hostinger a nombres con dos puntos.
+ * Ruta relativa desde /sistema/views/. Usa el mismo nombre guardado en BD y en disco.
  */
 function promo_image_web_path(?string $filename, $codigoProducto = null, string $descripcion = '', $promoId = 0): string
 {
-    $promoId = (int)$promoId;
-    if ($promoId > 0) {
-        return '../helpers/promo_imagen.php?id=' . $promoId;
-    }
-
     $filename = promo_image_filename($filename);
     if ($filename !== '') {
-        return '../helpers/promo_imagen.php?f=' . rawurlencode($filename);
+        return '../assets/img/licores/promos/' . $filename;
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);
@@ -102,19 +96,15 @@ function promo_image_web_path(?string $filename, $codigoProducto = null, string 
 }
 
 /**
- * URL absoluta (API / React).
+ * URL absoluta (API / React). Misma carpeta y mismo nombre de archivo.
  */
 function promo_image_absolute_url(?string $filename, $codigoProducto = null, string $descripcion = '', $promoId = 0): string
 {
-    $base = promo_https_base();
-    $promoId = (int)$promoId;
-    if ($promoId > 0) {
-        return $base . '/helpers/promo_imagen.php?id=' . $promoId;
-    }
-
     $filename = promo_image_filename($filename);
+    $base = promo_https_base();
+
     if ($filename !== '') {
-        return $base . '/helpers/promo_imagen.php?f=' . rawurlencode($filename);
+        return $base . '/assets/img/licores/promos/' . rawurlencode($filename);
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);
