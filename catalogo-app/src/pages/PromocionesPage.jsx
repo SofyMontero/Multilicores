@@ -31,7 +31,7 @@ export default function PromocionesPage() {
   }, [])
 
   return (
-    <section className="page">
+    <section className="page page-promo">
       <div className="page-toolbar">
         <Link to={withCli('/', telefono)} className="back-link">
           ← Categorías

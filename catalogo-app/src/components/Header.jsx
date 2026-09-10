@@ -34,7 +34,9 @@ export default function Header() {
           <NavLink to={withCli('/', idCli)} end>
             Categorías
           </NavLink>
-          <NavLink to={withCli('/promociones', idCli)}>Promos</NavLink>
+          <NavLink to={withCli('/promociones', idCli)} className="nav-promo">
+            Promos
+          </NavLink>
           <NavLink to={withCli('/catalogo', idCli)}>Productos</NavLink>
         </nav>
 

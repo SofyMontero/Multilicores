@@ -82,7 +82,7 @@ $tienePromociones = hayPromocionesActivas();
                     </li>
                     <?php if ($tienePromociones): ?>
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="promociones.php?idCli=<?php echo urlencode($numCliente); ?>" style="color: #1d4e89;">
+                        <a class="nav-link fw-semibold" href="promociones.php?idCli=<?php echo urlencode($numCliente); ?>" style="color: #e11d48;">
                             <i class="fas fa-fire me-1"></i>Promociones
                         </a>
                     </li>

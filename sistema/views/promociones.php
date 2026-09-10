@@ -59,7 +59,7 @@ $tienePromociones = !empty($promociones);
         }
 
         .promocion-header {
-            background: #1d4e89;
+            background: #e11d48;
             color: white;
             padding: 1.5rem;
             position: relative;
@@ -126,7 +126,7 @@ $tienePromociones = !empty($promociones);
         }
 
         .back-button:hover {
-            color: #1d4e89;
+            color: #e11d48;
         }
 
         .no-promociones {
@@ -170,7 +170,7 @@ $tienePromociones = !empty($promociones);
                             </li>
                             <?php if ($tienePromociones): ?>
                                 <li class="nav-item">
-                                    <a class="nav-link fw-semibold" href="promociones.php?idCli=<?php echo urlencode($numCliente); ?>" style="color: #1d4e89;">
+                                    <a class="nav-link fw-semibold" href="promociones.php?idCli=<?php echo urlencode($numCliente); ?>" style="color: #e11d48;">
                                         <i class="fas fa-fire me-1"></i>Promociones
                                     </a>
                                 </li>
@@ -207,7 +207,7 @@ $tienePromociones = !empty($promociones);
 
             <!-- Título -->
             <div class="text-center mb-5">
-                <h1 class="fw-bold mb-3" style="color: #1d4e89;">
+                <h1 class="fw-bold mb-3" style="color: #e11d48;">
                     <i class="fas fa-fire me-3"></i>Promociones Especiales
                 </h1>
                 <p class="text-muted">Descubre nuestras mejores ofertas y descuentos únicos</p>

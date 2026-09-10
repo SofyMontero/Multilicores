@@ -135,9 +135,17 @@ export default function CheckoutPage() {
           <h2>Resumen</h2>
           <ul className="cart-list">
             {items.map((item, index) => (
-              <li key={`${item.id}-${index}`} className="cart-item">
+              <li
+                key={`${item.id}-${index}`}
+                className={`cart-item${item.esPromo ? ' cart-item--promo' : ''}`}
+              >
                 <div>
-                  <strong>{item.nombre}</strong>
+                  <strong>
+                    {item.nombre}
+                    {item.esPromo && (
+                      <span className="cart-item__promo-tag">Promo</span>
+                    )}
+                  </strong>
                   <div className="muted small">
                     {item.cantidad} × {item.tipo}
                   </div>

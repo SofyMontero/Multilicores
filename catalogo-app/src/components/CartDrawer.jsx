@@ -39,10 +39,18 @@ export default function CartDrawer() {
         ) : (
           <ul className="cart-list">
             {items.map((item, index) => (
-              <li key={`${item.id}-${item.tipo}-${index}`} className="cart-item">
+              <li
+                key={`${item.id}-${item.tipo}-${index}`}
+                className={`cart-item${item.esPromo ? ' cart-item--promo' : ''}`}
+              >
                 <div className="cart-item__top">
                   <div className="cart-item__info">
-                    <strong className="cart-item__name">{item.nombre}</strong>
+                    <strong className="cart-item__name">
+                      {item.nombre}
+                      {item.esPromo && (
+                        <span className="cart-item__promo-tag">Promo</span>
+                      )}
+                    </strong>
                     <span className="cart-item__meta">
                       {item.tipo} · {formatMoney(item.precioUnitario)} c/u
                     </span>

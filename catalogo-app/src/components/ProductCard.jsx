@@ -90,7 +90,11 @@ export default function ProductCard({ product, esPromo = false }) {
 
         {error && <p className="error-text">{error}</p>}
 
-        <button type="button" className="btn btn-primary btn-block" onClick={handleAdd}>
+        <button
+          type="button"
+          className={`btn btn-block ${esPromo ? 'btn-promo' : 'btn-primary'}`}
+          onClick={handleAdd}
+        >
           Agregar
         </button>
       </div>
