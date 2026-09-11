@@ -106,7 +106,8 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                         <hr class="my-4">
 
                         <form id="uploadForm" action="../controllers/ProductoController.php" method="POST" enctype="multipart/form-data">
-                            <div class="upload-zone" onclick="document.getElementById('archivo_excel').click()">
+                            <input type="hidden" name="importar" value="1">
+                            <div class="upload-zone" id="uploadZone">
                                 <div class="upload-icon">💰</div>
                                 <h5>Arrastra tu archivo CSV de precios aquí</h5>
                                 <p class="text-muted">El sistema actualizará automáticamente los productos existentes</p>
@@ -117,7 +118,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                             </div>
 
                             <div class="mt-3 text-center">
-                                <button type="submit" name="importar" class="btn btn-success btn-lg" id="submitBtn" disabled title="Selecciona un archivo CSV válido para continuar">
+                                <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled title="Selecciona un archivo CSV válido para continuar">
                                     <i class="fas fa-upload"></i> Procesar Archivo
                                 </button>
                                 <small id="submitHint" class="d-block text-muted mt-2">Selecciona un archivo CSV para habilitar el procesamiento</small>
@@ -395,7 +396,7 @@ function closeToast(toastId) {
 <?php endif; ?>
 
 // Drag and drop functionality
-const uploadZone = document.querySelector('.upload-zone');
+const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('archivo_excel');
 const uploadForm = document.querySelector('#uploadForm');
 const submitBtn = document.getElementById('submitBtn');
@@ -406,9 +407,16 @@ const submitBtnDefaultHtml = submitBtn.innerHTML;
 const zonaTituloDefault = uploadZone.querySelector('h5').textContent;
 const zonaTextoDefault = uploadZone.querySelector('p').textContent;
 const zonaIconoDefault = uploadZone.querySelector('.upload-icon').textContent;
+let archivoValido = false;
+let procesando = false;
 
 function setBotonProcesar(listo, mensajeHint = '') {
+    if (procesando) {
+        return;
+    }
+    archivoValido = !!listo;
     submitBtn.disabled = !listo;
+    submitBtn.classList.remove('is-processing');
     submitBtn.innerHTML = submitBtnDefaultHtml;
     submitBtn.title = listo
         ? 'Procesar el archivo seleccionado'
@@ -420,7 +428,25 @@ function setBotonProcesar(listo, mensajeHint = '') {
     );
 }
 
+function bloquearDuranteProceso() {
+    procesando = true;
+    archivoValido = false;
+    submitBtn.disabled = true;
+    submitBtn.setAttribute('disabled', 'disabled');
+    submitBtn.classList.add('is-processing');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    submitBtn.title = 'El archivo se está procesando';
+    submitHint.textContent = 'Procesando el archivo, espera un momento...';
+    uploadZone.classList.add('is-processing');
+    progressBar.style.display = 'block';
+}
+
 function resetZonaCarga() {
+    if (procesando) {
+        return;
+    }
+    archivoValido = false;
+    uploadZone.classList.remove('is-processing');
     uploadZone.querySelector('h5').textContent = zonaTituloDefault;
     uploadZone.querySelector('p').textContent = zonaTextoDefault;
     uploadZone.querySelector('.upload-icon').textContent = zonaIconoDefault;
@@ -429,9 +455,24 @@ function resetZonaCarga() {
     setBotonProcesar(false);
 }
 
+uploadZone.addEventListener('click', (e) => {
+    if (procesando) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+    }
+    if (e.target === fileInput) {
+        return;
+    }
+    fileInput.click();
+});
+
 // Drag and drop events
 uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
+    if (procesando) {
+        return;
+    }
     uploadZone.classList.add('dragover');
 });
 
@@ -442,7 +483,10 @@ uploadZone.addEventListener('dragleave', () => {
 uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
     uploadZone.classList.remove('dragover');
-    
+    if (procesando) {
+        return;
+    }
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
         fileInput.files = files;
@@ -454,6 +498,10 @@ uploadZone.addEventListener('drop', (e) => {
 fileInput.addEventListener('change', handleFileSelect);
 
 function handleFileSelect() {
+    if (procesando) {
+        return;
+    }
+
     const file = fileInput.files[0];
     if (!file) {
         resetZonaCarga();
@@ -463,8 +511,9 @@ function handleFileSelect() {
     const fileName = file.name;
     const fileSize = (file.size / 1024 / 1024).toFixed(2);
 
-    // Bloquear el botón mientras se valida y carga el archivo
+    archivoValido = false;
     submitBtn.disabled = true;
+    submitBtn.classList.add('is-processing');
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando archivo...';
     submitHint.textContent = 'Espera a que el archivo se cargue correctamente';
 
@@ -484,6 +533,9 @@ function handleFileSelect() {
 
     const reader = new FileReader();
     reader.onload = function (event) {
+        if (procesando) {
+            return;
+        }
         const contenido = event.target.result;
         if (!contenido || !String(contenido).trim()) {
             showToast('error', 'Archivo vacío', 'El CSV no tiene contenido para procesar');
@@ -508,31 +560,32 @@ function handleFileSelect() {
 
 // Form submission with progress
 uploadForm.addEventListener('submit', (e) => {
-    if (submitBtn.disabled || !fileInput.files[0]) {
-        e.preventDefault();
+    e.preventDefault();
+
+    if (procesando) {
+        return;
+    }
+
+    if (!archivoValido || !fileInput.files[0]) {
         showToast('error', 'Sin archivo', 'Espera a que el archivo se cargue correctamente');
         return;
     }
-    
-    // Mostrar progreso
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-    submitHint.textContent = 'Procesando el archivo...';
-    progressBar.style.display = 'block';
-    
-    // Simular progreso
+
+    bloquearDuranteProceso();
+    showToast('warning', 'Procesando archivo', 'El archivo se está procesando. No cierres esta página.');
+
     let progress = 0;
     const interval = setInterval(() => {
-        progress += Math.random() * 30;
+        progress += Math.random() * 20;
         if (progress > 90) progress = 90;
         progressFill.style.width = progress + '%';
-    }, 100);
-    
-    // El formulario se enviará normalmente
+    }, 120);
+
     setTimeout(() => {
+        progressFill.style.width = '90%';
+        uploadForm.submit();
         clearInterval(interval);
-        progressFill.style.width = '100%';
-    }, 1000);
+    }, 300);
 });
 
 // Feedback al guardar producto desde el modal
