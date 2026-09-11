@@ -117,9 +117,10 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                             </div>
 
                             <div class="mt-3 text-center">
-                                <button type="submit" name="importar" class="btn btn-success btn-lg" id="submitBtn">
+                                <button type="submit" name="importar" class="btn btn-success btn-lg" id="submitBtn" disabled title="Selecciona un archivo CSV válido para continuar">
                                     <i class="fas fa-upload"></i> Procesar Archivo
                                 </button>
+                                <small id="submitHint" class="d-block text-muted mt-2">Selecciona un archivo CSV para habilitar el procesamiento</small>
                             </div>
                         </form>
                     </div>
@@ -398,8 +399,35 @@ const uploadZone = document.querySelector('.upload-zone');
 const fileInput = document.getElementById('archivo_excel');
 const uploadForm = document.querySelector('#uploadForm');
 const submitBtn = document.getElementById('submitBtn');
+const submitHint = document.getElementById('submitHint');
 const progressBar = document.querySelector('.progress-bar');
 const progressFill = document.querySelector('.progress-fill');
+const submitBtnDefaultHtml = submitBtn.innerHTML;
+const zonaTituloDefault = uploadZone.querySelector('h5').textContent;
+const zonaTextoDefault = uploadZone.querySelector('p').textContent;
+const zonaIconoDefault = uploadZone.querySelector('.upload-icon').textContent;
+
+function setBotonProcesar(listo, mensajeHint = '') {
+    submitBtn.disabled = !listo;
+    submitBtn.innerHTML = submitBtnDefaultHtml;
+    submitBtn.title = listo
+        ? 'Procesar el archivo seleccionado'
+        : 'Selecciona un archivo CSV válido para continuar';
+    submitHint.textContent = mensajeHint || (
+        listo
+            ? 'Archivo listo. Puedes procesarlo.'
+            : 'Selecciona un archivo CSV para habilitar el procesamiento'
+    );
+}
+
+function resetZonaCarga() {
+    uploadZone.querySelector('h5').textContent = zonaTituloDefault;
+    uploadZone.querySelector('p').textContent = zonaTextoDefault;
+    uploadZone.querySelector('.upload-icon').textContent = zonaIconoDefault;
+    progressBar.style.display = 'none';
+    progressFill.style.width = '0%';
+    setBotonProcesar(false);
+}
 
 // Drag and drop events
 uploadZone.addEventListener('dragover', (e) => {
@@ -427,44 +455,69 @@ fileInput.addEventListener('change', handleFileSelect);
 
 function handleFileSelect() {
     const file = fileInput.files[0];
-    if (file) {
-        const fileName = file.name;
-        const fileSize = (file.size / 1024 / 1024).toFixed(2);
-        
-        // Verificar extensión
-        if (!fileName.toLowerCase().endsWith('.csv')) {
-            showToast('error', 'Archivo inválido', 'Solo se permiten archivos CSV');
+    if (!file) {
+        resetZonaCarga();
+        return;
+    }
+
+    const fileName = file.name;
+    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+
+    // Bloquear el botón mientras se valida y carga el archivo
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando archivo...';
+    submitHint.textContent = 'Espera a que el archivo se cargue correctamente';
+
+    if (!fileName.toLowerCase().endsWith('.csv')) {
+        showToast('error', 'Archivo inválido', 'Solo se permiten archivos CSV');
+        fileInput.value = '';
+        resetZonaCarga();
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('error', 'Archivo muy grande', 'El archivo no debe superar los 5MB');
+        fileInput.value = '';
+        resetZonaCarga();
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const contenido = event.target.result;
+        if (!contenido || !String(contenido).trim()) {
+            showToast('error', 'Archivo vacío', 'El CSV no tiene contenido para procesar');
             fileInput.value = '';
+            resetZonaCarga();
             return;
         }
-        
-        // Verificar tamaño
-        if (file.size > 5 * 1024 * 1024) {
-            showToast('error', 'Archivo muy grande', 'El archivo no debe superar los 5MB');
-            fileInput.value = '';
-            return;
-        }
-        
-        // Actualizar UI
+
         uploadZone.querySelector('h5').textContent = fileName;
         uploadZone.querySelector('p').textContent = `${fileSize} MB - Listo para procesar`;
         uploadZone.querySelector('.upload-icon').textContent = '📄✅';
-        
-        showToast('success', 'Archivo seleccionado', `${fileName} (${fileSize} MB)`);
-    }
+        setBotonProcesar(true, `${fileName} cargado. Ya puedes procesarlo.`);
+        showToast('success', 'Archivo listo', `${fileName} (${fileSize} MB)`);
+    };
+    reader.onerror = function () {
+        showToast('error', 'Error de carga', 'No se pudo leer el archivo. Inténtalo de nuevo.');
+        fileInput.value = '';
+        resetZonaCarga();
+    };
+    reader.readAsText(file);
 }
 
 // Form submission with progress
 uploadForm.addEventListener('submit', (e) => {
-    if (!fileInput.files[0]) {
+    if (submitBtn.disabled || !fileInput.files[0]) {
         e.preventDefault();
-        showToast('error', 'Sin archivo', 'Selecciona un archivo CSV para continuar');
+        showToast('error', 'Sin archivo', 'Espera a que el archivo se cargue correctamente');
         return;
     }
     
     // Mostrar progreso
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    submitHint.textContent = 'Procesando el archivo...';
     progressBar.style.display = 'block';
     
     // Simular progreso
