@@ -22,7 +22,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
 ?>
 
 <!-- Estilos para notificaciones toast -->
-<link href="../css/subir_excel.css" rel="stylesheet" type="text/css" />
+<link href="../css/subir_excel.css?v=3" rel="stylesheet" type="text/css" />
 
 
 <!-- Container para las notificaciones toast -->
@@ -107,18 +107,19 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
 
                         <form id="uploadForm" action="../controllers/ProductoController.php" method="POST" enctype="multipart/form-data">
                             <input type="hidden" name="importar" value="1">
+                            <div id="uploadProcessingOverlay">Procesando archivo...</div>
                             <div class="upload-zone" id="uploadZone">
                                 <div class="upload-icon">💰</div>
                                 <h5>Arrastra tu archivo CSV de precios aquí</h5>
                                 <p class="text-muted">El sistema actualizará automáticamente los productos existentes</p>
-                                <input type="file" name="archivo_excel" id="archivo_excel" class="file-input" accept=".csv" required>
+                                <input type="file" name="archivo_excel" id="archivo_excel" class="file-input" accept=".csv">
                                 <div class="progress-bar">
                                     <div class="progress-fill"></div>
                                 </div>
                             </div>
 
                             <div class="mt-3 text-center">
-                                <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled title="Selecciona un archivo CSV válido para continuar">
+                                <button type="button" class="btn btn-success btn-lg" id="submitBtn" disabled title="Selecciona un archivo CSV válido para continuar">
                                     <i class="fas fa-upload"></i> Procesar Archivo
                                 </button>
                                 <small id="submitHint" class="d-block text-muted mt-2">Selecciona un archivo CSV para habilitar el procesamiento</small>
@@ -399,46 +400,87 @@ function closeToast(toastId) {
 const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('archivo_excel');
 const uploadForm = document.querySelector('#uploadForm');
-const submitBtn = document.getElementById('submitBtn');
 const submitHint = document.getElementById('submitHint');
 const progressBar = document.querySelector('.progress-bar');
 const progressFill = document.querySelector('.progress-fill');
-const submitBtnDefaultHtml = submitBtn.innerHTML;
+const overlayProceso = document.getElementById('uploadProcessingOverlay');
+const submitBtnDefaultHtml = '<i class="fas fa-upload"></i> Procesar Archivo';
 const zonaTituloDefault = uploadZone.querySelector('h5').textContent;
 const zonaTextoDefault = uploadZone.querySelector('p').textContent;
 const zonaIconoDefault = uploadZone.querySelector('.upload-icon').textContent;
 let archivoValido = false;
 let procesando = false;
 
+function botonProcesar() {
+    return document.getElementById('submitBtn');
+}
+
+function aplicarEstiloBloqueo(btn) {
+    btn.disabled = true;
+    btn.setAttribute('disabled', 'disabled');
+    btn.setAttribute('aria-disabled', 'true');
+    btn.classList.add('disabled', 'is-processing');
+    btn.classList.remove('btn-success');
+    btn.classList.add('btn-secondary');
+    btn.style.setProperty('background-color', '#9e9e9e', 'important');
+    btn.style.setProperty('background-image', 'none', 'important');
+    btn.style.setProperty('border-color', '#9e9e9e', 'important');
+    btn.style.setProperty('color', '#fff', 'important');
+    btn.style.setProperty('opacity', '0.7', 'important');
+    btn.style.setProperty('pointer-events', 'none', 'important');
+    btn.style.setProperty('cursor', 'not-allowed', 'important');
+    btn.style.setProperty('box-shadow', 'none', 'important');
+    btn.style.setProperty('filter', 'grayscale(1)', 'important');
+}
+
+function quitarEstiloBloqueo(btn) {
+    btn.classList.remove('disabled', 'is-processing', 'btn-secondary');
+    btn.classList.add('btn-success');
+    btn.removeAttribute('aria-disabled');
+    btn.style.removeProperty('background-color');
+    btn.style.removeProperty('background-image');
+    btn.style.removeProperty('border-color');
+    btn.style.removeProperty('color');
+    btn.style.removeProperty('opacity');
+    btn.style.removeProperty('pointer-events');
+    btn.style.removeProperty('cursor');
+    btn.style.removeProperty('box-shadow');
+    btn.style.removeProperty('filter');
+}
+
 function setBotonProcesar(listo, mensajeHint = '') {
     if (procesando) {
         return;
     }
+    const btn = botonProcesar();
     archivoValido = !!listo;
-    submitBtn.disabled = !listo;
-    submitBtn.classList.remove('is-processing');
-    submitBtn.innerHTML = submitBtnDefaultHtml;
-    submitBtn.title = listo
-        ? 'Procesar el archivo seleccionado'
-        : 'Selecciona un archivo CSV válido para continuar';
-    submitHint.textContent = mensajeHint || (
-        listo
-            ? 'Archivo listo. Puedes procesarlo.'
-            : 'Selecciona un archivo CSV para habilitar el procesamiento'
-    );
+    btn.innerHTML = submitBtnDefaultHtml;
+    if (listo) {
+        btn.disabled = false;
+        btn.removeAttribute('disabled');
+        quitarEstiloBloqueo(btn);
+        btn.title = 'Procesar el archivo seleccionado';
+        submitHint.textContent = mensajeHint || 'Archivo listo. Puedes procesarlo.';
+    } else {
+        aplicarEstiloBloqueo(btn);
+        btn.title = 'Selecciona un archivo CSV válido para continuar';
+        submitHint.textContent = mensajeHint || 'Selecciona un archivo CSV para habilitar el procesamiento';
+    }
 }
 
 function bloquearDuranteProceso() {
     procesando = true;
     archivoValido = false;
-    submitBtn.disabled = true;
-    submitBtn.setAttribute('disabled', 'disabled');
-    submitBtn.classList.add('is-processing');
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-    submitBtn.title = 'El archivo se está procesando';
+    const btn = botonProcesar();
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    btn.title = 'El archivo se está procesando';
+    aplicarEstiloBloqueo(btn);
     submitHint.textContent = 'Procesando el archivo, espera un momento...';
     uploadZone.classList.add('is-processing');
     progressBar.style.display = 'block';
+    if (overlayProceso) {
+        overlayProceso.classList.add('is-active');
+    }
 }
 
 function resetZonaCarga() {
@@ -452,7 +494,38 @@ function resetZonaCarga() {
     uploadZone.querySelector('.upload-icon').textContent = zonaIconoDefault;
     progressBar.style.display = 'none';
     progressFill.style.width = '0%';
+    if (overlayProceso) {
+        overlayProceso.classList.remove('is-active');
+    }
     setBotonProcesar(false);
+}
+
+function iniciarProcesamiento() {
+    if (procesando) {
+        return false;
+    }
+    if (!archivoValido || !fileInput.files[0]) {
+        showToast('error', 'Sin archivo', 'Espera a que el archivo se cargue correctamente');
+        return false;
+    }
+
+    bloquearDuranteProceso();
+    showToast('warning', 'Procesando archivo', 'El archivo se está procesando. No cierres esta página.');
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 20;
+        if (progress > 90) progress = 90;
+        progressFill.style.width = progress + '%';
+    }, 120);
+
+    setTimeout(() => {
+        progressFill.style.width = '90%';
+        clearInterval(interval);
+        uploadForm.submit();
+    }, 200);
+
+    return true;
 }
 
 uploadZone.addEventListener('click', (e) => {
@@ -512,9 +585,9 @@ function handleFileSelect() {
     const fileSize = (file.size / 1024 / 1024).toFixed(2);
 
     archivoValido = false;
-    submitBtn.disabled = true;
-    submitBtn.classList.add('is-processing');
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando archivo...';
+    const btnCarga = botonProcesar();
+    btnCarga.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando archivo...';
+    aplicarEstiloBloqueo(btnCarga);
     submitHint.textContent = 'Espera a que el archivo se cargue correctamente';
 
     if (!fileName.toLowerCase().endsWith('.csv')) {
@@ -558,35 +631,25 @@ function handleFileSelect() {
     reader.readAsText(file);
 }
 
-// Form submission with progress
+// Bloquear en el primer toque, antes de que Material Design u otros scripts lo manejen
+['pointerdown', 'click'].forEach(function (evt) {
+    document.addEventListener(evt, function (e) {
+        const btn = e.target.closest('#submitBtn');
+        if (!btn) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        iniciarProcesamiento();
+    }, true);
+});
+
 uploadForm.addEventListener('submit', (e) => {
     e.preventDefault();
-
-    if (procesando) {
-        return;
-    }
-
-    if (!archivoValido || !fileInput.files[0]) {
-        showToast('error', 'Sin archivo', 'Espera a que el archivo se cargue correctamente');
-        return;
-    }
-
-    bloquearDuranteProceso();
-    showToast('warning', 'Procesando archivo', 'El archivo se está procesando. No cierres esta página.');
-
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress > 90) progress = 90;
-        progressFill.style.width = progress + '%';
-    }, 120);
-
-    setTimeout(() => {
-        progressFill.style.width = '90%';
-        uploadForm.submit();
-        clearInterval(interval);
-    }, 300);
+    iniciarProcesamiento();
 });
+
+aplicarEstiloBloqueo(botonProcesar());
 
 // Feedback al guardar producto desde el modal
 const formCrearProducto = document.getElementById('formCrearProducto');
