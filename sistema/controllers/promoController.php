@@ -18,7 +18,7 @@ function normalizarEstado($estado) {
     return 0;
 }
 
-function nombreArchivoPromo(string $nombreOriginal, string $extension): string
+function nombreArchivoPromo(string $nombreOriginal, string $extension, string $directorio): string
 {
     $base = pathinfo($nombreOriginal, PATHINFO_FILENAME);
     if (function_exists('iconv')) {
@@ -35,7 +35,13 @@ function nombreArchivoPromo(string $nombreOriginal, string $extension): string
         $base = 'promo';
     }
 
-    return $base . '.' . $extension;
+    $base = substr($base, 0, 80);
+
+    do {
+        $nombre = $base . '-' . bin2hex(random_bytes(4)) . '.' . $extension;
+    } while (is_file($directorio . $nombre));
+
+    return $nombre;
 }
 
 function subirImagen($requerida = false) {
@@ -65,7 +71,7 @@ function subirImagen($requerida = false) {
         responderJson(false, "No existe la carpeta de imagenes de promociones.");
     }
 
-    $nombreImagen = nombreArchivoPromo($nombreOriginal, $extension);
+    $nombreImagen = nombreArchivoPromo($nombreOriginal, $extension, $directorio);
     $destino = $directorio . $nombreImagen;
 
     if (!move_uploaded_file($tmpPath, $destino)) {
