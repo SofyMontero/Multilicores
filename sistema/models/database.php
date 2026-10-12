@@ -1,25 +1,24 @@
 <?php
-class Database {
-    private $host = "localhost";
-    private $port = 3306;
-    private $db_name = "u633742531_Multilicores";
-    private $username = "u633742531_Multilicores25";
-    private $password = "Multilicores2025";
-    private $charset = "utf8mb4";
+require_once __DIR__ . '/../config/database.env.php';
 
+class Database {
     /** @var PDO|null Una sola conexión PDO por petición (Hostinger limita las concurrentes). */
     private static $pdo = null;
 
-    // private $host = "localhost";
-    // private $db_name = "multilicores";
-    // private $username = "root";
-    // private $password = "";
-    // private $charset = "utf8mb4";
+    /** Variante de DSN: default | ops (hoy suelen ser la misma BD). */
+    private $variant;
+
+    public function __construct(string $variant = 'default')
+    {
+        $this->variant = $variant === 'ops' ? 'ops' : 'default';
+    }
 
     public function connect() {
         if (self::$pdo instanceof PDO) {
             return self::$pdo;
         }
+
+        $cfg = multilicores_db_config($this->variant);
 
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -28,8 +27,8 @@ class Database {
         ];
 
         // localhost usa socket Unix; si el host lo bloquea (HY000/2002), se fuerza TCP.
-        $hosts = [$this->host];
-        if ($this->host === 'localhost') {
+        $hosts = [$cfg['host']];
+        if ($cfg['host'] === 'localhost') {
             $hosts[] = '127.0.0.1';
         }
 
@@ -39,11 +38,11 @@ class Database {
                 $dsn = sprintf(
                     'mysql:host=%s;port=%d;dbname=%s;charset=%s',
                     $host,
-                    $this->port,
-                    $this->db_name,
-                    $this->charset
+                    $cfg['port'],
+                    $cfg['dbname'],
+                    $cfg['charset']
                 );
-                self::$pdo = new PDO($dsn, $this->username, $this->password, $options);
+                self::$pdo = new PDO($dsn, $cfg['username'], $cfg['password'], $options);
                 return self::$pdo;
             } catch (PDOException $e) {
                 $lastError = $e;
@@ -57,4 +56,3 @@ class Database {
         );
     }
 }
-?>
