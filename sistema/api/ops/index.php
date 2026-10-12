@@ -19,6 +19,8 @@ ops_json([
         'GET  /ops/visitas.php?action=por_jornada&idJornada=',
         'POST /ops/visitas.php  action=registrar',
         'POST /ops/pedido_visita.php action=crear',
+        'GET  /ops/entregas.php?action=disponibles|mias|listar&estado=|detalle&idEntrega=|domiciliarios',
+        'POST /ops/entregas.php  action=tomar|asignar|estado',
     ],
 
 

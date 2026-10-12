@@ -25,6 +25,7 @@ const copies = [
   ['sistema/sql/002_variante_b_fase1_empresas_roles.sql', 'sistema/sql/002_variante_b_fase1_empresas_roles.sql'],
   ['sistema/sql/003_variante_b_fase2_jornadas_visitas.sql', 'sistema/sql/003_variante_b_fase2_jornadas_visitas.sql'],
   ['sistema/sql/004_variante_b_fase3_pedido_visita.sql', 'sistema/sql/004_variante_b_fase3_pedido_visita.sql'],
+  ['sistema/sql/005_variante_b_fase4_entregas.sql', 'sistema/sql/005_variante_b_fase4_entregas.sql'],
   ['sistema/sql/README_VARIANTE_B.md', 'sistema/sql/README_VARIANTE_B.md'],
 ]
 

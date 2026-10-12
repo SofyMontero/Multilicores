@@ -94,7 +94,8 @@ Objetivo: estructura y configuración, **sin lógica de negocio**.
 - [x] SQL documentado: `005_variante_b_fase4_entregas.sql` (`entregas` + `entrega_eventos`) — **NO ejecutado**
 - [ ] Ejecutar SQL (tras OK)
 - [ ] Estados: disponible → aceptado → salio → en_camino → entregado (+ no_entregado / cancelado)
-- [ ] API ops domiciliario + asignación admin
+- [x] API ops domiciliario + asignación admin (`modules/Entrega/EntregaRepository.php`, `api/ops/entregas.php`) — local, sin probar
+- [ ] Probar API en Hostinger (tras SQL 005)
 - [ ] Separación clara Pedido ≠ Entrega
 - [ ] UI domiciliario mínima
 
