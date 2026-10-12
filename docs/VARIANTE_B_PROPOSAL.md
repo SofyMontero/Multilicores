@@ -48,10 +48,10 @@ Objetivo: estructura y configuración, **sin lógica de negocio**.
 ## Fase 1 — Empresas + roles/permisos
 
 - [ ] Validar esquema actual `roles` / `users.rol` en BD **(acción manual en phpMyAdmin)**
-- [x] SQL aditivo documentado: `sistema/sql/002_variante_b_fase1_empresas_roles.sql` — **NO ejecutado aún**
+- [x] SQL aditivo documentado: `sistema/sql/002_variante_b_fase1_empresas_roles.sql`
 - [x] Código catálogo roles / empresas / auth ops en `modules/` + `api/ops/` (graceful si falta tabla)
-- [ ] Ejecutar SQL en Hostinger (tras backup)
-- [ ] Probar login ops end-to-end
+- [x] Ejecutar SQL en Hostinger (usuario, 2026-10-11)
+- [x] Probar login ops end-to-end (usuario, 2026-10-11)
 - [x] Seed empresa Multilicores `id=1` (incluido en SQL)
 
 **Criterio de cierre:** un usuario ops puede autenticarse; A no cambia.
@@ -60,8 +60,9 @@ Objetivo: estructura y configuración, **sin lógica de negocio**.
 
 ## Fase 2 — Jornadas y visitas
 
-- [x] SQL documentado: `sistema/sql/003_variante_b_fase2_jornadas_visitas.sql` — **NO ejecutado**
-- [ ] Ejecutar SQL (tras Fase 1 + OK)
+- [x] SQL documentado: `sistema/sql/003_variante_b_fase2_jornadas_visitas.sql`
+- [x] Ejecutar SQL (usuario, 2026-10-11)
+- [x] Prueba en producción: visitas OK (usuario, 2026-10-11)
 - [x] API ops jornadas: iniciar/finalizar/actual/listar (`api/ops/jornadas.php`) — local
 - [x] API ops visitas: registrar / listar por jornada (`api/ops/visitas.php`) — local
 
@@ -74,8 +75,9 @@ Objetivo: estructura y configuración, **sin lógica de negocio**.
 
 ## Fase 3 — Pedidos desde visita
 
-- [x] SQL documentado: `004_variante_b_fase3_pedido_visita.sql` — **NO ejecutado**
-- [ ] Ejecutar SQL (tras Fase 2 + OK)
+- [x] SQL documentado: `004_variante_b_fase3_pedido_visita.sql`
+- [x] Ejecutar SQL (usuario, 2026-10-11)
+- [x] Prueba en producción: pedido desde visita OK (usuario, 2026-10-11)
 - [x] `POST /ops/pedido_visita.php` (PedidoDesdeVisita → Pedido::crearPedido) — local
 - [x] No alterar contrato `POST /sistema/api/pedido.php`
 - [x] UI paseador: crear pedido + fecha acordada (`/paseador`) — local
@@ -88,8 +90,10 @@ Objetivo: estructura y configuración, **sin lógica de negocio**.
 
 ## Fase 4 — Entregas y domiciliario
 
-- [ ] Tablas `entregas` (+ `num_factura`)
-- [ ] Estados: disponible → aceptado/asignado → salio → en_camino → entregado
+- [x] Decisiones (usuario, 2026-10-11): al pasar a `salio` → `ped_estado='enviado'`; estados extra `no_entregado` y `cancelado` (con motivo); disponible apenas el pedido está aceptado
+- [x] SQL documentado: `005_variante_b_fase4_entregas.sql` (`entregas` + `entrega_eventos`) — **NO ejecutado**
+- [ ] Ejecutar SQL (tras OK)
+- [ ] Estados: disponible → aceptado → salio → en_camino → entregado (+ no_entregado / cancelado)
 - [ ] API ops domiciliario + asignación admin
 - [ ] Separación clara Pedido ≠ Entrega
 - [ ] UI domiciliario mínima

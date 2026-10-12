@@ -51,3 +51,16 @@ Agrega columnas aditivas en `pedidos`:
 - `id_empresa`
 
 No altera `POST /sistema/api/pedido.php`. El alta desde visita irá por `/sistema/api/ops/`.
+
+---
+
+## Archivo Fase 4 (documentado; no ejecutar aún)
+
+`005_variante_b_fase4_entregas.sql`
+
+Crea (solo si no existen):
+
+- `entregas` (una por pedido; `num_factura` ≠ `ped_numfac`)
+- `entrega_eventos` (historial de estados con usuario, motivo y GPS opcional)
+
+No modifica `pedidos`. La API pondrá `ped_estado = 'enviado'` cuando la entrega pase a `salio`.
