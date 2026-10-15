@@ -322,6 +322,115 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accion"]) && $_POST["
     }
 }
 
+// Editar producto individual desde el formulario modal
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accion"]) && $_POST["accion"] === "editar_producto") {
+    try {
+        $id_producto            = limpiarValor($_POST["id_producto"] ?? "", "int");
+        $codigo_productos       = limpiarValor($_POST["codigo_productos"] ?? "");
+        $descripcion_producto   = limpiarValor($_POST["descripcion_producto"] ?? "");
+        $cantidad_paca_producto = limpiarValor($_POST["cantidad_paca_producto"] ?? "1", "float") ?: 1;
+        $precio_unidad_producto = limpiarValor($_POST["precio_unidad_producto"] ?? "0", "float");
+        $precio_paca_producto   = limpiarValor($_POST["precio_paca_producto"] ?? "0", "float");
+        $id_cate_producto       = limpiarValor($_POST["id_cate_producto"] ?? "1", "int") ?: 1;
+        $acti_Unidad            = limpiarValor($_POST["acti_Unidad"] ?? "1") ?: "1";
+        $estado_producto        = limpiarValor($_POST["estado_producto"] ?? "1") ?: "1";
+
+        $erroresFila = [];
+
+        if (!$id_producto) {
+            $erroresFila[] = "Producto inválido";
+        }
+        if ($codigo_productos === "") {
+            $erroresFila[] = "El código es obligatorio";
+        }
+        if ($descripcion_producto === "") {
+            $erroresFila[] = "La descripción es obligatoria";
+        }
+        if ($precio_unidad_producto <= 0) {
+            $erroresFila[] = "El precio unidad debe ser mayor a 0";
+        }
+        if ($precio_paca_producto < 0) {
+            $erroresFila[] = "El precio paca no puede ser negativo";
+        }
+
+        if (!empty($erroresFila)) {
+            header("Location: ../views/Subir_excel_producto.php?error=" . urlencode(implode(". ", $erroresFila)));
+            exit;
+        }
+
+        $producto = new Producto();
+        $actual = $producto->obtenerProductoPorId($id_producto);
+
+        if (!$actual) {
+            header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("El producto no existe"));
+            exit;
+        }
+
+        $duplicado = $producto->obtenerProductoPorCodigo($codigo_productos);
+        if ($duplicado && (int)$duplicado["id_producto"] !== (int)$id_producto) {
+            header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Ya existe un producto con el código '$codigo_productos'"));
+            exit;
+        }
+
+        $imagen_producto = $actual["imagen_producto"] ?? "";
+
+        if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] !== UPLOAD_ERR_NO_FILE) {
+            if ($_FILES["imagen"]["error"] !== UPLOAD_ERR_OK) {
+                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Error al subir la imagen"));
+                exit;
+            }
+
+            $extension = strtolower(pathinfo($_FILES["imagen"]["name"], PATHINFO_EXTENSION));
+            $extensionesPermitidas = ["jpg", "jpeg", "png", "gif", "webp"];
+
+            if (!in_array($extension, $extensionesPermitidas, true)) {
+                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Formato de imagen no permitido (jpg, png, gif, webp)"));
+                exit;
+            }
+
+            if ($_FILES["imagen"]["size"] > 3 * 1024 * 1024) {
+                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("La imagen no debe superar los 3MB"));
+                exit;
+            }
+
+            $directorio = "../assets/img/licores/";
+            if (!is_dir($directorio)) {
+                mkdir($directorio, 0755, true);
+            }
+
+            $imagenNueva = uniqid("prod_", true) . "." . $extension;
+            if (!move_uploaded_file($_FILES["imagen"]["tmp_name"], $directorio . $imagenNueva)) {
+                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("No se pudo guardar la imagen"));
+                exit;
+            }
+
+            $imagen_producto = $imagenNueva;
+        }
+
+        if ($producto->actualizarProducto(
+            $id_producto,
+            $codigo_productos,
+            $descripcion_producto,
+            $cantidad_paca_producto,
+            $precio_unidad_producto,
+            $precio_paca_producto,
+            $id_cate_producto,
+            $acti_Unidad,
+            $imagen_producto,
+            $estado_producto
+        )) {
+            header("Location: ../views/Subir_excel_producto.php?editado=1");
+            exit;
+        }
+
+        header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("No se pudo actualizar el producto"));
+        exit;
+    } catch (Exception $e) {
+        header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Error: " . $e->getMessage()));
+        exit;
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivo_excel"])) {
 
     // Verificaciones básicas

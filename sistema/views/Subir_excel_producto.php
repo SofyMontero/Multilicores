@@ -14,6 +14,7 @@ $errores = $_GET['errores'] ?? 0;
 $success = $_GET['success'] ?? null;
 $error = $_GET['error'] ?? null;
 $creado = $_GET['creado'] ?? null;
+$editado = $_GET['editado'] ?? null;
 $erroresDetalle = isset($_GET['errores_detalle']) ? explode('|', $_GET['errores_detalle']) : [];
 $filasVacias = $_GET['filas_vacias'] ?? 0;
 $delimitador = $_GET['delimitador'] ?? null;
@@ -22,7 +23,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
 ?>
 
 <!-- Estilos para notificaciones toast -->
-<link href="../css/subir_excel.css?v=3" rel="stylesheet" type="text/css" />
+<link href="../css/subir_excel.css?v=4" rel="stylesheet" type="text/css" />
 
 
 <!-- Container para las notificaciones toast -->
@@ -35,7 +36,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
     </h3>
     <p class="text-justify">
         Descarga la plantilla con los productos actuales, edita los precios y vuelve a subir el CSV para actualizarlos en lote.
-        También puedes crear productos nuevos uno a uno.
+        También puedes crear productos nuevos o editar los existentes uno a uno.
     </p>
 </div>
 
@@ -143,7 +144,8 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
             <button type="button"
                     class="btn btn-primary btn-sm"
                     data-toggle="modal"
-                    data-target="#crearProductoModal">
+                    data-target="#crearProductoModal"
+                    id="btnNuevoProducto">
                 <i class="fas fa-plus"></i> Nuevo
             </button>
         </div>
@@ -163,6 +165,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                             <th>U o P</th>
                             <th>IMAGEN</th>
                             <th>ESTADO</th>
+                            <th>ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -211,10 +214,32 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                                 <td><?php echo $prod['acti_Unidad']; ?></td>
                                 <td><?php echo htmlspecialchars($prod['imagen_producto']); ?></td>
                                 <td><?php echo $prod['estado_producto']; ?></td>
+                                <td>
+                                    <?php
+                                    $payloadProducto = htmlspecialchars(json_encode([
+                                        'id' => (int)$prod['id_producto'],
+                                        'codigo' => (string)$prod['codigo_productos'],
+                                        'descripcion' => (string)$prod['descripcion_producto'],
+                                        'embalaje' => (float)$prod['cantidad_paca_producto'],
+                                        'precio_unidad' => (float)$prod['precio_unidad_producto'],
+                                        'precio_paca' => (float)$prod['precio_paca_producto'],
+                                        'categoria' => (int)$prod['id_cate_producto'],
+                                        'unidad' => (string)$prod['acti_Unidad'],
+                                        'imagen' => (string)$prod['imagen_producto'],
+                                        'estado' => (string)$prod['estado_producto'],
+                                    ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8');
+                                    ?>
+                                    <button type="button"
+                                            class="btn btn-sm btn-info btn-editar-producto"
+                                            data-producto="<?php echo $payloadProducto; ?>"
+                                            title="Editar producto">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="11" class="text-center">No hay productos registrados</td></tr>
+                            <tr><td colspan="12" class="text-center">No hay productos registrados</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -231,7 +256,8 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
               enctype="multipart/form-data"
               class="modal-content"
               id="formCrearProducto">
-            <input type="hidden" name="accion" value="crear_producto">
+            <input type="hidden" name="accion" id="accion_producto" value="crear_producto">
+            <input type="hidden" name="id_producto" id="id_producto" value="">
 
             <div class="modal-header" style="background: #009688; color: #fff;">
                 <h5 class="modal-title" id="crearProductoModalLabel">
@@ -312,7 +338,7 @@ $preciosActualizados = $_GET['precios_actualizados'] ?? 0;
                         <div class="form-group">
                             <label for="imagen">Imagen</label>
                             <input type="file" class="form-control-file" id="imagen" name="imagen" accept="image/*">
-                            <small class="form-text text-muted">Opcional. JPG, PNG, GIF o WEBP (máx. 3MB)</small>
+                            <small class="form-text text-muted" id="imagen-ayuda">Opcional. JPG, PNG, GIF o WEBP (máx. 3MB)</small>
                         </div>
                     </div>
                 </div>
@@ -376,7 +402,9 @@ function closeToast(toastId) {
 }
 
 // Mostrar notificaciones según los parámetros URL
-<?php if ($creado): ?>
+<?php if ($editado): ?>
+    showToast('success', 'Producto actualizado', 'Los cambios se guardaron correctamente.');
+<?php elseif ($creado): ?>
     showToast('success', 'Producto creado', 'El producto se registró correctamente.');
 <?php elseif ($success): ?>
     <?php if ($importados > 0 || $actualizados > 0): ?>
@@ -651,9 +679,81 @@ uploadForm.addEventListener('submit', (e) => {
 
 aplicarEstiloBloqueo(botonProcesar());
 
-// Feedback al guardar producto desde el modal
+// Crear y editar producto desde el mismo modal
 const formCrearProducto = document.getElementById('formCrearProducto');
 const btnGuardarProducto = document.getElementById('btnGuardarProducto');
+const accionProducto = document.getElementById('accion_producto');
+const idProductoInput = document.getElementById('id_producto');
+const tituloModalProducto = document.getElementById('crearProductoModalLabel');
+const ayudaImagen = document.getElementById('imagen-ayuda');
+const ayudaImagenDefault = 'Opcional. JPG, PNG, GIF o WEBP (máx. 3MB)';
+
+function prepararFormularioCrear() {
+    if (!formCrearProducto) {
+        return;
+    }
+    formCrearProducto.reset();
+    accionProducto.value = 'crear_producto';
+    idProductoInput.value = '';
+    tituloModalProducto.innerHTML = '<i class="fas fa-plus-circle"></i> Crear producto';
+    btnGuardarProducto.disabled = false;
+    btnGuardarProducto.innerHTML = '<i class="fas fa-save"></i> Guardar producto';
+    if (ayudaImagen) {
+        ayudaImagen.textContent = ayudaImagenDefault;
+    }
+}
+
+function abrirEdicionProducto(prod) {
+    prepararFormularioCrear();
+    accionProducto.value = 'editar_producto';
+    idProductoInput.value = prod.id || '';
+    document.getElementById('codigo_productos').value = prod.codigo || '';
+    document.getElementById('descripcion_producto').value = prod.descripcion || '';
+    document.getElementById('cantidad_paca_producto').value = prod.embalaje || 1;
+    document.getElementById('precio_unidad_producto').value = prod.precio_unidad || '';
+    document.getElementById('precio_paca_producto').value = prod.precio_paca || 0;
+    document.getElementById('id_cate_producto').value = String(prod.categoria || '');
+    document.getElementById('acti_Unidad').value = String(prod.unidad ?? '1');
+    document.getElementById('estado_producto').value = String(prod.estado ?? '1');
+    tituloModalProducto.innerHTML = '<i class="fas fa-edit"></i> Editar producto';
+    btnGuardarProducto.innerHTML = '<i class="fas fa-save"></i> Guardar cambios';
+    if (ayudaImagen) {
+        ayudaImagen.textContent = prod.imagen
+            ? 'Imagen actual: ' + prod.imagen + '. Sube otra solo si quieres reemplazarla.'
+            : 'Sin imagen. Puedes subir una ahora. ' + ayudaImagenDefault;
+    }
+    $('#crearProductoModal').modal('show');
+}
+
+['btnCrearProducto', 'btnNuevoProducto'].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+        btn.addEventListener('click', prepararFormularioCrear);
+    }
+});
+
+document.querySelectorAll('.btn-editar-producto').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        try {
+            const prod = JSON.parse(btn.dataset.producto || '{}');
+            if (!prod.id) {
+                showToast('error', 'Error', 'No se pudo cargar el producto para editar');
+                return;
+            }
+            const row = btn.closest('.producto-row');
+            if (row) {
+                const unidad = row.querySelector('.precio-unidad');
+                const paca = row.querySelector('.precio-paca');
+                if (unidad) prod.precio_unidad = Number(unidad.value);
+                if (paca) prod.precio_paca = Number(paca.value);
+            }
+            abrirEdicionProducto(prod);
+        } catch (err) {
+            showToast('error', 'Error', 'No se pudo leer la información del producto');
+        }
+    });
+});
+
 if (formCrearProducto) {
     formCrearProducto.addEventListener('submit', () => {
         btnGuardarProducto.disabled = true;
