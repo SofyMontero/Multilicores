@@ -45,7 +45,12 @@ function nombreArchivoPromo(string $nombreOriginal, string $extension, string $d
 }
 
 function subirImagen($requerida = false) {
-    if (!isset($_FILES["imagen"]) || $_FILES["imagen"]["error"] === UPLOAD_ERR_NO_FILE) {
+    $sinArchivo = !isset($_FILES["imagen"])
+        || $_FILES["imagen"]["error"] === UPLOAD_ERR_NO_FILE
+        || empty($_FILES["imagen"]["name"])
+        || (int)($_FILES["imagen"]["size"] ?? 0) <= 0;
+
+    if ($sinArchivo) {
         if ($requerida) {
             responderJson(false, "Debe subir una imagen para la promocion.");
         }
@@ -99,6 +104,44 @@ try {
         $actiUnidad = (int)($_POST["acti_Unidad"] ?? 0);
         $estado = normalizarEstado($_POST["estado"] ?? 1);
         $prioridad = (int)($_POST["prioridad"] ?? 0);
+        $nombreImagen = subirImagen($metodo === "insert");
+
+        if ($metodo === "update") {
+            if (empty($id)) {
+                responderJson(false, "No se recibio el ID de la promocion.");
+            }
+
+            $actual = $promo->getPromoById($id);
+            if (!$actual) {
+                responderJson(false, "No se encontro la promocion.");
+            }
+
+            if ($titulo === "") {
+                $titulo = trim((string)($actual["titulo"] ?? ""));
+            }
+            if ($descripcion === "") {
+                $descripcion = trim((string)($actual["descripcion"] ?? ""));
+            }
+            if ($codigo <= 0) {
+                $codigo = (int)($actual["codigo"] ?? 0);
+            }
+            if ($precioUnidad <= 0 && $precioPaca <= 0) {
+                $precioUnidad = (int)($actual["precio_unidad_producto"] ?? 0);
+                $precioPaca = (int)($actual["precio_paca_producto"] ?? 0);
+            }
+            if (!isset($_POST["estado"])) {
+                $estado = normalizarEstado($actual["estado"] ?? 1);
+            }
+            if (!isset($_POST["prioridad"])) {
+                $prioridad = (int)($actual["prioridad"] ?? 0);
+            }
+            if (!isset($_POST["acti_Unidad"])) {
+                $actiUnidad = (int)($actual["acti_Unidad"] ?? 0);
+            }
+            if ($nombreImagen === "") {
+                $nombreImagen = (string)($actual["imagen"] ?? "");
+            }
+        }
 
         if ($titulo === "" || $descripcion === "") {
             responderJson(false, "El titulo y la descripcion son obligatorios.");
@@ -107,8 +150,6 @@ try {
         if ($codigo <= 0) {
             responderJson(false, "El codigo del producto es obligatorio.");
         }
-
-        $nombreImagen = subirImagen($metodo === "insert");
 
         if ($metodo === "insert") {
             $guardado = $promo->registerPromo(
@@ -124,10 +165,6 @@ try {
             );
 
             responderJson($guardado, $guardado ? "Promocion registrada correctamente." : "No se pudo registrar la promocion.");
-        }
-
-        if (empty($id)) {
-            responderJson(false, "No se recibio el ID de la promocion.");
         }
 
         $guardado = $promo->updatePromo(

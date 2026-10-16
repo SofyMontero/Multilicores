@@ -94,23 +94,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <label for="buscar-producto" class="form-label fw-medium">Buscar producto</label>
                         <input type="text" class="form-control" id="buscar-producto" autocomplete="off"
                                placeholder="Nombre o código del producto">
-                        <small class="form-text text-muted">Al elegir un producto se cargan el código y los precios de unidad y paca.</small>
+                        <small class="form-text text-muted">Al elegir un producto se carga el precio de paca. La cantidad de botellas multiplica solo el precio de unidad.</small>
                         <div id="resultados-producto" class="product-search-results" style="display: none;"></div>
                         <div id="producto-precios" class="product-price-choice" style="display: none;">
                             <p class="mb-2 fw-medium" id="producto-elegido-nombre"></p>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tipo_precio_promo" id="precio-una-botella" value="unidad">
-                                <label class="form-check-label" for="precio-una-botella">
-                                    Una botella — <span id="label-precio-unidad"></span>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tipo_precio_promo" id="precio-varias-botellas" value="paca">
-                                <label class="form-check-label" for="precio-varias-botellas">
-                                    Más de una botella (paca de <span id="label-cantidad-paca"></span>) — <span id="label-precio-paca"></span>
-                                </label>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-medium mb-1">Precio por botella</label>
+                                    <div class="fw-semibold" id="label-precio-unidad"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="cantidad-botellas" class="form-label fw-medium mb-1">Cantidad de botellas</label>
+                                    <input type="number" class="form-control" id="cantidad-botellas" min="1" step="1" value="1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-medium mb-1">Precio a guardar</label>
+                                    <div class="fw-semibold" id="label-precio-calculado"></div>
+                                </div>
                             </div>
                             <small class="form-text text-muted d-block mt-2" id="nota-cantidad-botellas"></small>
+                            <small class="form-text text-muted d-block">Precio paca del producto: <span id="label-precio-paca"></span>. No cambia con la cantidad.</small>
                         </div>
                     </div>
 
@@ -163,6 +166,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     
                     <div class="col-md-6">
                         <label for="imagen" class="form-label fw-medium">Imagen <span class="text-danger" id="imagen-requerida-label">*</span></label>
+                        <input type="hidden" name="imagen_actual" id="imagen_actual" value="">
+                        <div id="imagen-actual-box" class="imagen-actual-box" style="display: none;">
+                            <img id="imagen-actual-preview" alt="Imagen actual de la promoción">
+                            <small class="form-text text-muted d-block">Esta imagen se conserva si no eliges otra.</small>
+                        </div>
                         <input type="file" class="form-control-file" id="imagen" name="imagen" accept="image/*">
                         <small class="form-text text-muted" id="imagen-ayuda">Obligatoria al crear. Opcional al editar.</small>
                     </div>
@@ -204,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <button type="submit" class="btn btn-modern btn-primary-modern">
                         <i class="fas fa-save me-2"></i>Guardar Promoción
                     </button>
-                    <button type="reset" class="btn btn-modern btn-outline-modern">
+                    <button type="button" class="btn btn-modern btn-outline-modern" id="btn-limpiar-promo">
                         <i class="fas fa-undo me-2"></i>Limpiar
                     </button>
                 </div>
@@ -231,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             <th>ID</th>
                             <th>Promoción</th>
                             <th>Código</th>
-                            <th>Precio Paca</th>
+                            <th>Precio</th>
                             <th>Fecha</th>
                             <th>Estado</th>
                             <th>Descripción</th>
@@ -343,6 +351,17 @@ document.addEventListener('DOMContentLoaded', function() {
         resetPromoForm();
     });
 
+    document.getElementById('btn-limpiar-promo').addEventListener('click', function() {
+        const action = document.getElementById('action').value;
+        const id = document.getElementById('id').value;
+        if (action === 'update' && id && promosPorId[id]) {
+            editarPromo(id);
+            return;
+        }
+        formPromocion.reset();
+        resetPromoForm();
+    });
+
     const buscarProductoInput = document.getElementById('buscar-producto');
     const resultadosProducto = document.getElementById('resultados-producto');
 
@@ -368,12 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
         buscarProductoInput.value = producto.descripcion_producto || '';
     });
 
-    document.querySelectorAll('input[name="tipo_precio_promo"]').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            if (!radio.checked) return;
-            marcarPrecioElegido(radio.value);
-        });
-    });
+    document.getElementById('cantidad-botellas').addEventListener('input', calcularPrecioPorBotellas);
 
     formPromocion.addEventListener('reset', function() {
         setTimeout(resetPromoForm, 0);
@@ -464,7 +478,7 @@ function cargarPromociones() {
                     <td><span class="fw-medium">${escaparHtml(idPromo)}</span></td>
                     <td><span class="fw-medium">${escaparHtml(promo.titulo)}</span></td>
                     <td>${escaparHtml(promo.codigo || '-')}</td>
-                    <td>$${Number(promo.precio_paca_producto || 0).toLocaleString('es-CO')}</td>
+                    <td>${htmlPreciosPromo(promo)}</td>
                     <td>${escaparHtml(promo.creado_en || '-')}</td>
                     <td>
                         <div class="custom-control custom-switch promo-status-switch">
@@ -574,6 +588,8 @@ function editarPromo(idPromo) {
         return;
     }
 
+    limpiarBuscadorProducto();
+
     document.getElementById('form-title').textContent = 'Editar Promoción';
     document.getElementById('action').value = 'update';
     document.getElementById('id').value = promo.id_promocion || '';
@@ -581,8 +597,10 @@ function editarPromo(idPromo) {
     document.getElementById('codigo').value = promo.codigo || '';
     document.getElementById('estado').value = String(promo.estado ?? '1');
     document.getElementById('prioridad').value = promo.prioridad || 0;
-    document.getElementById('precio_unidad_producto').value = promo.precio_unidad_producto || 0;
-    document.getElementById('precio_paca_producto').value = promo.precio_paca_producto || 0;
+    const precioUnidad = precioDePromo(promo, 'unidad');
+    const precioPaca = precioDePromo(promo, 'paca');
+    document.getElementById('precio_unidad_producto').value = precioUnidad;
+    document.getElementById('precio_paca_producto').value = precioPaca;
     document.getElementById('acti_Unidad').value = String(promo.acti_Unidad ?? '1');
     document.getElementById('descripcion').value = promo.descripcion || '';
 
@@ -593,7 +611,7 @@ function editarPromo(idPromo) {
     const ayuda = document.getElementById('imagen-ayuda');
     if (labelReq) labelReq.style.display = 'none';
     if (ayuda) ayuda.textContent = 'Opcional: deja vacío para conservar la imagen actual.';
-    limpiarBuscadorProducto();
+    mostrarImagenActual(promo.imagen || '');
 
     abrirModalPromo();
 }
@@ -607,7 +625,48 @@ function resetPromoForm() {
     const ayuda = document.getElementById('imagen-ayuda');
     if (labelReq) labelReq.style.display = '';
     if (ayuda) ayuda.textContent = 'Obligatoria al crear. Opcional al editar.';
+    mostrarImagenActual('');
     limpiarBuscadorProducto();
+}
+
+function numeroPrecio(valor) {
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : 0;
+}
+
+function precioDePromo(promo, tipo) {
+    const propio = numeroPrecio(tipo === 'unidad' ? promo.precio_unidad_producto : promo.precio_paca_producto);
+    const catalogo = numeroPrecio(tipo === 'unidad' ? promo.precio_unidad_catalogo : promo.precio_paca_catalogo);
+    return propio > 0 ? propio : catalogo;
+}
+
+function htmlPreciosPromo(promo) {
+    const unidad = precioDePromo(promo, 'unidad');
+    const paca = precioDePromo(promo, 'paca');
+    const esPaca = String(promo.acti_Unidad ?? '1') === '0' || (unidad <= 0 && paca > 0);
+    return '<div class="promo-precios">' +
+        '<div class="' + (esPaca ? '' : 'precio-principal') + '">Unidad: ' + (unidad > 0 ? formatoPrecio(unidad) : '—') + '</div>' +
+        '<div class="' + (esPaca ? 'precio-principal' : '') + '">Paca: ' + (paca > 0 ? formatoPrecio(paca) : '—') + '</div>' +
+        '</div>';
+}
+
+function mostrarImagenActual(nombre) {
+    const box = document.getElementById('imagen-actual-box');
+    const preview = document.getElementById('imagen-actual-preview');
+    const hidden = document.getElementById('imagen_actual');
+    const archivo = String(nombre || '').trim();
+
+    if (hidden) hidden.value = archivo;
+    if (!box || !preview) return;
+
+    if (!archivo) {
+        preview.removeAttribute('src');
+        box.style.display = 'none';
+        return;
+    }
+
+    preview.src = '../assets/img/licores/promos/' + archivo;
+    box.style.display = '';
 }
 
 function formatoPrecio(valor) {
@@ -633,11 +692,10 @@ function limpiarBuscadorProducto() {
     if (panel) panel.style.display = 'none';
     if (nota) nota.textContent = '';
 
-    document.getElementById('grupo-precio-unidad').classList.remove('precio-elegido');
-    document.getElementById('grupo-precio-paca').classList.remove('precio-elegido');
-    document.querySelectorAll('input[name="tipo_precio_promo"]').forEach(function(radio) {
-        radio.checked = false;
-    });
+    const cantidad = document.getElementById('cantidad-botellas');
+    if (cantidad) cantidad.value = '1';
+    const calculado = document.getElementById('label-precio-calculado');
+    if (calculado) calculado.textContent = '';
 }
 
 function buscarProductosPromo(termino) {
@@ -690,50 +748,47 @@ function renderResultadosProducto(productos) {
 
 function aplicarProductoPromo(producto) {
     productoPromoSeleccionado = producto;
-    const precioUnidad = Number(producto.precio_unidad_producto || 0);
     const precioPaca = Number(producto.precio_paca_producto || 0);
-    const cantidad = Number(producto.cantidad_paca_producto || 0);
-    const tipo = precioUnidad > 0 ? 'unidad' : 'paca';
 
     document.getElementById('codigo').value = producto.codigo_productos || '';
-    document.getElementById('precio_unidad_producto').value = precioUnidad;
     document.getElementById('precio_paca_producto').value = precioPaca;
     document.getElementById('acti_Unidad').value = String(producto.acti_Unidad ?? '1');
+    document.getElementById('cantidad-botellas').value = '1';
 
     const titulo = document.getElementById('titulo');
     if (titulo && titulo.value.trim() === '') {
         titulo.value = producto.descripcion_producto || '';
     }
 
-    document.getElementById('label-precio-unidad').textContent = formatoPrecio(precioUnidad);
+    document.getElementById('label-precio-unidad').textContent = formatoPrecio(producto.precio_unidad_producto);
     document.getElementById('label-precio-paca').textContent = formatoPrecio(precioPaca);
-    document.getElementById('label-cantidad-paca').textContent = cantidad > 1 ? String(cantidad) : 'varias';
     document.getElementById('producto-elegido-nombre').textContent = producto.descripcion_producto || '';
     document.getElementById('producto-precios').style.display = '';
     document.getElementById('resultados-producto').style.display = 'none';
 
-    document.getElementById(tipo === 'paca' ? 'precio-varias-botellas' : 'precio-una-botella').checked = true;
-    marcarPrecioElegido(tipo);
+    calcularPrecioPorBotellas();
+    document.getElementById('cantidad-botellas').focus();
 }
 
-function marcarPrecioElegido(tipo) {
-    const esPaca = tipo === 'paca';
-    document.getElementById('grupo-precio-unidad').classList.toggle('precio-elegido', !esPaca);
-    document.getElementById('grupo-precio-paca').classList.toggle('precio-elegido', esPaca);
-    document.getElementById('acti_Unidad').value = esPaca ? '0' : '1';
-
-    const nota = document.getElementById('nota-cantidad-botellas');
-    const cantidad = Number(productoPromoSeleccionado && productoPromoSeleccionado.cantidad_paca_producto || 0);
-    if (esPaca) {
-        nota.textContent = cantidad > 1
-            ? 'El precio de paca es de ' + cantidad + ' botellas. Puedes ajustarlo antes de guardar.'
-            : 'El precio de paca es de más de una botella. Puedes ajustarlo antes de guardar.';
-    } else {
-        nota.textContent = 'El precio de unidad es de una botella. Puedes ajustarlo antes de guardar.';
+function calcularPrecioPorBotellas() {
+    if (!productoPromoSeleccionado) {
+        return;
     }
 
-    const campo = document.getElementById(esPaca ? 'precio_paca_producto' : 'precio_unidad_producto');
-    if (campo) campo.focus();
+    const precioBotella = Number(productoPromoSeleccionado.precio_unidad_producto || 0);
+    const cantidadInput = document.getElementById('cantidad-botellas');
+    let cantidad = parseInt(cantidadInput.value, 10);
+    if (!Number.isFinite(cantidad) || cantidad < 1) {
+        cantidad = 1;
+    }
+
+    const total = Math.round(precioBotella * cantidad);
+    document.getElementById('precio_unidad_producto').value = total;
+    document.getElementById('label-precio-calculado').textContent = formatoPrecio(total);
+    document.getElementById('nota-cantidad-botellas').textContent =
+        cantidad + (cantidad === 1 ? ' botella' : ' botellas') +
+        ' × ' + formatoPrecio(precioBotella) +
+        ' = ' + formatoPrecio(total);
 }
 
 function cambiarEstadoPromo(input, idPromo) {
@@ -882,11 +937,18 @@ body {
 }
 
 .page-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
-    color: white;
+    background-color: #1d4ed8;
+    background-image: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    color: #ffffff;
     border-radius: 12px;
     padding: 2rem;
     margin-bottom: 2rem;
+}
+
+.page-header h1,
+.page-header p,
+.page-header i {
+    color: #ffffff;
 }
 
 .form-control, .form-select {
@@ -972,15 +1034,13 @@ body {
     padding: 0.4rem 0.65rem;
 }
 
-.table-modern thead {
-    background: #f8fafc;
-}
-
-.table-modern th {
+.table.table-modern thead th {
+    background-color: #1e3a5f;
+    color: #ffffff;
     border: none;
+    border-bottom: 2px solid #0f2744;
     padding: 1rem;
     font-weight: 600;
-    color: var(--secondary-color);
 }
 
 .table-modern td {
@@ -1092,6 +1152,29 @@ body {
 .precio-elegido .form-control {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgb(37 99 235 / 0.12);
+}
+
+.promo-precios {
+    white-space: nowrap;
+    line-height: 1.35;
+}
+
+.promo-precios .precio-principal {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.imagen-actual-box {
+    margin-bottom: 0.75rem;
+}
+
+.imagen-actual-box img {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
 }
 </style>
 

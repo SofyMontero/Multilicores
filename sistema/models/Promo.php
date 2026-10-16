@@ -101,8 +101,41 @@ class Promo {
         ]);
     }
 
+    public function getPromoById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM promociones WHERE id_promocion = :id LIMIT 1");
+        $stmt->execute(["id" => $id]);
+        $promo = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $promo ?: null;
+    }
+
     public function getAllPromos() {
-        $stmt = $this->db->prepare("SELECT * FROM promociones ORDER BY prioridad DESC, creado_en DESC");
+        $stmt = $this->db->prepare("
+            SELECT
+                pr.id_promocion,
+                pr.titulo,
+                pr.descripcion,
+                pr.codigo,
+                pr.imagen,
+                pr.estado,
+                pr.prioridad,
+                pr.creado_en,
+                pr.acti_Unidad,
+                pr.precio_unidad_producto,
+                pr.precio_paca_producto,
+                p.precio_unidad_producto AS precio_unidad_catalogo,
+                p.precio_paca_producto AS precio_paca_catalogo,
+                p.cantidad_paca_producto,
+                p.descripcion_producto AS nombre_producto
+            FROM promociones pr
+            LEFT JOIN productos p ON p.id_producto = (
+                SELECT p2.id_producto
+                FROM productos p2
+                WHERE p2.codigo_productos = pr.codigo
+                ORDER BY p2.estado_producto DESC, p2.id_producto DESC
+                LIMIT 1
+            )
+            ORDER BY pr.prioridad DESC, pr.creado_en DESC
+        ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
