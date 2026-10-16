@@ -90,6 +90,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <input type="hidden" name="id" id="id">
                 
                 <div class="row g-4">
+                    <div class="col-12">
+                        <label for="buscar-producto" class="form-label fw-medium">Buscar producto</label>
+                        <input type="text" class="form-control" id="buscar-producto" autocomplete="off"
+                               placeholder="Nombre o código del producto">
+                        <small class="form-text text-muted">Al elegir un producto se cargan el código y los precios de unidad y paca.</small>
+                        <div id="resultados-producto" class="product-search-results" style="display: none;"></div>
+                        <div id="producto-precios" class="product-price-choice" style="display: none;">
+                            <p class="mb-2 fw-medium" id="producto-elegido-nombre"></p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipo_precio_promo" id="precio-una-botella" value="unidad">
+                                <label class="form-check-label" for="precio-una-botella">
+                                    Una botella — <span id="label-precio-unidad"></span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipo_precio_promo" id="precio-varias-botellas" value="paca">
+                                <label class="form-check-label" for="precio-varias-botellas">
+                                    Más de una botella (paca de <span id="label-cantidad-paca"></span>) — <span id="label-precio-paca"></span>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted d-block mt-2" id="nota-cantidad-botellas"></small>
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <label for="titulo" class="form-label fw-medium">
                             Título de la Promoción <span class="text-danger">*</span>
@@ -119,12 +143,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <input type="number" class="form-control" id="prioridad" name="prioridad" min="0" value="0">
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="grupo-precio-unidad">
                         <label for="precio_unidad_producto" class="form-label fw-medium">Precio Unidad</label>
                         <input type="number" class="form-control" id="precio_unidad_producto" name="precio_unidad_producto" min="0" value="0">
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="grupo-precio-paca">
                         <label for="precio_paca_producto" class="form-label fw-medium">Precio Paca</label>
                         <input type="number" class="form-control" id="precio_paca_producto" name="precio_paca_producto" min="0" value="0">
                     </div>
@@ -255,6 +279,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Mantener todo el JavaScript original pero con mejoras visuales
 let dataTablesCargando = false;
 const promosPorId = {};
+const productosBusqueda = {};
+let productoPromoSeleccionado = null;
+let busquedaProductoTimer = null;
 
 function escaparHtml(texto) {
     return String(texto ?? '')
@@ -291,6 +318,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!emojiBox.contains(e.target) && !emojiBtn.contains(e.target)) {
             emojiBox.style.display = 'none';
         }
+
+        const buscarProducto = document.getElementById('buscar-producto');
+        const resultadosProducto = document.getElementById('resultados-producto');
+        if (resultadosProducto && buscarProducto && !resultadosProducto.contains(e.target) && e.target !== buscarProducto) {
+            resultadosProducto.style.display = 'none';
+        }
     });
 
     // Agregar emoji al textarea
@@ -308,6 +341,38 @@ document.addEventListener('DOMContentLoaded', function() {
     btnAgregarPromo.addEventListener('click', function() {
         formPromocion.reset();
         resetPromoForm();
+    });
+
+    const buscarProductoInput = document.getElementById('buscar-producto');
+    const resultadosProducto = document.getElementById('resultados-producto');
+
+    buscarProductoInput.addEventListener('input', function() {
+        const termino = buscarProductoInput.value.trim();
+        clearTimeout(busquedaProductoTimer);
+        if (termino.length < 2) {
+            resultadosProducto.innerHTML = '';
+            resultadosProducto.style.display = 'none';
+            return;
+        }
+        busquedaProductoTimer = setTimeout(function() {
+            buscarProductosPromo(termino);
+        }, 300);
+    });
+
+    resultadosProducto.addEventListener('click', function(e) {
+        const boton = e.target.closest('.product-search-item');
+        if (!boton) return;
+        const producto = productosBusqueda[boton.dataset.id];
+        if (!producto) return;
+        aplicarProductoPromo(producto);
+        buscarProductoInput.value = producto.descripcion_producto || '';
+    });
+
+    document.querySelectorAll('input[name="tipo_precio_promo"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (!radio.checked) return;
+            marcarPrecioElegido(radio.value);
+        });
     });
 
     formPromocion.addEventListener('reset', function() {
@@ -528,6 +593,7 @@ function editarPromo(idPromo) {
     const ayuda = document.getElementById('imagen-ayuda');
     if (labelReq) labelReq.style.display = 'none';
     if (ayuda) ayuda.textContent = 'Opcional: deja vacío para conservar la imagen actual.';
+    limpiarBuscadorProducto();
 
     abrirModalPromo();
 }
@@ -541,6 +607,133 @@ function resetPromoForm() {
     const ayuda = document.getElementById('imagen-ayuda');
     if (labelReq) labelReq.style.display = '';
     if (ayuda) ayuda.textContent = 'Obligatoria al crear. Opcional al editar.';
+    limpiarBuscadorProducto();
+}
+
+function formatoPrecio(valor) {
+    return '$' + Number(valor || 0).toLocaleString('es-CO');
+}
+
+function limpiarBuscadorProducto() {
+    productoPromoSeleccionado = null;
+    Object.keys(productosBusqueda).forEach(function(key) {
+        delete productosBusqueda[key];
+    });
+
+    const input = document.getElementById('buscar-producto');
+    const resultados = document.getElementById('resultados-producto');
+    const panel = document.getElementById('producto-precios');
+    const nota = document.getElementById('nota-cantidad-botellas');
+
+    if (input) input.value = '';
+    if (resultados) {
+        resultados.innerHTML = '';
+        resultados.style.display = 'none';
+    }
+    if (panel) panel.style.display = 'none';
+    if (nota) nota.textContent = '';
+
+    document.getElementById('grupo-precio-unidad').classList.remove('precio-elegido');
+    document.getElementById('grupo-precio-paca').classList.remove('precio-elegido');
+    document.querySelectorAll('input[name="tipo_precio_promo"]').forEach(function(radio) {
+        radio.checked = false;
+    });
+}
+
+function buscarProductosPromo(termino) {
+    const formData = new FormData();
+    formData.append('action', 'buscarProducto');
+    formData.append('q', termino);
+
+    fetch('../controllers/promoController.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (document.getElementById('buscar-producto').value.trim() !== termino) {
+            return;
+        }
+        renderResultadosProducto(data.success ? (data.productos || []) : []);
+    })
+    .catch(function(error) {
+        console.error('Error al buscar productos:', error);
+        renderResultadosProducto([]);
+    });
+}
+
+function renderResultadosProducto(productos) {
+    const cont = document.getElementById('resultados-producto');
+    Object.keys(productosBusqueda).forEach(function(key) {
+        delete productosBusqueda[key];
+    });
+
+    if (!productos.length) {
+        cont.innerHTML = '<div class="product-search-empty">No se encontraron productos</div>';
+        cont.style.display = 'block';
+        return;
+    }
+
+    cont.innerHTML = productos.map(function(producto) {
+        productosBusqueda[producto.id_producto] = producto;
+        const cantidad = Number(producto.cantidad_paca_producto || 0);
+        const detallePaca = cantidad > 1 ? ' · ' + cantidad + ' botellas' : '';
+        return '<button type="button" class="product-search-item" data-id="' + escaparHtml(producto.id_producto) + '">' +
+            '<strong>' + escaparHtml(producto.descripcion_producto) + '</strong>' +
+            '<span>Cód. ' + escaparHtml(producto.codigo_productos || '-') +
+            ' · Unidad ' + formatoPrecio(producto.precio_unidad_producto) +
+            ' · Paca ' + formatoPrecio(producto.precio_paca_producto) + detallePaca + '</span>' +
+            '</button>';
+    }).join('');
+    cont.style.display = 'block';
+}
+
+function aplicarProductoPromo(producto) {
+    productoPromoSeleccionado = producto;
+    const precioUnidad = Number(producto.precio_unidad_producto || 0);
+    const precioPaca = Number(producto.precio_paca_producto || 0);
+    const cantidad = Number(producto.cantidad_paca_producto || 0);
+    const tipo = precioUnidad > 0 ? 'unidad' : 'paca';
+
+    document.getElementById('codigo').value = producto.codigo_productos || '';
+    document.getElementById('precio_unidad_producto').value = precioUnidad;
+    document.getElementById('precio_paca_producto').value = precioPaca;
+    document.getElementById('acti_Unidad').value = String(producto.acti_Unidad ?? '1');
+
+    const titulo = document.getElementById('titulo');
+    if (titulo && titulo.value.trim() === '') {
+        titulo.value = producto.descripcion_producto || '';
+    }
+
+    document.getElementById('label-precio-unidad').textContent = formatoPrecio(precioUnidad);
+    document.getElementById('label-precio-paca').textContent = formatoPrecio(precioPaca);
+    document.getElementById('label-cantidad-paca').textContent = cantidad > 1 ? String(cantidad) : 'varias';
+    document.getElementById('producto-elegido-nombre').textContent = producto.descripcion_producto || '';
+    document.getElementById('producto-precios').style.display = '';
+    document.getElementById('resultados-producto').style.display = 'none';
+
+    document.getElementById(tipo === 'paca' ? 'precio-varias-botellas' : 'precio-una-botella').checked = true;
+    marcarPrecioElegido(tipo);
+}
+
+function marcarPrecioElegido(tipo) {
+    const esPaca = tipo === 'paca';
+    document.getElementById('grupo-precio-unidad').classList.toggle('precio-elegido', !esPaca);
+    document.getElementById('grupo-precio-paca').classList.toggle('precio-elegido', esPaca);
+    document.getElementById('acti_Unidad').value = esPaca ? '0' : '1';
+
+    const nota = document.getElementById('nota-cantidad-botellas');
+    const cantidad = Number(productoPromoSeleccionado && productoPromoSeleccionado.cantidad_paca_producto || 0);
+    if (esPaca) {
+        nota.textContent = cantidad > 1
+            ? 'El precio de paca es de ' + cantidad + ' botellas. Puedes ajustarlo antes de guardar.'
+            : 'El precio de paca es de más de una botella. Puedes ajustarlo antes de guardar.';
+    } else {
+        nota.textContent = 'El precio de unidad es de una botella. Puedes ajustarlo antes de guardar.';
+    }
+
+    const campo = document.getElementById(esPaca ? 'precio_paca_producto' : 'precio_unidad_producto');
+    if (campo) campo.focus();
 }
 
 function cambiarEstadoPromo(input, idPromo) {
@@ -847,6 +1040,58 @@ body {
     background: #fee2e2;
     color: var(--danger-color);
     border-left: 4px solid var(--danger-color);
+}
+
+.product-search-results {
+    margin-top: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.product-search-item,
+.product-search-empty {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fff;
+    padding: 0.75rem 1rem;
+}
+
+.product-search-item:last-child {
+    border-bottom: none;
+}
+
+.product-search-item strong,
+.product-search-item span {
+    display: block;
+}
+
+.product-search-item span,
+.product-search-empty {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+}
+
+.product-search-item:hover {
+    background: #f8fafc;
+}
+
+.product-price-choice {
+    margin-top: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.precio-elegido .form-control {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.12);
 }
 </style>
 

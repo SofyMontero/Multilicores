@@ -172,6 +172,20 @@ try {
         responderJson(true, "", ["promociones" => $promo->getAllPromos()]);
     }
 
+    if ($metodo === "buscarProducto") {
+        $termino = trim($_POST["q"] ?? "");
+        $longitud = function_exists('mb_strlen') ? mb_strlen($termino) : strlen($termino);
+        if ($longitud < 2) {
+            responderJson(true, "", ["productos" => []]);
+        }
+
+        require_once __DIR__ . "/../models/ProductoModel.php";
+        $productoModel = new Producto();
+        $productos = $productoModel->buscarParaPromo($termino);
+
+        responderJson(true, "", ["productos" => $productos ?: []]);
+    }
+
     if ($metodo === "enviarPromo") {
         $id = $_POST['id'] ?? null;
         $texto = $_POST['texto'] ?? null;
