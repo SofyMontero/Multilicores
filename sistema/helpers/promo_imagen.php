@@ -12,6 +12,7 @@ $pdo = null;
 
 $extPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 $directorios = [
+    __DIR__ . '/../assets/img/promos/',
     __DIR__ . '/../assets/img/licores/promos/',
     __DIR__ . '/../assets/img/licores/',
     __DIR__ . '/../uploads/',

@@ -76,6 +76,27 @@ function promo_image_filename(?string $filename): string
     return basename($filename);
 }
 
+function promo_directorio_disco(): string
+{
+    return dirname(__DIR__) . '/assets/img/promos/';
+}
+
+/**
+ * Carpeta pública de la imagen. La vigente es /assets/img/promos/.
+ * Si el archivo solo sigue en la ruta anterior, se usa esa para no dejarla rota.
+ */
+function promo_carpeta_publica(string $filename): string
+{
+    $nuevo = dirname(__DIR__) . '/assets/img/promos/' . $filename;
+    $anterior = dirname(__DIR__) . '/assets/img/licores/promos/' . $filename;
+
+    if (is_file($nuevo) || !is_file($anterior)) {
+        return '/assets/img/promos/';
+    }
+
+    return '/assets/img/licores/promos/';
+}
+
 /**
  * Ruta relativa desde /sistema/views/. Usa el mismo nombre guardado en BD y en disco.
  */
@@ -83,7 +104,7 @@ function promo_image_web_path(?string $filename, $codigoProducto = null, string 
 {
     $filename = promo_image_filename($filename);
     if ($filename !== '') {
-        return '../assets/img/licores/promos/' . $filename;
+        return '..' . promo_carpeta_publica($filename) . rawurlencode($filename);
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);
@@ -104,7 +125,7 @@ function promo_image_absolute_url(?string $filename, $codigoProducto = null, str
     $base = promo_https_base();
 
     if ($filename !== '') {
-        return $base . '/assets/img/licores/promos/' . rawurlencode($filename);
+        return $base . promo_carpeta_publica($filename) . rawurlencode($filename);
     }
 
     $prod = promo_find_product($codigoProducto, $descripcion);

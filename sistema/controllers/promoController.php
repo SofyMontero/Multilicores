@@ -1,5 +1,6 @@
 <?php
 require_once "../models/Promo.php";
+require_once __DIR__ . "/../helpers/promo_images.php";
 
 function responderJson($success, $message = "", $extra = []) {
     header('Content-Type: application/json');
@@ -71,7 +72,7 @@ function subirImagen($requerida = false) {
         responderJson(false, "Formato de imagen no permitido.");
     }
 
-    $directorio = __DIR__ . "/../assets/img/licores/promos/";
+    $directorio = promo_directorio_disco();
     if (!is_dir($directorio) && !mkdir($directorio, 0755, true) && !is_dir($directorio)) {
         responderJson(false, "No existe la carpeta de imagenes de promociones.");
     }
