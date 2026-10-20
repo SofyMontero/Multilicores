@@ -70,7 +70,7 @@ function multilicores_db_config(string $variant = 'default'): array
     $host = multilicores_env('DB_HOST', 'localhost');
     $port = (int)multilicores_env('DB_PORT', '3306');
     $username = multilicores_env('DB_USER', 'u633742531_Multilicores25');
-    $password = multilicores_env('DB_PASS', 'Multilicores2025');
+    $password = multilicores_env('DB_PASS', 'Multi25.');
     $charset = multilicores_env('DB_CHARSET', 'utf8mb4');
 
     $dbnameDefault = multilicores_env('DB_NAME', 'u633742531_Multilicores');
