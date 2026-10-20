@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../config/catalogo_router.php';
-catalogo_redirigir_si_react('catalogo');
-
 //include_once "header.php";
 require_once "../models/database.php";
 require_once "../models/ProductoModel.php";

@@ -43,7 +43,6 @@ $timestamp = $mensajeData['timestamp'];
 
 require_once 'conexion.php';
 require_once 'WhatsappSender.php';
-require_once __DIR__ . '/../config/catalogo_router.php';
 
 $sender = new WhatsappSender($conn);
 
@@ -51,8 +50,12 @@ $sender = new WhatsappSender($conn);
 write_log("Mensaje recibido de $telefonoCliente: $mensaje");
 
 if ($mensaje != null) {
-    // Link estable: siempre categorias.php (la versión activa se elige en config/catalogo.php)
-    $link = catalogo_whatsapp_link($telefonoCliente);
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    $scheme = $https ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'multilicoreschapinero.com';
+    $link = $scheme . '://' . $host . '/sistema/views/categorias.php?idCli=' . rawurlencode($telefonoCliente);
     $respuestaTexto = "    
         🍷 ¡Bienvenido a Multilicores!
 Tu experiencia en licores comienza aquí.

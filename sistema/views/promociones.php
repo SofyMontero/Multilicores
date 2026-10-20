@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../config/catalogo_router.php';
-catalogo_redirigir_si_react('promociones');
-
 require_once __DIR__ . '/../helpers/promo_images.php';
 require_once "../models/database.php";
 require_once "../models/ProductoModel.php";
