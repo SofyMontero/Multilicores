@@ -9,9 +9,13 @@ $dbname = $cfg['dbname'];
 $port = $cfg['port'];
 
 mysqli_report(MYSQLI_REPORT_OFF);
-$conn = @new mysqli($servername, $username, $password, $dbname, $port);
+if ($servername === 'localhost') {
+    $conn = @new mysqli($servername, $username, $password, $dbname);
+} else {
+    $conn = @new mysqli($servername, $username, $password, $dbname, $port);
+}
 
-if ($conn->connect_error) {
+if ($conn->connect_error && $servername === 'localhost' && strpos($conn->connect_error, '2002') !== false) {
     $conn = @new mysqli('127.0.0.1', $username, $password, $dbname, $port);
 }
 

@@ -26,33 +26,55 @@ class Database {
             PDO::ATTR_TIMEOUT => 5,
         ];
 
-        // localhost usa socket Unix; si el host lo bloquea (HY000/2002), se fuerza TCP.
-        $hosts = [$cfg['host']];
-        if ($cfg['host'] === 'localhost') {
-            $hosts[] = '127.0.0.1';
-        }
+        try {
+            self::$pdo = new PDO(
+                self::dsn($cfg['host'], $cfg, $cfg['host'] !== 'localhost'),
+                $cfg['username'],
+                $cfg['password'],
+                $options
+            );
+            return self::$pdo;
+        } catch (PDOException $e) {
+            // 2002: el socket de localhost no responde. 1045 en 127.0.0.1 es otro host
+            // y Hostinger no autoriza al usuario por TCP, así que no se reintenta.
+            $socketBloqueado = $cfg['host'] === 'localhost'
+                && strpos($e->getMessage(), '[2002]') !== false;
 
-        $lastError = null;
-        foreach ($hosts as $host) {
-            try {
-                $dsn = sprintf(
-                    'mysql:host=%s;port=%d;dbname=%s;charset=%s',
-                    $host,
-                    $cfg['port'],
-                    $cfg['dbname'],
-                    $cfg['charset']
+            if (!$socketBloqueado) {
+                throw new PDOException(
+                    'Error de conexión: ' . $e->getMessage(),
+                    (int)$e->getCode(),
+                    $e
                 );
-                self::$pdo = new PDO($dsn, $cfg['username'], $cfg['password'], $options);
-                return self::$pdo;
-            } catch (PDOException $e) {
-                $lastError = $e;
             }
+
+            self::$pdo = new PDO(
+                self::dsn('127.0.0.1', $cfg, true),
+                $cfg['username'],
+                $cfg['password'],
+                $options
+            );
+            return self::$pdo;
+        }
+    }
+
+    private static function dsn(string $host, array $cfg, bool $tcp): string
+    {
+        if (!$tcp) {
+            return sprintf(
+                'mysql:host=%s;dbname=%s;charset=%s',
+                $host,
+                $cfg['dbname'],
+                $cfg['charset']
+            );
         }
 
-        throw new PDOException(
-            'Error de conexión: ' . ($lastError ? $lastError->getMessage() : 'No se pudo conectar a MySQL'),
-            (int)($lastError ? $lastError->getCode() : 0),
-            $lastError
+        return sprintf(
+            'mysql:host=%s;port=%d;dbname=%s;charset=%s',
+            $host,
+            $cfg['port'],
+            $cfg['dbname'],
+            $cfg['charset']
         );
     }
 }
