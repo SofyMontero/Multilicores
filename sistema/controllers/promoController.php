@@ -19,32 +19,6 @@ function normalizarEstado($estado) {
     return 0;
 }
 
-function nombreArchivoPromo(string $nombreOriginal, string $extension, string $directorio): string
-{
-    $base = pathinfo($nombreOriginal, PATHINFO_FILENAME);
-    if (function_exists('iconv')) {
-        $transliterado = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $base);
-        if (is_string($transliterado) && $transliterado !== '') {
-            $base = $transliterado;
-        }
-    }
-
-    $base = strtolower($base);
-    $base = preg_replace('/[^a-z0-9]+/', '-', $base);
-    $base = trim($base, '-');
-    if ($base === '') {
-        $base = 'promo';
-    }
-
-    $base = substr($base, 0, 80);
-
-    do {
-        $nombre = $base . '-' . bin2hex(random_bytes(4)) . '.' . $extension;
-    } while (is_file($directorio . $nombre));
-
-    return $nombre;
-}
-
 function subirImagen($requerida = false) {
     $sinArchivo = !isset($_FILES["imagen"])
         || $_FILES["imagen"]["error"] === UPLOAD_ERR_NO_FILE
@@ -63,28 +37,22 @@ function subirImagen($requerida = false) {
         responderJson(false, "Hubo un error al subir la imagen.");
     }
 
-    $nombreOriginal = $_FILES["imagen"]["name"];
-    $tmpPath = $_FILES["imagen"]["tmp_name"];
-    $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
-    $extensionesPermitidas = ["jpg", "jpeg", "png", "gif", "webp"];
+    if ((int)$_FILES["imagen"]["size"] > 8 * 1024 * 1024) {
+        responderJson(false, "La imagen no debe superar los 8MB.");
+    }
 
+    $extension = strtolower(pathinfo((string)$_FILES["imagen"]["name"], PATHINFO_EXTENSION));
+    $extensionesPermitidas = ["jpg", "jpeg", "png", "gif", "webp"];
     if (!in_array($extension, $extensionesPermitidas, true)) {
         responderJson(false, "Formato de imagen no permitido.");
     }
 
-    $directorio = promo_directorio_disco();
-    if (!is_dir($directorio) && !mkdir($directorio, 0755, true) && !is_dir($directorio)) {
-        responderJson(false, "No existe la carpeta de imagenes de promociones.");
+    $resultado = promo_guardar_subida((string)$_FILES["imagen"]["tmp_name"]);
+    if (empty($resultado["ok"])) {
+        responderJson(false, $resultado["error"] ?? "No se pudo guardar la imagen.");
     }
 
-    $nombreImagen = nombreArchivoPromo($nombreOriginal, $extension, $directorio);
-    $destino = $directorio . $nombreImagen;
-
-    if (!move_uploaded_file($tmpPath, $destino)) {
-        responderJson(false, "Error al mover la imagen al servidor.");
-    }
-
-    return $nombreImagen;
+    return (string)$resultado["archivo"];
 }
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {

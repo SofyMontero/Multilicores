@@ -1,22 +1,17 @@
 <?php
 /**
- * Entrega la imagen de una promoción por ID.
- * Evita el 404 de Hostinger con nombres tipo promo_xxx.123456.jpg (doble extensión).
+ * Entrega la imagen de una promoción por ID o por nombre de archivo.
+ * Busca primero fuera de /sistema y después en las carpetas anteriores.
  */
 
-require_once __DIR__ . '/../models/database.php';
+require_once __DIR__ . '/promo_images.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $pedido = isset($_GET['f']) ? basename(str_replace('\\', '/', (string)$_GET['f'])) : '';
 $pdo = null;
 
 $extPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-$directorios = [
-    __DIR__ . '/../assets/img/promos/',
-    __DIR__ . '/../assets/img/licores/promos/',
-    __DIR__ . '/../assets/img/licores/',
-    __DIR__ . '/../uploads/',
-];
+$directorios = promo_directorios_busqueda();
 
 $filename = '';
 if ($id > 0) {
@@ -49,7 +44,9 @@ if ($filename !== '') {
     }
 }
 
+$esRespaldo = false;
 if ($path === null) {
+    $esRespaldo = true;
     $path = __DIR__ . '/../assets/img/logoM.png';
     if (!is_file($path)) {
         http_response_code(404);
@@ -68,7 +65,7 @@ $mimes = [
 
 header('Content-Type: ' . ($mimes[$ext] ?? 'application/octet-stream'));
 header('Content-Length: ' . (string)filesize($path));
-header('Cache-Control: public, max-age=86400');
+header('Cache-Control: ' . ($esRespaldo ? 'no-store' : 'public, max-age=86400'));
 header('X-Content-Type-Options: nosniff');
 readfile($path);
 exit;

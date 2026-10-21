@@ -470,7 +470,7 @@ function cargarPromociones() {
             const estadoTexto = String(promo.estado) === '1' ? 'Activa' : 'Inactiva';
             const estadoChecked = String(promo.estado) === '1' ? 'checked' : '';
             const imagen = promo.imagen
-                ? `../assets/img/promos/${encodeURIComponent(promo.imagen)}`
+                ? `../helpers/promo_imagen.php?f=${encodeURIComponent(promo.imagen)}`
                 : '../assets/img/licores/placeholder.jpg';
 
             const fila = `
@@ -665,7 +665,7 @@ function mostrarImagenActual(nombre) {
         return;
     }
 
-    preview.src = '../assets/img/promos/' + encodeURIComponent(archivo);
+    preview.src = '../helpers/promo_imagen.php?f=' + encodeURIComponent(archivo);
     box.style.display = '';
 }
 

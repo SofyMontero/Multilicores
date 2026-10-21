@@ -61,6 +61,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // $imagen1 = $_POST['imagen1'] ?? null;
 // $plantilla = $_POST['plantilla'] ?? 'promo1';
 
+function enlaceImagenPublica($imagen) {
+    $imagen = trim((string)$imagen);
+    if (preg_match('#^https?://#i', $imagen)) {
+        return $imagen;
+    }
+
+    $archivo = basename(str_replace('\\', '/', $imagen));
+    return 'https://multilicoreschapinero.com/sistema/helpers/promo_imagen.php?f=' . rawurlencode($archivo);
+}
+
     // MENSAJE A ENVIAR
 
     switch ($tipo_alerta) {
@@ -130,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 [
                                     "type" => "image",
                                     "image" => [
-                                        "link" => "https://multilicoreschapinero.com/sistema/uploads/" . $imagen1
+                                        "link" => enlaceImagenPublica($imagen1)
                                     ]
                                 ]
                             ]
@@ -241,7 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     [
                                         "type" => "image",
                                         "image" => [
-                                            "link" => "https://multilicoreschapinero.com/sistema/uploads/$imagen"  // URL pública de la imagen
+                                            "link" => enlaceImagenPublica($imagen)
                                         ]
                                     ]
                                 ]
