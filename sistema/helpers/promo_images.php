@@ -77,11 +77,12 @@ function promo_image_filename(?string $filename): string
 }
 
 /**
- * Fuera de /sistema. Reemplazar o desplegar el proyecto no borra esta carpeta.
+ * Las promociones se guardan en la misma carpeta física que los productos.
+ * Es la ubicación que ya se comprobó estable en Hostinger.
  */
 function promo_directorio_persistente(): string
 {
-    return dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'promo-imagenes' . DIRECTORY_SEPARATOR;
+    return dirname(__DIR__) . '/assets/img/licores/';
 }
 
 function promo_asegurar_directorio(string $dir): bool
@@ -91,20 +92,6 @@ function promo_asegurar_directorio(string $dir): bool
     }
 
     @chmod($dir, 0755);
-
-    $htaccess = $dir . '.htaccess';
-    if (!is_file($htaccess)) {
-        $reglas = "Options -Indexes\n"
-            . "<FilesMatch \"\\.(php|phtml|php5|phar|cgi|pl|py)$\">\n"
-            . "    Require all denied\n"
-            . "</FilesMatch>\n";
-        @file_put_contents($htaccess, $reglas);
-    }
-
-    $index = $dir . 'index.html';
-    if (!is_file($index)) {
-        @file_put_contents($index, '');
-    }
 
     $prueba = $dir . '.escritura';
     if (@file_put_contents($prueba, '1') === false) {
@@ -130,13 +117,12 @@ function promo_directorios_busqueda(): array
         $base . '/assets/img/promos/',
         $base . '/assets/img/licores/promos/',
         $base . '/uploads/',
-        $base . '/assets/img/licores/',
     ];
 }
 
 /**
- * Reescribe la subida como JPEG nuevo. Hostinger (Imunify) cuarentena
- * el archivo original cuando conserva metadatos o no es una imagen limpia.
+ * Valida y reescribe la subida como JPEG nuevo para no conservar archivos
+ * dañados, extensiones falsas ni metadatos innecesarios.
  */
 function promo_guardar_subida(string $tmpPath): array
 {
@@ -163,7 +149,7 @@ function promo_guardar_subida(string $tmpPath): array
 
     $directorio = promo_directorio_persistente();
     if (!promo_asegurar_directorio($directorio)) {
-        return ['ok' => false, 'error' => 'No se pudo crear la carpeta de imagenes fuera del proyecto. Revisa los permisos del hosting.'];
+        return ['ok' => false, 'error' => 'No se pudo escribir en la carpeta de imagenes de licores. Revisa los permisos del hosting.'];
     }
 
     $src = @$lectores[$mime]($tmpPath);
