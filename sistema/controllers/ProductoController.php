@@ -8,6 +8,7 @@ mb_internal_encoding('UTF-8');
 ini_set('default_charset', 'UTF-8');
 
 require_once "../models/ProductoModel.php";
+require_once __DIR__ . "/../helpers/product_images.php";
 
 // Función para detectar el delimitador del CSV
 function detectarDelimitador($archivo)
@@ -274,29 +275,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accion"]) && $_POST["
                 exit;
             }
 
-            $extension = strtolower(pathinfo($_FILES["imagen"]["name"], PATHINFO_EXTENSION));
-            $extensionesPermitidas = ["jpg", "jpeg", "png", "gif", "webp"];
-
-            if (!in_array($extension, $extensionesPermitidas, true)) {
-                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Formato de imagen no permitido (jpg, png, gif, webp)"));
+            $resultadoImagen = product_store_upload($_FILES["imagen"]);
+            if (empty($resultadoImagen["ok"])) {
+                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode($resultadoImagen["error"] ?? "No se pudo guardar la imagen"));
                 exit;
             }
 
-            if ($_FILES["imagen"]["size"] > 3 * 1024 * 1024) {
-                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("La imagen no debe superar los 3MB"));
-                exit;
-            }
-
-            $directorio = "../assets/img/licores/";
-            if (!is_dir($directorio)) {
-                mkdir($directorio, 0755, true);
-            }
-
-            $imagen_producto = uniqid("prod_", true) . "." . $extension;
-            if (!move_uploaded_file($_FILES["imagen"]["tmp_name"], $directorio . $imagen_producto)) {
-                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("No se pudo guardar la imagen"));
-                exit;
-            }
+            $imagen_producto = (string)$resultadoImagen["archivo"];
         }
 
         if ($producto->insertarProducto(
@@ -380,31 +365,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accion"]) && $_POST["
                 exit;
             }
 
-            $extension = strtolower(pathinfo($_FILES["imagen"]["name"], PATHINFO_EXTENSION));
-            $extensionesPermitidas = ["jpg", "jpeg", "png", "gif", "webp"];
-
-            if (!in_array($extension, $extensionesPermitidas, true)) {
-                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("Formato de imagen no permitido (jpg, png, gif, webp)"));
+            $resultadoImagen = product_store_upload($_FILES["imagen"]);
+            if (empty($resultadoImagen["ok"])) {
+                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode($resultadoImagen["error"] ?? "No se pudo guardar la imagen"));
                 exit;
             }
 
-            if ($_FILES["imagen"]["size"] > 3 * 1024 * 1024) {
-                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("La imagen no debe superar los 3MB"));
-                exit;
-            }
-
-            $directorio = "../assets/img/licores/";
-            if (!is_dir($directorio)) {
-                mkdir($directorio, 0755, true);
-            }
-
-            $imagenNueva = uniqid("prod_", true) . "." . $extension;
-            if (!move_uploaded_file($_FILES["imagen"]["tmp_name"], $directorio . $imagenNueva)) {
-                header("Location: ../views/Subir_excel_producto.php?error=" . urlencode("No se pudo guardar la imagen"));
-                exit;
-            }
-
-            $imagen_producto = $imagenNueva;
+            $imagen_producto = (string)$resultadoImagen["archivo"];
         }
 
         if ($producto->actualizarProducto(

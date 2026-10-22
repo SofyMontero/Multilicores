@@ -5,6 +5,8 @@
 
 require_once __DIR__ . '/../models/database.php';
 require_once __DIR__ . '/../models/ProductoModel.php';
+require_once __DIR__ . '/media_storage.php';
+require_once __DIR__ . '/product_images.php';
 
 function promo_https_base(): string
 {
@@ -77,34 +79,11 @@ function promo_image_filename(?string $filename): string
 }
 
 /**
- * Las promociones se guardan en la misma carpeta física que los productos.
- * Es la ubicación que ya se comprobó estable en Hostinger.
+ * Carpeta persistente fuera de public_html y del despliegue de Git.
  */
 function promo_directorio_persistente(): string
 {
-    return dirname(__DIR__) . '/assets/img/licores/';
-}
-
-function promo_asegurar_directorio(string $dir): bool
-{
-    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
-        return false;
-    }
-
-    @chmod($dir, 0755);
-
-    $prueba = $dir . '.escritura';
-    if (@file_put_contents($prueba, '1') === false) {
-        return false;
-    }
-
-    @unlink($prueba);
-    return true;
-}
-
-function promo_directorio_disco(): string
-{
-    return promo_directorio_persistente();
+    return multilicores_media_dir('promos');
 }
 
 function promo_directorios_busqueda(): array
@@ -117,6 +96,7 @@ function promo_directorios_busqueda(): array
         $base . '/assets/img/promos/',
         $base . '/assets/img/licores/promos/',
         $base . '/uploads/',
+        $base . '/assets/img/licores/',
     ];
 }
 
@@ -147,10 +127,11 @@ function promo_guardar_subida(string $tmpPath): array
         return ['ok' => false, 'error' => 'El archivo no es una imagen valida. Usa JPG, PNG, GIF o WEBP.'];
     }
 
-    $directorio = promo_directorio_persistente();
-    if (!promo_asegurar_directorio($directorio)) {
-        return ['ok' => false, 'error' => 'No se pudo escribir en la carpeta de imagenes de licores. Revisa los permisos del hosting.'];
+    $almacenamiento = multilicores_ensure_media_dir('promos');
+    if (empty($almacenamiento['ok'])) {
+        return ['ok' => false, 'error' => $almacenamiento['error'] ?? 'No se pudo abrir el almacenamiento persistente.'];
     }
+    $directorio = $almacenamiento['dir'];
 
     $src = @$lectores[$mime]($tmpPath);
     if (!$src) {
@@ -216,7 +197,7 @@ function promo_image_web_path(?string $filename, $codigoProducto = null, string 
     $prod = promo_find_product($codigoProducto, $descripcion);
     $img = $prod['imagen_producto'] ?? '';
     if ($img !== '') {
-        return '../assets/img/licores/' . ltrim(str_replace('\\', '/', $img), '/');
+        return product_image_web_path($img);
     }
 
     return '../assets/img/logoM.png';
@@ -237,7 +218,7 @@ function promo_image_absolute_url(?string $filename, $codigoProducto = null, str
     $prod = promo_find_product($codigoProducto, $descripcion);
     $img = $prod['imagen_producto'] ?? '';
     if ($img !== '') {
-        return $base . '/assets/img/licores/' . ltrim(str_replace('\\', '/', $img), '/');
+        return $base . '/helpers/product_image.php?f=' . rawurlencode(product_image_filename($img));
     }
 
     return $base . '/assets/img/logoM.png';
